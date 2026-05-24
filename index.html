@@ -181,18 +181,64 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
 .modal-btn-primary:hover{background:#c00710}
 .modal-btn-cancel{padding:12px 20px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s}
 .modal-btn-cancel:hover{background:var(--card2);color:var(--text)}
-.import-textarea{width:100%;height:110px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:.82rem;resize:vertical;font-family:monospace;margin-bottom:16px}
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:var(--bg2)}
 ::-webkit-scrollbar-thumb{background:#1e2f4a;border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:#2a3f5a}
+/* ── STATS BAR 6 cols ── */
+#stats-bar{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+
+/* ── SUB-STATES: repetida / reserva ── */
+.sticker.sub-repetida{box-shadow:inset 3px 0 0 #f59e0b}
+.sticker.sub-reserva {box-shadow:inset 3px 0 0 #818cf8}
+.s-sub-btn{font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:8px;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;border:1px solid;transition:all .18s;user-select:none}
+.s-sub-btn.sub-none{background:transparent;color:var(--muted);border-color:var(--muted);opacity:.5}
+.s-sub-btn.sub-none:hover{opacity:1;color:var(--dim);border-color:var(--dim)}
+.s-sub-btn.sub-repetida{background:#422006;color:#f59e0b;border-color:#92400e}
+.s-sub-btn.sub-reserva {background:#1e1b4b;color:#818cf8;border-color:#3730a3}
+/* pcard sub overlay */
+.pcard.sub-repetida::before,.pcard.sub-reserva::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0}
+.pcard.sub-repetida::before{background:#f59e0b}
+.pcard.sub-reserva::before{background:#818cf8}
+.pcard-sub{font-size:.6rem;font-weight:700;padding:2px 5px;border-radius:5px;margin-top:4px;display:inline-block;cursor:pointer;border:1px solid;letter-spacing:.04em}
+.pcard-sub.sub-repetida{background:#422006;color:#f59e0b;border-color:#92400e}
+.pcard-sub.sub-reserva {background:#1e1b4b;color:#818cf8;border-color:#3730a3}
+.pcard-sub.sub-none{background:rgba(255,255,255,.05);color:var(--muted);border-color:var(--muted)}
+
+/* ── VOLUME CONTROL BAR ── */
+#vol-bar{max-width:900px;margin:-6px auto 12px;padding:0 16px;display:flex;align-items:center;gap:12px}
+.vol-icon{font-size:1rem;cursor:pointer;color:var(--dim);flex-shrink:0;transition:color .2s;user-select:none}
+.vol-icon:hover{color:var(--text)}
+.vol-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:linear-gradient(to right,var(--gold) var(--pct,60%),var(--bg4) var(--pct,60%));outline:none;cursor:pointer}
+.vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer;box-shadow:0 0 4px rgba(0,0,0,.4)}
+.vol-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--gold);border:none;cursor:pointer}
+.vol-label{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:600;color:var(--dim);min-width:34px;text-align:right}
+
+/* ── RADIO PLAYER (fixed bottom) ── */
+#radio-bar{position:fixed;bottom:0;left:0;right:0;z-index:800;background:rgba(7,11,20,.96);backdrop-filter:blur(18px);border-top:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:14px;transform:translateY(100%);transition:transform .4s cubic-bezier(.32,.72,0,1)}
+#radio-bar.visible{transform:translateY(0)}
+#radio-bar .radio-icon{font-size:1.4rem;flex-shrink:0}
+.radio-info{flex:1;min-width:0}
+.radio-title{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.radio-artist{font-size:.72rem;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.radio-controls{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.radio-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.radio-btn:hover{background:var(--bg4);border-color:#3a5280}
+.radio-btn.play-btn{width:40px;height:40px;background:var(--gold);color:#111;border-color:var(--gold);font-size:1rem}
+.radio-btn.play-btn:hover{background:#e6b800}
+.radio-badge{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.1em;color:var(--gold);background:rgba(245,197,24,.1);border:1px solid rgba(245,197,24,.25);border-radius:8px;padding:2px 7px;flex-shrink:0}
+
+/* ── RESET MODAL ── */
+#reset-modal .modal-box h2{color:var(--red)}
+
 @media(max-width:600px){
-  #stats-bar{grid-template-columns:repeat(2,1fr)}
+  #stats-bar{grid-template-columns:repeat(3,1fr)}
   .group-flags{display:none}
   .sticker-list{grid-template-columns:1fr}
   .player-grid{grid-template-columns:repeat(2,1fr)}
   .gtab{width:36px;height:36px;font-size:.95rem}
   .gtab.all-tab{padding:0 10px}
+  #radio-bar{padding:8px 12px;gap:8px}
 }
 /* ===== WELCOME SCREEN ===== */
 #ws{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at 50% 0%,rgba(245,197,24,.18) 0,transparent 50%),linear-gradient(180deg,#060b16 0%,#0b1223 60%,#060b14 100%);display:flex;align-items:center;justify-content:center;padding:20px;transition:opacity .55s ease,visibility .55s ease;}
@@ -236,17 +282,27 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
   <div class="stat-card" style="--accent:#22c55e"><span class="stat-value" id="s-tengo">0</span><span class="stat-label">Tengo</span></div>
   <div class="stat-card" style="--accent:#f43f5e"><span class="stat-value" id="s-falta">0</span><span class="stat-label">Faltan</span></div>
   <div class="stat-card" style="--accent:#38bdf8"><span class="stat-value" id="s-pct">0%</span><span class="stat-label">Progreso</span></div>
+  <div class="stat-card" style="--accent:#f59e0b"><span class="stat-value" id="s-rep">0</span><span class="stat-label">🔄 Repetidas</span></div>
+  <div class="stat-card" style="--accent:#818cf8"><span class="stat-value" id="s-res">0</span><span class="stat-label">📌 Reservadas</span></div>
+</div>
+<div id="vol-bar">
+  <span class="vol-icon" id="vol-mute-btn" title="Silenciar/activar">🔊</span>
+  <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="60" style="--pct:60%">
+  <span class="vol-label" id="vol-label">60%</span>
 </div>
 <div id="controls">
   <input type="text" id="search" placeholder="🔍  Buscar jugador o selección...">
   <button class="action-btn primary" id="btn-pdf">📄 Exportar PDF</button>
-  <button class="action-btn" id="btn-import">⬆ Importar</button>
   <button class="action-btn" id="btn-save">💾 Guardar JSON</button>
+  <button class="action-btn" id="btn-radio">📻 Radio</button>
+  <button class="action-btn" id="btn-reset" style="border-color:#e50914;color:#e57373">🗑 Reiniciar</button>
 </div>
 <div id="status-tabs">
   <button class="stab active" data-status="all">Todos</button>
   <button class="stab" data-status="tengo">✅ Tengo</button>
   <button class="stab" data-status="falta">❌ Faltan</button>
+  <button class="stab" data-status="repetida" style="--stab-active:#f59e0b">🔄 Repetidas</button>
+  <button class="stab" data-status="reserva" style="--stab-active:#818cf8">📌 Reservadas</button>
 </div>
 <div id="group-tabs"></div>
 <div id="groups-container"></div>
@@ -281,6 +337,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
       <button class="modal-opt selected" data-mode="owned"><span class="modal-opt-icon">✅</span><div><strong>Solo los que TENGO</strong><br><small style="color:var(--dim);font-weight:400">Lista de cromos en tu poder</small></div></button>
       <button class="modal-opt" data-mode="missing"><span class="modal-opt-icon">❌</span><div><strong>Solo los que me FALTAN</strong><br><small style="color:var(--dim);font-weight:400">Tu lista de compras / intercambio</small></div></button>
       <button class="modal-opt" data-mode="all"><span class="modal-opt-icon">📋</span><div><strong>Todos (con estado TENGO / FALTA)</strong><br><small style="color:var(--dim);font-weight:400">Colección completa marcada</small></div></button>
+      <button class="modal-opt" data-mode="repetida"><span class="modal-opt-icon">🔄</span><div><strong>Mis REPETIDAS</strong><br><small style="color:var(--dim);font-weight:400">Cromos para intercambio</small></div></button>
+      <button class="modal-opt" data-mode="reserva"><span class="modal-opt-icon">📌</span><div><strong>Mis RESERVADAS</strong><br><small style="color:var(--dim);font-weight:400">Cromos destinados / segunda cuenta</small></div></button>
     </div>
     <div class="modal-actions">
       <button class="modal-btn-cancel" id="pdf-cancel">Cancelar</button>
@@ -289,17 +347,31 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
   </div>
 </div>
 
-<!-- Import Modal -->
-<div class="modal-backdrop" id="import-modal">
+<!-- Reset Modal -->
+<div class="modal-backdrop" id="reset-modal">
   <div class="modal-box">
-    <h2>⬆ Importar JSON</h2>
-    <p>Pega el contenido de tu archivo JSON guardado anteriormente.</p>
-    <textarea class="import-textarea" id="import-text" placeholder='{"key":"tengo",...}'></textarea>
+    <h2>🗑 Reiniciar Álbum</h2>
+    <p>¿Estás seguro de que deseas borrar <strong>todo tu progreso</strong>? Se eliminarán todos los cromos marcados, repetidas y reservadas. Esta acción no se puede deshacer.</p>
     <div class="modal-actions">
-      <button class="modal-btn-cancel" id="import-cancel">Cancelar</button>
-      <button class="modal-btn-primary" id="import-confirm">Importar →</button>
+      <button class="modal-btn-cancel" id="reset-cancel">Cancelar</button>
+      <button class="modal-btn-primary" id="reset-confirm" style="background:#e50914">Sí, borrar todo →</button>
     </div>
   </div>
+</div>
+
+<!-- Radio Player -->
+<div id="radio-bar">
+  <span class="radio-icon">📻</span>
+  <div class="radio-info">
+    <div class="radio-title" id="radio-title">Seleccionando canción…</div>
+    <div class="radio-artist" id="radio-artist">Radio Mundial 2026</div>
+  </div>
+  <div class="radio-controls">
+    <button class="radio-btn" id="radio-prev" title="Anterior">⏮</button>
+    <button class="radio-btn play-btn" id="radio-play" title="Play/Pausa">▶</button>
+    <button class="radio-btn" id="radio-next" title="Siguiente">⏭</button>
+  </div>
+  <span class="radio-badge">🔀 ALEATORIO</span>
 </div>
 
 <script>
@@ -524,33 +596,25 @@ const ANTHEMS = {
 let _anthemAudio = null;
 
 function playAnthem(country) {
-  stopAnthem(); // detener himno anterior si hay uno
+  stopAnthem();
+  pauseRadio(false); // pausa radio sin restaurar video (el himno toma el control)
 
   const url = ANTHEMS[country];
   if (!url) return;
 
-  // Silenciar el video de fondo
   const bgVideo = document.getElementById('bg-video');
-  if (bgVideo) {
-    bgVideo._prevVolume = bgVideo.volume;
-    bgVideo.volume = 0;
-  }
+  if (bgVideo) { bgVideo._prevVolume = bgVideo.volume; bgVideo.volume = 0; }
 
   _anthemAudio = new Audio(url);
-  _anthemAudio.volume = 0.85;
-  _anthemAudio.play().catch(() => {/* bloqueado por autoplay policy — silencioso */});
+  _anthemAudio.volume = Math.min(1, getEffectiveVolume() + 0.1);
+  _anthemAudio.play().catch(() => {});
 }
 
 function stopAnthem() {
-  if (_anthemAudio) {
-    _anthemAudio.pause();
-    _anthemAudio.currentTime = 0;
-    _anthemAudio = null;
-  }
-  // Restaurar volumen del video de fondo
+  if (_anthemAudio) { _anthemAudio.pause(); _anthemAudio.currentTime = 0; _anthemAudio = null; }
   const bgVideo = document.getElementById('bg-video');
-  if (bgVideo) {
-    bgVideo.volume = bgVideo._prevVolume != null ? bgVideo._prevVolume : 0.6;
+  if (bgVideo && !_radioPlaying) {
+    bgVideo.volume = bgVideo._prevVolume != null ? bgVideo._prevVolume : getEffectiveVolume();
     bgVideo._prevVolume = null;
   }
 }
@@ -579,22 +643,63 @@ function cycleStickerState(country, idx) {
   const cur = state[k] || 'none';
   if (cur === 'none') state[k] = 'tengo';
   else if (cur === 'tengo') state[k] = 'falta';
-  else state[k] = 'none';
+  else { state[k] = 'none'; clearStickerSubState(country, idx); }
   saveState();
+}
+
+// ── SUB-STATES ──
+function getSubKey(c, i) { return c + '::' + i + '::sub'; }
+function getStickerSubState(c, i) { return state[getSubKey(c, i)] || null; }
+function cycleStickerSubState(c, i) {
+  const k = getSubKey(c, i);
+  const cur = state[k] || null;
+  if (!cur) state[k] = 'repetida';
+  else if (cur === 'repetida') state[k] = 'reserva';
+  else delete state[k];
+  saveState();
+}
+function clearStickerSubState(c, i) { delete state[getSubKey(c, i)]; saveState(); }
+
+// ── MASTER VOLUME ──
+let masterVolume = 0.6;
+let masterMuted  = false;
+
+function getEffectiveVolume() { return masterMuted ? 0 : masterVolume; }
+
+function applyMasterVolume() {
+  const v = getEffectiveVolume();
+  const bg = document.getElementById('bg-video');
+  // Only update bg if no anthem/radio override is active
+  if (bg && !_anthemAudio && !_radioPlaying) bg.volume = v;
+  if (_anthemAudio) _anthemAudio.volume = Math.min(1, v + 0.1);
+  if (_radioAudio)  _radioAudio.volume  = v;
+  // Update slider visual
+  const sl = document.getElementById('vol-slider');
+  if (sl) {
+    sl.value = Math.round(masterVolume * 100);
+    sl.style.setProperty('--pct', Math.round(masterVolume*100) + '%');
+  }
+  const lbl = document.getElementById('vol-label');
+  if (lbl) lbl.textContent = masterMuted ? '🔇' : Math.round(masterVolume*100) + '%';
+  const icon = document.getElementById('vol-mute-btn');
+  if (icon) icon.textContent = masterMuted ? '🔇' : masterVolume > 0.5 ? '🔊' : masterVolume > 0 ? '🔉' : '🔈';
 }
 
 // ════════════ STATS ════════════
 function getCountryStats(country) {
   const stickers = albumData[country];
-  if (!stickers) return {owned:0,missing:0,total:0,pct:0};
-  let owned=0,missing=0;
+  if (!stickers) return {owned:0,missing:0,total:0,pct:0,repetida:0,reserva:0};
+  let owned=0,missing=0,repetida=0,reserva=0;
   stickers.forEach((_, i) => {
     const s = getStickerState(country, i);
+    const sub = getStickerSubState(country, i);
     if (s === 'tengo') owned++;
     else if (s === 'falta') missing++;
+    if (sub === 'repetida') repetida++;
+    else if (sub === 'reserva') reserva++;
   });
   const total = stickers.length;
-  return {owned, missing, total, pct: total ? Math.round(owned/total*100) : 0};
+  return {owned, missing, total, pct: total ? Math.round(owned/total*100) : 0, repetida, reserva};
 }
 function getGroupStats(grp) {
   const countries = GROUPS[grp] || [];
@@ -606,30 +711,34 @@ function getGroupStats(grp) {
   return {owned, total, pct: total ? Math.round(owned/total*100) : 0};
 }
 function getGlobalStats() {
-  let owned = 0, missing = 0, total = 0;
+  let owned=0, missing=0, total=0, repetida=0, reserva=0;
 
   INTRO_DATA.forEach((_, i) => {
     const s = getStickerState('INTRO', i);
+    const sub = getStickerSubState('INTRO', i);
     if (s === 'tengo') owned++;
     else if (s === 'falta') missing++;
+    if (sub === 'repetida') repetida++;
+    else if (sub === 'reserva') reserva++;
     total++;
   });
 
   Object.keys(albumData).forEach(c => {
     const s = getCountryStats(c);
-    owned += s.owned;
-    missing += s.missing;
-    total += s.total;
+    owned += s.owned; missing += s.missing; total += s.total;
+    repetida += s.repetida; reserva += s.reserva;
   });
 
-  return {owned, missing, total, pct: total ? Math.round(owned / total * 100) : 0};
+  return {owned, missing, total, pct: total ? Math.round(owned/total*100) : 0, repetida, reserva};
 }
 function updateStatsBar() {
   const gs = getGlobalStats();
   document.getElementById('s-total').textContent = gs.total;
   document.getElementById('s-tengo').textContent = gs.owned;
   document.getElementById('s-falta').textContent = gs.missing;
-  document.getElementById('s-pct').textContent = gs.pct + '%';
+  document.getElementById('s-pct').textContent   = gs.pct + '%';
+  document.getElementById('s-rep').textContent   = gs.repetida;
+  document.getElementById('s-res').textContent   = gs.reserva;
 }
 
 // ════════════ GROUP TABS ════════════
@@ -700,21 +809,62 @@ function renderGroups() {
     container.appendChild(introAcc);
 
     const introList = introAcc.querySelector('#intro-list');
-    INTRO_DATA.forEach((name, i) => {
-      const st = getStickerState('INTRO', i);
-      if (activeStatus === 'tengo' && st !== 'tengo') return;
-      if (activeStatus === 'falta' && st !== 'falta') return;
+    function renderIntroList() {
+      introList.innerHTML = '';
+      INTRO_DATA.forEach((name, ii) => {
+        const st  = getStickerState('INTRO', ii);
+        const sub = getStickerSubState('INTRO', ii);
 
-      const li = document.createElement('li');
-      li.className = 'sticker' + (st === 'tengo' ? ' state-tengo' : st === 'falta' ? ' state-falta' : '');
-      li.innerHTML = `<span class="s-num">#${i+1}</span><span class="s-name">${name}</span><span class="s-badge">${st === 'tengo' ? 'TENGO' : st === 'falta' ? 'FALTA' : '—'}</span>`;
-      li.addEventListener('click', () => {
-        cycleStickerState('INTRO', i);
-        updateAll();
-        renderGroups();
+        if (activeStatus === 'tengo'    && st  !== 'tengo')    return;
+        if (activeStatus === 'falta'    && st  !== 'falta')    return;
+        if (activeStatus === 'repetida' && sub !== 'repetida') return;
+        if (activeStatus === 'reserva'  && sub !== 'reserva')  return;
+        if (searchQuery && !name.toLowerCase().includes(searchQuery)) return;
+
+        const stClass  = st  === 'tengo' ? ' state-tengo' : st  === 'falta' ? ' state-falta' : '';
+        const subClass = sub ? ' sub-' + sub : '';
+        const li = document.createElement('li');
+        li.className = 'sticker' + stClass + subClass;
+        li.dataset.country = 'INTRO';
+        li.dataset.idx = ii;
+
+        const subLabel   = sub === 'repetida' ? '🔄 REP' : sub === 'reserva' ? '📌 RES' : '+';
+        const subBtnHtml = st !== 'none'
+          ? `<span class="s-sub-btn sub-${sub||'none'}">${subLabel}</span>`
+          : '';
+
+        li.innerHTML = `<span class="s-num">#${ii+1}</span><span class="s-name">${name}</span>
+          ${subBtnHtml}
+          <span class="s-badge">${st === 'tengo' ? 'TENGO' : st === 'falta' ? 'FALTA' : '—'}</span>`;
+
+        li.addEventListener('click', (e) => {
+          if (e.target.closest('.s-sub-btn')) return;
+          cycleStickerState('INTRO', ii);
+          updateAll();
+          const introPct2 = INTRO_DATA.length ? Math.round(
+            INTRO_DATA.filter((_, x) => getStickerState('INTRO', x) === 'tengo').length / INTRO_DATA.length * 100
+          ) : 0;
+          const fill = introAcc.querySelector('.group-prog-fill');
+          const pct  = introAcc.querySelector('.group-prog-pct');
+          if (fill) fill.style.width = introPct2 + '%';
+          if (pct)  pct.textContent  = introPct2 + '%';
+          renderIntroList();
+        });
+
+        const subBtn = li.querySelector('.s-sub-btn');
+        if (subBtn) {
+          subBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            cycleStickerSubState('INTRO', ii);
+            updateAll();
+            renderIntroList();
+          });
+        }
+
+        introList.appendChild(li);
       });
-      introList.appendChild(li);
-    });
+    }
+    renderIntroList();
   }
 
   let groupsToShow = 'ABCDEFGHIJKL'.split('');
@@ -875,30 +1025,58 @@ function renderStickerList(country, listEl, gColor) {
   listEl.innerHTML = '';
   const stickers = albumData[country] || [];
   stickers.forEach((name, i) => {
-    const st = getStickerState(country, i);
+    const st  = getStickerState(country, i);
+    const sub = getStickerSubState(country, i);
+
     // Status filter
-    if (activeStatus === 'tengo' && st !== 'tengo') return;
-    if (activeStatus === 'falta' && st !== 'falta') return;
-    // Search filter
+    if (activeStatus === 'tengo'    && st !== 'tengo') return;
+    if (activeStatus === 'falta'    && st !== 'falta') return;
+    if (activeStatus === 'repetida' && sub !== 'repetida') return;
+    if (activeStatus === 'reserva'  && sub !== 'reserva')  return;
     if (searchQuery && !name.toLowerCase().includes(searchQuery) && !country.toLowerCase().includes(searchQuery)) return;
 
     const li = document.createElement('li');
-    li.className = 'sticker' + (st === 'tengo' ? ' state-tengo' : st === 'falta' ? ' state-falta' : '');
+    const stClass = st === 'tengo' ? ' state-tengo' : st === 'falta' ? ' state-falta' : '';
+    const subClass = sub ? ' sub-' + sub : '';
+    li.className = 'sticker' + stClass + subClass;
     li.dataset.country = country;
     li.dataset.idx = i;
+
+    const subLabel = sub === 'repetida' ? '🔄 REP' : sub === 'reserva' ? '📌 RES' : '+';
+    const subBtnHtml = st !== 'none'
+      ? `<span class="s-sub-btn sub-${sub||'none'}">${subLabel}</span>`
+      : '';
+
     li.innerHTML = `<span class="s-num">#${i+1}</span><span class="s-name">${name}</span>
+      ${subBtnHtml}
       <span class="s-badge">${st === 'tengo' ? 'TENGO' : st === 'falta' ? 'FALTA' : '—'}</span>`;
-    li.addEventListener('click', () => {
+
+    // Primary click → cycle main state
+    li.addEventListener('click', (e) => {
+      if (e.target.closest('.s-sub-btn')) return;
       cycleStickerState(country, i);
       updateAll();
-      // Re-render this list
-      const parentList = li.closest('.sticker-list');
-      const parentGrp = li.closest('.group-accordion');
-      const gc = parentGrp ? (parentGrp.querySelector('.group-header').dataset.grp) : null;
-      renderStickerList(country, parentList, gc ? GROUP_COLORS[gc] : gColor);
-      // Update country progress bar
+      const pl = li.closest('.sticker-list');
+      const pg = li.closest('.group-accordion');
+      const gc = pg ? pg.querySelector('.group-header').dataset.grp : null;
+      renderStickerList(country, pl, gc ? GROUP_COLORS[gc] : gColor);
       updateCountryBar(country, gc ? GROUP_COLORS[gc] : gColor);
     });
+
+    // Sub-state click
+    const subBtn = li.querySelector('.s-sub-btn');
+    if (subBtn) {
+      subBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        cycleStickerSubState(country, i);
+        updateAll();
+        const pl = li.closest('.sticker-list');
+        const pg = li.closest('.group-accordion');
+        const gc = pg ? pg.querySelector('.group-header').dataset.grp : null;
+        renderStickerList(country, pl, gc ? GROUP_COLORS[gc] : gColor);
+      });
+    }
+
     listEl.appendChild(li);
   });
 }
@@ -968,20 +1146,64 @@ function openOverlay(country) {
 
   const grid = playersSection.querySelector('#ov-player-grid');
   stickers.forEach((name, i) => {
-    const st = getStickerState(country, i);
+    const st  = getStickerState(country, i);
+    const sub = getStickerSubState(country, i);
     const card = document.createElement('div');
-    card.className = 'pcard' + (st==='tengo' ? ' owned' : st==='falta' ? ' missing' : '');
-    card.innerHTML = `<div class="pcard-num">#${i+1}</div><div class="pcard-name">${name}</div>`;
-    card.addEventListener('click', () => {
+    const stClass = st==='tengo' ? ' owned' : st==='falta' ? ' missing' : '';
+    const subClass = sub ? ' sub-' + sub : '';
+    card.className = 'pcard' + stClass + subClass;
+
+    const subLabel = sub === 'repetida' ? '🔄 REP' : sub === 'reserva' ? '📌 RES' : '+ sub';
+    const subHtml  = st !== 'none'
+      ? `<span class="pcard-sub sub-${sub||'none'}" data-action="sub">${subLabel}</span>`
+      : '';
+
+    card.innerHTML = `<div class="pcard-num">#${i+1}</div><div class="pcard-name">${name}</div>${subHtml}`;
+
+    // Main click → cycle primary
+    card.addEventListener('click', (e) => {
+      if (e.target.dataset.action === 'sub') return;
       cycleStickerState(country, i);
-      const ns = getStickerState(country, i);
-      card.className = 'pcard' + (ns==='tengo' ? ' owned' : ns==='falta' ? ' missing' : '');
+      const ns   = getStickerState(country, i);
+      const nsub = getStickerSubState(country, i);
+      const stC  = ns==='tengo' ? ' owned' : ns==='falta' ? ' missing' : '';
+      const subC = nsub ? ' sub-'+nsub : '';
+      card.className = 'pcard' + stC + subC;
+      const sl2 = nsub==='repetida'?'🔄 REP':nsub==='reserva'?'📌 RES':'+ sub';
+      const sbtn = card.querySelector('.pcard-sub');
+      if (ns !== 'none' && !sbtn) {
+        const ns2 = document.createElement('span');
+        ns2.className = `pcard-sub sub-${nsub||'none'}`;
+        ns2.dataset.action = 'sub';
+        ns2.textContent = sl2;
+        card.appendChild(ns2);
+        ns2.addEventListener('click', subClickHandler);
+      } else if (ns === 'none' && sbtn) sbtn.remove();
+      else if (sbtn) { sbtn.className = `pcard-sub sub-${nsub||'none'}`; sbtn.textContent = sl2; }
       const cs2 = getCountryStats(country);
       document.getElementById('ov-pbar').style.width = cs2.pct + '%';
       document.getElementById('ov-ptext').textContent = `${cs2.owned} / ${cs2.total} cromos (${cs2.pct}%)`;
       updateAll();
       updateCountryBar(country, gColor);
     });
+
+    function subClickHandler(e) {
+      e.stopPropagation();
+      cycleStickerSubState(country, i);
+      const nsub = getStickerSubState(country, i);
+      const sbtn = card.querySelector('.pcard-sub');
+      if (sbtn) {
+        sbtn.className = `pcard-sub sub-${nsub||'none'}`;
+        sbtn.textContent = nsub==='repetida'?'🔄 REP':nsub==='reserva'?'📌 RES':'+ sub';
+      }
+      const stC = getStickerState(country,i);
+      card.className = 'pcard' + (stC==='tengo'?' owned':stC==='falta'?' missing':'') + (nsub?' sub-'+nsub:'');
+      updateAll();
+    }
+
+    const sb = card.querySelector('.pcard-sub');
+    if (sb) sb.addEventListener('click', subClickHandler);
+
     grid.appendChild(card);
   });
 
@@ -1010,10 +1232,14 @@ function openOverlay(country) {
 }
 
 function closeOverlay() {
-  stopAnthem(); // ◼ Detener himno y restaurar video
+  stopAnthem(); // detiene himno y restaura video (solo si radio no está activa)
   document.getElementById('country-overlay').classList.remove('visible');
   document.body.style.overflow = '';
   currentOverlayCountry = null;
+  // Si la radio estaba visible y "debería" estar sonando, reanudarla
+  if (_radioVisible && _radioPlaying === false && _radioAudio) {
+    // No auto-resume; el usuario decide
+  }
 }
 document.getElementById('ov-back').addEventListener('click', closeOverlay);
 
@@ -1051,7 +1277,7 @@ function generatePDF(mode) {
   doc.text('ÁLBUM MUNDIAL 2026', W/2, 12, {align:'center'});
   doc.setFontSize(9);
   doc.setTextColor(122,138,170);
-  const modeLabel = mode==='owned'?'Solo TENGO': mode==='missing'?'Solo FALTAN':'Colección completa (TENGO / FALTA)';
+  const modeLabel = mode==='owned'?'Solo TENGO': mode==='missing'?'Solo FALTAN': mode==='repetida'?'Mis REPETIDAS': mode==='reserva'?'Mis RESERVADAS':'Colección completa (TENGO / FALTA)';
   const gs = getGlobalStats();
   doc.text(`${modeLabel} · ${gs.owned}/${gs.total} cromos (${gs.pct}%)`, W/2, 20, {align:'center'});
   doc.text(`Generado: ${new Date().toLocaleDateString('es-CL')}`, W/2, 26, {align:'center'});
@@ -1135,10 +1361,13 @@ function generatePDF(mode) {
     countries.forEach(c => {
       const stickers = albumData[c] || [];
       stickers.forEach((name, i) => {
-        const st = getStickerState(c, i);
-        if (mode==='owned' && st==='tengo') groupHasItems=true;
-        if (mode==='missing' && st==='falta') groupHasItems=true;
-        if (mode==='all') groupHasItems=true;
+        const st  = getStickerState(c, i);
+        const sub = getStickerSubState(c, i);
+        if (mode==='owned'    && st==='tengo')      groupHasItems=true;
+        if (mode==='missing'  && st==='falta')      groupHasItems=true;
+        if (mode==='all')                           groupHasItems=true;
+        if (mode==='repetida' && sub==='repetida')  groupHasItems=true;
+        if (mode==='reserva'  && sub==='reserva')   groupHasItems=true;
       });
     });
     if (!groupHasItems) return;
@@ -1162,10 +1391,13 @@ function generatePDF(mode) {
       const cs = getCountryStats(c);
       const items = [];
       stickers.forEach((name, i) => {
-        const st = getStickerState(c, i);
-        if (mode==='owned' && st!=='tengo') return;
-        if (mode==='missing' && st!=='falta') return;
-        items.push({name, st, i});
+        const st  = getStickerState(c, i);
+        const sub = getStickerSubState(c, i);
+        if (mode==='owned'    && st  !== 'tengo')     return;
+        if (mode==='missing'  && st  !== 'falta')     return;
+        if (mode==='repetida' && sub !== 'repetida')  return;
+        if (mode==='reserva'  && sub !== 'reserva')   return;
+        items.push({name, st, sub, i});
       });
       if (items.length===0) return;
 
@@ -1250,30 +1482,6 @@ document.getElementById('btn-save').addEventListener('click', () => {
   a.click();
 });
 
-document.getElementById('btn-import').addEventListener('click', () => {
-  document.getElementById('import-modal').classList.add('visible');
-});
-document.getElementById('import-cancel').addEventListener('click', () => {
-  document.getElementById('import-modal').classList.remove('visible');
-});
-document.getElementById('import-modal').addEventListener('click', e => {
-  if(e.target===e.currentTarget) document.getElementById('import-modal').classList.remove('visible');
-});
-document.getElementById('import-confirm').addEventListener('click', () => {
-  try {
-    const raw = document.getElementById('import-text').value.trim();
-    const parsed = JSON.parse(raw);
-    state = parsed;
-    saveState();
-    document.getElementById('import-modal').classList.remove('visible');
-    document.getElementById('import-text').value = '';
-    updateAll();
-    renderGroups();
-    alert('✅ Importación exitosa');
-  } catch(e) {
-    alert('❌ JSON inválido. Verifica el formato e intenta nuevamente.');
-  }
-});
 
 // ════════════ SEARCH ════════════
 document.getElementById('search').addEventListener('input', e => {
@@ -1281,11 +1489,199 @@ document.getElementById('search').addEventListener('input', e => {
   renderGroups();
 });
 
+// ════════════ RESET ════════════
+document.getElementById('btn-reset').addEventListener('click', () => {
+  document.getElementById('reset-modal').classList.add('visible');
+});
+document.getElementById('reset-cancel').addEventListener('click', () => {
+  document.getElementById('reset-modal').classList.remove('visible');
+});
+document.getElementById('reset-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) document.getElementById('reset-modal').classList.remove('visible');
+});
+document.getElementById('reset-confirm').addEventListener('click', () => {
+  state = {};
+  saveState();
+  document.getElementById('reset-modal').classList.remove('visible');
+  updateAll();
+  renderGroups();
+  alert('✅ Álbum reiniciado a cero');
+});
+
+// ════════════ VOLUME CONTROL ════════════
+(function initVolume() {
+  const slider = document.getElementById('vol-slider');
+  const muteBtn = document.getElementById('vol-mute-btn');
+
+  slider.addEventListener('input', () => {
+    masterVolume = parseInt(slider.value) / 100;
+    masterMuted  = false;
+    applyMasterVolume();
+  });
+
+  muteBtn.addEventListener('click', () => {
+    masterMuted = !masterMuted;
+    applyMasterVolume();
+  });
+})();
+
+// ════════════ RADIO ENGINE ════════════
+const RADIO_PLAYLIST = [
+  {artist:"Shakira, Burna Boy",            title:"Dai Dai",                        url:"https://files.catbox.moe/lay7sr.mp3"},
+  {artist:"FIFA Sound",                    title:"The Official FIFA World Cup 26™ Theme", url:"https://files.catbox.moe/7m5cck.mp3"},
+  {artist:"Jelly Roll, Carín León, FIFA Sound", title:"Lighter",                   url:"https://files.catbox.moe/y0qzsw.mp3"},
+  {artist:"LISA, Anitta, Rema, FIFA Sound",title:"Goals",                          url:"https://files.catbox.moe/vyttci.mp3"},
+  {artist:"Jessie Reyez, Elyanna, FIFA Sound", title:"Illuminate",                 url:"https://files.catbox.moe/z8lgve.mp3"},
+  {artist:"Daddy Yankee, Shenseea, FIFA Sound", title:"Echo",                      url:"https://files.catbox.moe/pnvjau.mp3"},
+  {artist:"Trinidad Cardona, Davido, Aisha",title:"Hayya Hayya (Better Together)", url:"https://files.catbox.moe/tsipl8.mp3"},
+  {artist:"FIFA Sound",                    title:"The Official FIFA World Cup Qatar 2022™ Theme", url:"https://files.catbox.moe/p6pc5a.mp3"},
+  {artist:"Shakira, Carlinhos Brown",      title:"La La La (Brazil 2014)",         url:"https://files.catbox.moe/2pfb0y.mp3"},
+  {artist:"K'NAAN",                        title:"Wavin' Flag - Coca-Cola® Celebration Mix", url:"https://files.catbox.moe/i2vooq.mp3"},
+  {artist:"Ozuna, RedOne, GIMS, FIFA Sound",title:"Arhbo",                         url:"https://files.catbox.moe/9nz1nn.mp3"},
+  {artist:"Ricky Martin",                  title:"The Cup of Life (La Copa De La Vida)", url:"https://files.catbox.moe/0bekk2.mp3"},
+  {artist:"Shakira ft. Wyclef Jean",       title:"Hips Don't Lie",                 url:"https://files.catbox.moe/kuwc87.mp3"},
+  {artist:"Magic System, Chawki",          title:"Magic in the Air",               url:"https://files.catbox.moe/yxddk5.mp3"},
+  {artist:"Daddy Yankee",                  title:"Grito Mundial",                  url:"https://files.catbox.moe/8hlzyc.mp3"},
+  {artist:"Wisin",                         title:"Que Viva la Vida",               url:"https://files.catbox.moe/gfanij.mp3"},
+  {artist:"Wisin ft. Jennifer Lopez & Ricky Martin", title:"Adrenalina",           url:"https://files.catbox.moe/zmbnk6.mp3"},
+  {artist:"Queen",                         title:"We Are The Champions",           url:"https://files.catbox.moe/zmbnk6.mp3"},
+  {artist:"Pitbull ft. Jennifer Lopez & Claudia Leitte", title:"We Are One (Ole Ola)", url:"https://files.catbox.moe/0hok92.mp3"},
+  {artist:"Avicii",                        title:"The Nights",                     url:"https://files.catbox.moe/0hok92.mp3"},
+  {artist:"Imagine Dragons",               title:"On Top Of The World",            url:"https://files.catbox.moe/g45lmz.mp3"},
+  {artist:"John Newman",                   title:"Love Me Again",                  url:"https://files.catbox.moe/b79l0p.mp3"},
+  {artist:"Glass Animals",                 title:"Heat Waves",                     url:"https://files.catbox.moe/88x44k.mp3"},
+  {artist:"MEDUZA, OneRepublic, Leony",    title:"Fire (UEFA EURO 2024)",          url:"https://files.catbox.moe/7vjx0h.mp3"},
+  {artist:"Skrillex, Fred again.., Flowdan", title:"Rumble",                       url:"https://files.catbox.moe/rbt2i4.mp3"},
+  {artist:"Zakes Bantwini, Kasango",       title:"Osama (Bruno Be, Ralk Rework)",  url:"https://files.catbox.moe/0u77x6.mp3"},
+  {artist:"Andrei Mihai, Elena Morosanu",  title:"I Need You Like Medicine",       url:"https://files.catbox.moe/fixgy9.mp3"},
+  {artist:"MEDUZA, Sam Tompkins, Em Beihold", title:"Phone",                      url:"https://files.catbox.moe/rbt2i4.mp3"},
+  {artist:"Myke Towers",                   title:"LALA",                           url:"https://files.catbox.moe/mf78j6.mp3"},
+  {artist:"Mata",                          title:"Lloret de Mar",                  url:"https://files.catbox.moe/93xriq.mp3"},
+  {artist:"Young Miko",                    title:"arcoíris",                       url:"https://files.catbox.moe/q6zgaj.mp3"},
+  {artist:"Charlotte Plank, Hybrid Minds", title:"Lights",                         url:"https://files.catbox.moe/5v70j9.mp3"},
+  {artist:"Justice, Tame Impala",          title:"Neverender",                     url:"https://files.catbox.moe/6weet4.mp3"},
+  {artist:"RÜFÜS DU SOL",                  title:"Break My Love",                  url:"https://files.catbox.moe/gnoy28.mp3"},
+  {artist:"Joy Crookes",                   title:"Feet Don't Fail Me Now",         url:"https://files.catbox.moe/s0ae8h.mp3"},
+  {artist:"Young Miko",                    title:"WASSUP",                         url:"https://files.catbox.moe/hzejc8.mp3"},
+  {artist:"Gusttavo Lima",                 title:"Balada",                         url:"https://files.catbox.moe/wzxe85.mp3"},
+  {artist:"MC L da Vinte, MC Gury, DJ Swat", title:"Parado no Bailão",            url:"https://files.catbox.moe/3f6oyp.mp3"},
+  {artist:"Michel Teló",                   title:"Ai Se Eu Te Pego",               url:"https://files.catbox.moe/ao36ya.mp3"},
+  {artist:"MC Kevinho",                    title:"Olha A Explosão",                url:"https://files.catbox.moe/ht5ltn.mp3"},
+  {artist:"Sérgio Mendes",                 title:"Magalenha",                      url:"https://files.catbox.moe/afik3h.mp3"},
+  {artist:"Opus",                          title:"Live Is Life (Live)",             url:"https://files.catbox.moe/eeqyck.mp3"},
+  {artist:"Luck Ra, Bersuit, La T y La M", title:"TOCO Y ME VOY",                  url:"https://files.catbox.moe/xpqizr.mp3"},
+  {artist:"Rodrigo",                       title:"La Mano de Dios",                url:"https://files.catbox.moe/trjvgm.mp3"},
+  {artist:"La T y La M",                   title:"Pa' la Selección",               url:"https://files.catbox.moe/kfknsq.mp3"},
+  {artist:"Los Miserables",                title:"El crack",                       url:"https://files.catbox.moe/5v76st.mp3"},
+  {artist:"Shakira ft. Freshlyground",     title:"Waka Waka (Esto es Africa)",     url:"https://files.catbox.moe/gxa7aq.mp3"},
+  {artist:"Turf",                          title:"Pasos Al Costado",               url:"https://files.catbox.moe/4f2em5.mp3"},
+  {artist:"Los Palmeras",                  title:"El Bombón",                      url:"https://files.catbox.moe/2sz5jj.mp3"},
+  {artist:"Los Palmeras",                  title:"Soy Sabalero (Versión Cancha)",  url:"https://files.catbox.moe/686sfk.mp3"},
+];
+
+// Shuffle helper
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+let _radioAudio    = null;
+let _radioPlaying  = false;
+let _radioQueue    = shuffleArray(RADIO_PLAYLIST);
+let _radioIdx      = 0;
+let _radioVisible  = false;
+
+function radioLoadTrack(idx) {
+  if (_radioAudio) { _radioAudio.pause(); _radioAudio.src = ''; }
+  const track = _radioQueue[idx];
+  document.getElementById('radio-title').textContent  = track.title;
+  document.getElementById('radio-artist').textContent = track.artist;
+  _radioAudio = new Audio(track.url);
+  _radioAudio.volume = getEffectiveVolume();
+  _radioAudio.addEventListener('ended', () => radioNext());
+  if (_radioPlaying) _radioAudio.play().catch(() => {});
+}
+
+function radioPlay() {
+  if (!_radioAudio) radioLoadTrack(_radioIdx);
+  stopAnthem(); // no himno mientras suena radio
+  const bg = document.getElementById('bg-video');
+  if (bg) { bg._prevVolume = bg.volume; bg.volume = 0; }
+  _radioAudio.volume = getEffectiveVolume();
+  _radioAudio.play().catch(() => {});
+  _radioPlaying = true;
+  document.getElementById('radio-play').textContent = '⏸';
+}
+
+function pauseRadio(restoreVideo = true) {
+  if (_radioAudio) _radioAudio.pause();
+  _radioPlaying = false;
+  document.getElementById('radio-play').textContent = '▶';
+  if (restoreVideo) {
+    const bg = document.getElementById('bg-video');
+    if (bg) { bg.volume = bg._prevVolume != null ? bg._prevVolume : getEffectiveVolume(); bg._prevVolume = null; }
+  }
+}
+
+function radioNext() {
+  _radioIdx = (_radioIdx + 1) % _radioQueue.length;
+  if (_radioIdx === 0) _radioQueue = shuffleArray(RADIO_PLAYLIST); // re-shuffle al terminar ciclo
+  const wasPlaying = _radioPlaying;
+  radioLoadTrack(_radioIdx);
+  if (wasPlaying) _radioAudio.play().catch(() => {});
+}
+
+function radioPrev() {
+  _radioIdx = (_radioIdx - 1 + _radioQueue.length) % _radioQueue.length;
+  const wasPlaying = _radioPlaying;
+  radioLoadTrack(_radioIdx);
+  if (wasPlaying) _radioAudio.play().catch(() => {});
+}
+
+document.getElementById('btn-radio').addEventListener('click', () => {
+  if (!_radioVisible) {
+    _radioVisible = true;
+    document.getElementById('radio-bar').classList.add('visible');
+    document.body.style.paddingBottom = '70px';
+    // Inicializar primera canción sin reproducir
+    radioLoadTrack(_radioIdx);
+  } else {
+    // Segunda pulsación: ocultar y detener
+    pauseRadio(true);
+    _radioVisible = false;
+    document.getElementById('radio-bar').classList.remove('visible');
+    document.body.style.paddingBottom = '';
+  }
+});
+
+document.getElementById('radio-play').addEventListener('click', () => {
+  if (_radioPlaying) pauseRadio(true);
+  else radioPlay();
+});
+document.getElementById('radio-next').addEventListener('click', radioNext);
+document.getElementById('radio-prev').addEventListener('click', radioPrev);
+
 // ════════════ STATUS TABS ════════════
 document.querySelectorAll('.stab').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.stab').forEach(b => {
+      b.classList.remove('active');
+      b.style.background = '';
+      b.style.color = '';
+      b.style.borderColor = '';
+    });
     btn.classList.add('active');
+    // Custom colors for sub-state tabs
+    const customColor = btn.style.getPropertyValue('--stab-active');
+    if (customColor) {
+      btn.style.background = customColor;
+      btn.style.color = '#111';
+      btn.style.borderColor = customColor;
+    }
     activeStatus = btn.dataset.status;
     renderGroups();
   });
@@ -1299,7 +1695,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeOverlay();
     hidePdfModal();
-    document.getElementById('import-modal').classList.remove('visible');
+    document.getElementById('reset-modal').classList.remove('visible');
   }
 });
 
@@ -1312,16 +1708,12 @@ updateStatsBar();
 <script>
 
 function startAlbum(){
-
     document.getElementById('ws').classList.add('off');
-
     const video = document.getElementById('bg-video');
-
     video.muted = false;
-    video.volume = 0.6;
-
+    video.volume = getEffectiveVolume();
     video.play();
-
+    applyMasterVolume();
 }
 
 </script>
