@@ -866,6 +866,22 @@ function closeOverlay() {
 }
 document.getElementById('ov-back').addEventListener('click', closeOverlay);
 
+
+function pdfSafeText(str=''){
+  return String(str)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/[‐‑–—]/g, '-')
+    .replace(/[•·]/g, '-')
+    .replace(/[\u{1F1E6}-\u{1F1FF}]/gu, '')
+    .replace(/[\p{Extended_Pictographic}]/gu, '')
+    .replace(/[^\x20-\x7E\n]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 // ════════════ PDF EXPORT ════════════
 function showPdfModal() { document.getElementById('pdf-modal').classList.add('visible'); }
 function hidePdfModal() { document.getElementById('pdf-modal').classList.remove('visible'); }
@@ -897,13 +913,13 @@ function generatePDF(mode) {
   doc.setTextColor(245,197,24);
   doc.setFontSize(22);
   doc.setFont('helvetica','bold');
-  doc.text('ÁLBUM MUNDIAL 2026', W/2, 12, {align:'center'});
+  doc.text('ALBUM MUNDIAL 2026', W/2, 12, {align:'center'});
   doc.setFontSize(9);
   doc.setTextColor(122,138,170);
   const modeLabel = mode==='owned'?'Solo TENGO': mode==='missing'?'Solo FALTAN': mode==='repetida'?'Mis REPETIDAS': mode==='reserva'?'Mis RESERVADAS':'Colección completa (TENGO / FALTA)';
   const gs = getGlobalStats();
-  doc.text(`${modeLabel} · ${gs.owned}/${gs.total} cromos (${gs.pct}%)`, W/2, 20, {align:'center'});
-  doc.text(`Generado: ${new Date().toLocaleDateString('es-CL')}`, W/2, 26, {align:'center'});
+  doc.text(pdfSafeText(`${modeLabel} - ${gs.owned}/${gs.total} cromos (${gs.pct}%)`), W/2, 20, {align:'center'});
+  doc.setFontSize(8); doc.text(pdfSafeText(`Generado: ${new Date().toLocaleDateString('es-CL')}`), W/2, 26, {align:'center'});
   y = 36;
 
 
@@ -924,7 +940,7 @@ function generatePDF(mode) {
     doc.setTextColor(0,0,0);
     doc.setFontSize(10);
     doc.setFont('helvetica','bold');
-    doc.text('SECCIÓN INTRO', margin + 4, y + 6);
+    doc.text('SECCION INTRO', margin + 4, y + 6);
     y += 12;
 
     const colW = (W - margin * 2 - 6) / 3;
@@ -960,7 +976,7 @@ function generatePDF(mode) {
       doc.setTextColor(20,30,50);
       doc.setFontSize(7);
       const introName = item.name.length > 22 ? item.name.substring(0,20) + '…' : item.name;
-      doc.text(introName, x + 11, yy + 3.5);
+      doc.text(pdfSafeText(introName), x + 11, yy + 3.5);
 
       if (mode === 'all') {
         doc.setFontSize(6);
@@ -1004,7 +1020,7 @@ function generatePDF(mode) {
     doc.setTextColor(0,0,0);
     doc.setFontSize(10);
     doc.setFont('helvetica','bold');
-    doc.text(`GRUPO ${grp} — ${gInfo ? gInfo.label.toUpperCase() : ''}`, margin+4, y+6);
+    doc.text(pdfSafeText(`GRUPO ${grp} - ${gInfo ? gInfo.label.toUpperCase() : ''}`), margin+4, y+6);
     doc.setFontSize(8);
     doc.text(`${gs2.pct}%`, W-margin-4, y+6, {align:'right'});
     y += 12;
@@ -1027,13 +1043,13 @@ function generatePDF(mode) {
       if (y > 268) { doc.addPage(); y = margin; }
 
       // Country sub-header
-      const cName = c.replace(/^[\p{Emoji}\s]+/u,'');
+      const cName = pdfSafeText(c.replace(/^[\p{Emoji}\s]+/u,''));
       doc.setFillColor(22,32,58);
       doc.rect(margin, y, W-margin*2, 7, 'F');
       doc.setTextColor(...gColor);
       doc.setFontSize(8);
       doc.setFont('helvetica','bold');
-      doc.text(`  ${cName}  (${cs.owned}/${cs.total} · ${cs.pct}%)`, margin+2, y+5);
+      doc.setFontSize(8.5); doc.text(pdfSafeText(`${cName} (${cs.owned}/${cs.total} - ${cs.pct}%)`), margin+3, y+4.8);
       y += 9;
 
       // Sticker rows — 3 columns
@@ -1069,7 +1085,7 @@ function generatePDF(mode) {
         doc.setTextColor(20,30,50);
         doc.setFontSize(7);
         const nameStr = item.name.length > 22 ? item.name.substring(0,20)+'…' : item.name;
-        doc.text(nameStr, x+11, finalY+3.5);
+        doc.text(pdfSafeText(nameStr), x+11, finalY+3.5);
 
         if (mode==='all') {
           doc.setFontSize(6);
@@ -1089,9 +1105,9 @@ function generatePDF(mode) {
   // Footer on last page
   doc.setFontSize(7);
   doc.setTextColor(100,110,130);
-  doc.text('Álbum Mundial 2026 — Panini Digital', W/2, 292, {align:'center'});
+  doc.text('Album Mundial 2026 - Panini Digital', W/2, 292, {align:'center'});
 
-  const fname = mode==='owned'?'tengo':mode==='missing'?'faltan':'completo';
+  const fname = mode==='owned'?'tengo':mode==='missing'?'faltan':mode==='repetida'?'repetidas':mode==='reserva'?'reservadas':'completo';
   doc.save(`album-mundial-2026-${fname}.pdf`);
 }
 
