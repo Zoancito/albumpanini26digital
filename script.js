@@ -1378,6 +1378,7 @@ buildGroupTabs();
 renderGroups();
 updateStatsBar();
 
+
 function startAlbum(){
     document.getElementById('ws').classList.add('off');
     const video = document.getElementById('bg-video');
@@ -1386,3 +1387,237 @@ function startAlbum(){
     video.play();
     applyMasterVolume();
 }
+
+// ════════════ ACCESSIBILITY + RADIO UX PATCH ════════════
+const A11Y_KEY = 'album_panini_2026_accessibility';
+let a11yPrefs = {
+  textSize: 'normal',
+  theme: 'dark',
+  touchUI: false,
+  labels: false,
+  visualRadio: false,
+  reduceMotion: false,
+  keyboardNav: false
+};
+
+function loadA11yPrefs(){
+  try{
+    const raw = localStorage.getItem(A11Y_KEY);
+    if(raw) a11yPrefs = {...a11yPrefs, ...JSON.parse(raw)};
+  }catch(e){}
+}
+function saveA11yPrefs(){
+  try{ localStorage.setItem(A11Y_KEY, JSON.stringify(a11yPrefs)); }catch(e){}
+}
+function applyA11yPrefs(){
+  const html = document.documentElement;
+  const scaleMap = { small: .94, normal: 1, large: 1.1, xlarge: 1.2 };
+  html.style.setProperty('--font-scale', scaleMap[a11yPrefs.textSize] || 1);
+  html.setAttribute('data-theme', a11yPrefs.theme || 'dark');
+  html.classList.toggle('touch-ui', !!a11yPrefs.touchUI);
+  html.classList.toggle('labels-on', !!a11yPrefs.labels);
+  html.classList.toggle('reduce-motion', !!a11yPrefs.reduceMotion);
+  html.classList.toggle('keyboard-nav', !!a11yPrefs.keyboardNav);
+
+  document.querySelectorAll('.a11y-font-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.size === a11yPrefs.textSize));
+  document.querySelectorAll('.a11y-mode-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === a11yPrefs.theme));
+
+  const setChecked = (id,val) => {
+    const el = document.getElementById(id);
+    if(el){ el.checked = !!val; el.setAttribute('aria-checked', !!val ? 'true' : 'false'); }
+  };
+  setChecked('toggle-touch', a11yPrefs.touchUI);
+  setChecked('toggle-labels', a11yPrefs.labels);
+  setChecked('toggle-visual-radio', a11yPrefs.visualRadio);
+  setChecked('toggle-motion', a11yPrefs.reduceMotion);
+  setChecked('toggle-keyboard', a11yPrefs.keyboardNav);
+
+  const panel = document.getElementById('a11y-panel');
+  if(panel) panel.setAttribute('aria-hidden', panel.classList.contains('open') ? 'false' : 'true');
+
+  updateRadioVisualState();
+}
+function setupA11yUI(){
+  const fab = document.getElementById('a11y-fab');
+  const panel = document.getElementById('a11y-panel');
+  const close = document.getElementById('a11y-close');
+  if(fab && panel){
+    fab.addEventListener('click', () => {
+      panel.classList.add('open');
+      panel.setAttribute('aria-hidden','false');
+    });
+  }
+  if(close && panel){
+    close.addEventListener('click', () => {
+      panel.classList.remove('open');
+      panel.setAttribute('aria-hidden','true');
+    });
+  }
+  document.querySelectorAll('.a11y-font-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      a11yPrefs.textSize = btn.dataset.size;
+      saveA11yPrefs(); applyA11yPrefs();
+    });
+  });
+  document.querySelectorAll('.a11y-mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      a11yPrefs.theme = btn.dataset.mode;
+      saveA11yPrefs(); applyA11yPrefs();
+    });
+  });
+  const bindToggle = (id, key) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('change', () => {
+      a11yPrefs[key] = el.checked;
+      saveA11yPrefs(); applyA11yPrefs();
+    });
+  };
+  bindToggle('toggle-touch', 'touchUI');
+  bindToggle('toggle-labels', 'labels');
+  bindToggle('toggle-visual-radio', 'visualRadio');
+  bindToggle('toggle-motion', 'reduceMotion');
+  bindToggle('toggle-keyboard', 'keyboardNav');
+}
+function updateRadioVisualState(){
+  const banner = document.getElementById('radio-visual-banner');
+  const txt = document.getElementById('rvb-text');
+  if(!banner) return;
+  const visible = !!a11yPrefs.visualRadio && !!_radioVisible && !!_radioPlaying;
+  banner.classList.toggle('visible', visible);
+  if(txt && _radioQueue && _radioQueue[_radioIdx]) txt.textContent = `Reproduciendo: ${_radioQueue[_radioIdx].title}`;
+  document.body.classList.toggle('radio-active', !!_radioVisible && !!_radioPlaying);
+}
+function closeRadioCompletely(){
+  pauseRadio(true);
+  _radioVisible = false;
+  document.getElementById('radio-bar')?.classList.remove('visible');
+  document.body.style.paddingBottom = '';
+  updateRadioVisualState();
+}
+
+// History UX for mobile back gesture
+let _uiHistoryDepth = 0;
+function pushUiState(kind){
+  try{
+    history.pushState({albumUI:true, kind}, '');
+    _uiHistoryDepth++;
+  }catch(e){}
+}
+window.addEventListener('popstate', (e) => {
+  const overlay = document.getElementById('country-overlay');
+  const pdf = document.getElementById('pdf-modal');
+  const reset = document.getElementById('reset-modal');
+  const a11y = document.getElementById('a11y-panel');
+  if(overlay && overlay.classList.contains('open')){ closeOverlay(); return; }
+  if(pdf && pdf.classList.contains('visible')){ hidePdfModal(); return; }
+  if(reset && reset.classList.contains('visible')){ reset.classList.remove('visible'); return; }
+  if(a11y && a11y.classList.contains('open')){ a11y.classList.remove('open'); a11y.setAttribute('aria-hidden','true'); return; }
+});
+
+// Patch sticker click animation
+const _origRenderGroups = renderGroups;
+renderGroups = function(){
+  _origRenderGroups();
+  setTimeout(() => {
+    document.querySelectorAll('.sticker').forEach(st => {
+      if(st.dataset.flashBound) return;
+      st.dataset.flashBound = '1';
+      st.addEventListener('click', () => {
+        st.classList.remove('flash');
+        void st.offsetWidth;
+        st.classList.add('flash');
+      }, {capture:true});
+    });
+  }, 0);
+};
+
+// Patch radio button behavior: opening radio autoplays, stop button closes all
+const oldBtnRadio = document.getElementById('btn-radio');
+if(oldBtnRadio){
+  const fresh = oldBtnRadio.cloneNode(true);
+  oldBtnRadio.parentNode.replaceChild(fresh, oldBtnRadio);
+  fresh.addEventListener('click', () => {
+    if (!_radioVisible) {
+      _radioVisible = true;
+      document.getElementById('radio-bar').classList.add('visible');
+      document.body.style.paddingBottom = '78px';
+      if (!_radioAudio) radioLoadTrack(_radioIdx);
+      radioPlay();
+      updateRadioVisualState();
+      pushUiState('radio');
+    } else {
+      closeRadioCompletely();
+    }
+  });
+}
+const stopBtn = document.getElementById('radio-stop');
+if(stopBtn) stopBtn.addEventListener('click', closeRadioCompletely);
+
+// Patch existing radio functions to keep accessibility banner synced
+const _origRadioLoadTrack = radioLoadTrack;
+radioLoadTrack = function(idx){
+  _origRadioLoadTrack(idx);
+  updateRadioVisualState();
+};
+const _origRadioPlay = radioPlay;
+radioPlay = function(){
+  _origRadioPlay();
+  updateRadioVisualState();
+};
+const _origPauseRadio = pauseRadio;
+pauseRadio = function(restoreVideo = true){
+  _origPauseRadio(restoreVideo);
+  updateRadioVisualState();
+};
+const _origRadioNext = radioNext;
+radioNext = function(){
+  _origRadioNext();
+  updateRadioVisualState();
+};
+const _origRadioPrev = radioPrev;
+radioPrev = function(){
+  _origRadioPrev();
+  updateRadioVisualState();
+};
+
+// Improve ARIA on status tab clicks
+const _statusBtns = document.querySelectorAll('.stab');
+_statusBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    _statusBtns.forEach(b => b.setAttribute('aria-selected', b === btn ? 'true' : 'false'));
+  });
+});
+
+// Patch open overlay/history hooks if button exists later
+const _origOpenCountryOverlay = typeof openCountryOverlay === 'function' ? openCountryOverlay : null;
+if(_origOpenCountryOverlay){
+  openCountryOverlay = function(country){
+    _origOpenCountryOverlay(country);
+    pushUiState('country');
+  };
+}
+const _origShowPdfModal = typeof showPdfModal === 'function' ? showPdfModal : null;
+if(_origShowPdfModal){
+  showPdfModal = function(){
+    _origShowPdfModal();
+    pushUiState('pdf');
+  };
+}
+
+// Start album remains global
+function startAlbum(){
+  document.getElementById('ws')?.classList.add('off');
+  const video = document.getElementById('bg-video');
+  if(video){
+    video.muted = false;
+    video.volume = getEffectiveVolume();
+    video.play().catch(() => {});
+  }
+  applyMasterVolume();
+}
+window.startAlbum = startAlbum;
+
+loadA11yPrefs();
+setupA11yUI();
+applyA11yPrefs();
