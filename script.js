@@ -1111,15 +1111,7 @@ function generatePDF(mode) {
   doc.save(`album-mundial-2026-${fname}.pdf`);
 }
 
-// ════════════ SAVE / IMPORT ════════════
-document.getElementById('btn-save').addEventListener('click', () => {
-  const json = JSON.stringify(state, null, 2);
-  const blob = new Blob([json], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'album-mundial-2026.json';
-  a.click();
-});
+
 
 
 // ════════════ SEARCH ════════════
@@ -1395,14 +1387,7 @@ renderGroups();
 updateStatsBar();
 
 
-function startAlbum(){
-    document.getElementById('ws').classList.add('off');
-    const video = document.getElementById('bg-video');
-    video.muted = false;
-    video.volume = getEffectiveVolume();
-    video.play();
-    applyMasterVolume();
-}
+
 
 // ════════════ ACCESSIBILITY + RADIO UX PATCH ════════════
 const A11Y_KEY = 'album_panini_2026_accessibility';
