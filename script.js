@@ -1377,8 +1377,6 @@ loadState();
 buildGroupTabs();
 renderGroups();
 updateStatsBar();
-</script>
-<script>
 
 function startAlbum(){
     document.getElementById('ws').classList.add('off');
