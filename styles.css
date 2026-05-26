@@ -420,3 +420,50 @@ html.reduce-motion *,html.reduce-motion *::before,html.reduce-motion *::after{
   .radio-btn.play-btn{width:42px;height:42px}
   .radio-btn.stop-btn{width:38px;height:38px}
 }
+
+
+/* ===== LIGHT / CONTRAST FIXES ===== */
+html[data-theme="light"] #radio-bar{background:rgba(255,255,255,.96);border-top:1px solid var(--border)}
+html[data-theme="light"] .radio-title{color:var(--text)}
+html[data-theme="light"] .radio-artist{color:var(--dim)}
+html[data-theme="light"] .radio-btn{background:#eef3fb;color:var(--text);border-color:var(--border)}
+html[data-theme="light"] .radio-btn:hover{background:#dde8f7}
+html[data-theme="light"] .radio-badge{color:#8a6b00;background:rgba(212,164,0,.12);border-color:rgba(212,164,0,.28)}
+html[data-theme="light"] .sticker{background:linear-gradient(180deg,#eef3fb,#dde6f5);border-color:#c6d3e6}
+html[data-theme="light"] .sticker:hover{background:#d7e3f6}
+html[data-theme="light"] .s-name,
+html[data-theme="light"] .country-name,
+html[data-theme="light"] .group-names,
+html[data-theme="light"] .cp-text,
+html[data-theme="light"] .group-prog-pct,
+html[data-theme="light"] .view-btn,
+html[data-theme="light"] .stat-label,
+html[data-theme="light"] .header-sub{color:var(--dim)}
+html[data-theme="light"] .s-num{color:var(--muted)}
+html[data-theme="light"] .sticker.state-tengo{background:linear-gradient(180deg,#def7e8,#c8edd9);border-color:#78c796}
+html[data-theme="light"] .sticker.state-falta{background:linear-gradient(180deg,#fde7ea,#f7cfd6);border-color:#e19aa6}
+html[data-theme="light"] .modal-box{background:#fff;color:var(--text)}
+html[data-theme="light"] .modal-opt{background:#f7f9fd}
+html[data-theme="light"] .modal-opt:hover{background:#edf3fb}
+html[data-theme="light"] .group-header:hover,
+html[data-theme="light"] .country-header:hover{background:rgba(13,26,43,.04)}
+
+html[data-theme="contrast"] #radio-bar{background:#000;border-top:2px solid #fff}
+html[data-theme="contrast"] .radio-title,
+html[data-theme="contrast"] .radio-artist,
+html[data-theme="contrast"] .s-name,
+html[data-theme="contrast"] .country-name,
+html[data-theme="contrast"] .group-names,
+html[data-theme="contrast"] .cp-text,
+html[data-theme="contrast"] .group-prog-pct,
+html[data-theme="contrast"] .view-btn,
+html[data-theme="contrast"] .stat-label,
+html[data-theme="contrast"] .header-sub,
+html[data-theme="contrast"] .s-num{color:#fff}
+html[data-theme="contrast"] .sticker{background:#111;border-color:#fff}
+html[data-theme="contrast"] .sticker.state-tengo{background:#0b1e10;border-color:#4dff88}
+html[data-theme="contrast"] .sticker.state-falta{background:#260d0d;border-color:#ff4d4d}
+html[data-theme="contrast"] .modal-box,
+html[data-theme="contrast"] .modal-opt,
+html[data-theme="contrast"] .group-accordion,
+html[data-theme="contrast"] .stat-card{border-color:#fff}
