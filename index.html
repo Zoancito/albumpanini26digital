@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Álbum Mundial 2026 — Panini</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="bvw">
+    <video
+        id="bg-video"
+        autoplay
+        muted
+        loop
+        playsinline
+        style="position:absolute;top:50%;left:50%;width:177.78vh;height:56.25vw;min-width:100vw;min-height:100vh;transform:translate(-50%,-50%);object-fit:cover;"
+    >
+        <source src="https://res.cloudinary.com/drchzbnpd/video/upload/es_OFICIAL__Nueva_Intro_para_la_Copa_del_Mundo_2026___HD_60fps_1080P_60FPS_eyp12s.mp4" type="video/mp4">
+    </video>
+</div>
+    <div id="ws"><div class="wc"><div class="wc-ey">Experiencia Virtual Panini</div><div class="wc-t1">ÁLBUM MUNDIAL <span>2026</span></div><div class="wc-t2">CANADA · MÉXICO · USA</div><p class="wc-d">Marca tus cromos, sigue tu progreso por grupo y selección, y exporta tu colección en PDF.</p><button class="wc-b" onclick="startAlbum()">
+⚽ INICIAR ÁLBUM
+</button></div></div>
+<div id="app-header">
+  <div class="header-eyebrow">Panini Official — Colección Digital</div>
+  <h1>ÁLBUM MUNDIAL <span>2026</span></h1>
+  <p class="header-sub">Haz clic en cualquier cromo para marcar TENGO / FALTA · Se guarda automáticamente</p>
+</div>
+<div id="stats-bar">
+  <div class="stat-card" style="--accent:#f5c518"><span class="stat-value" id="s-total">0</span><span class="stat-label">Total Cromos</span></div>
+  <div class="stat-card" style="--accent:#22c55e"><span class="stat-value" id="s-tengo">0</span><span class="stat-label">Tengo</span></div>
+  <div class="stat-card" style="--accent:#f43f5e"><span class="stat-value" id="s-falta">0</span><span class="stat-label">Faltan</span></div>
+  <div class="stat-card" style="--accent:#38bdf8"><span class="stat-value" id="s-pct">0%</span><span class="stat-label">Progreso</span></div>
+  <div class="stat-card" style="--accent:#f59e0b"><span class="stat-value" id="s-rep">0</span><span class="stat-label">🔄 Repetidas</span></div>
+  <div class="stat-card" style="--accent:#818cf8"><span class="stat-value" id="s-res">0</span><span class="stat-label">📌 Reservadas</span></div>
+</div>
+<div id="vol-bar">
+  <span class="vol-icon" id="vol-mute-btn" title="Silenciar/activar">🔊</span>
+  <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="60" style="--pct:60%">
+  <span class="vol-label" id="vol-label">60%</span>
+</div>
+<div id="controls">
+  <input type="text" id="search" placeholder="🔍  Buscar jugador o selección...">
+  <button class="action-btn primary" id="btn-pdf">📄 Exportar PDF</button>
+  <button class="action-btn" id="btn-save">💾 Guardar JSON</button>
+  <button class="action-btn" id="btn-radio">📻 Radio</button>
+  <button class="action-btn" id="btn-reset" style="border-color:#e50914;color:#e57373">🗑 Reiniciar</button>
+</div>
+<div id="status-tabs">
+  <button class="stab active" data-status="all">Todos</button>
+  <button class="stab" data-status="tengo">✅ Tengo</button>
+  <button class="stab" data-status="falta">❌ Faltan</button>
+  <button class="stab" data-status="repetida" style="--stab-active:#f59e0b">🔄 Repetidas</button>
+  <button class="stab" data-status="reserva" style="--stab-active:#818cf8">📌 Reservadas</button>
+</div>
+<div id="group-tabs"></div>
+<div id="groups-container"></div>
+
+<!-- Country Overlay -->
+<div id="country-overlay">
+  <div class="overlay-hero" id="ov-hero">
+    <div class="overlay-hero-bg" id="ov-bg"></div>
+    <button class="overlay-back" id="ov-back">← Volver</button>
+    <div class="overlay-hero-content">
+      <img class="overlay-big-flag" id="ov-flag" src="" alt="">
+      <div class="overlay-meta">
+        <div class="overlay-nick" id="ov-nick"></div>
+        <div class="overlay-title" id="ov-name"></div>
+        <div class="overlay-badges" id="ov-badges"></div>
+      </div>
+    </div>
+  </div>
+  <div class="overlay-progress">
+    <div class="ov-track"><div class="ov-fill" id="ov-pbar" style="width:0%"></div></div>
+    <div class="ov-text" id="ov-ptext">0/12</div>
+  </div>
+  <div class="overlay-body" id="ov-body"></div>
+</div>
+
+<!-- PDF Modal -->
+<div class="modal-backdrop" id="pdf-modal">
+  <div class="modal-box">
+    <h2>📄 Exportar PDF</h2>
+    <p>¿Qué cromos deseas incluir en el PDF?</p>
+    <div class="modal-opts">
+      <button class="modal-opt selected" data-mode="owned"><span class="modal-opt-icon">✅</span><div><strong>Solo los que TENGO</strong><br><small style="color:var(--dim);font-weight:400">Lista de cromos en tu poder</small></div></button>
+      <button class="modal-opt" data-mode="missing"><span class="modal-opt-icon">❌</span><div><strong>Solo los que me FALTAN</strong><br><small style="color:var(--dim);font-weight:400">Tu lista de compras / intercambio</small></div></button>
+      <button class="modal-opt" data-mode="all"><span class="modal-opt-icon">📋</span><div><strong>Todos (con estado TENGO / FALTA)</strong><br><small style="color:var(--dim);font-weight:400">Colección completa marcada</small></div></button>
+      <button class="modal-opt" data-mode="repetida"><span class="modal-opt-icon">🔄</span><div><strong>Mis REPETIDAS</strong><br><small style="color:var(--dim);font-weight:400">Cromos para intercambio</small></div></button>
+      <button class="modal-opt" data-mode="reserva"><span class="modal-opt-icon">📌</span><div><strong>Mis RESERVADAS</strong><br><small style="color:var(--dim);font-weight:400">Cromos destinados / segunda cuenta</small></div></button>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" id="pdf-cancel">Cancelar</button>
+      <button class="modal-btn-primary" id="pdf-generate">Generar PDF →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Modal -->
+<div class="modal-backdrop" id="reset-modal">
+  <div class="modal-box">
+    <h2>🗑 Reiniciar Álbum</h2>
+    <p>¿Estás seguro de que deseas borrar <strong>todo tu progreso</strong>? Se eliminarán todos los cromos marcados, repetidas y reservadas. Esta acción no se puede deshacer.</p>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" id="reset-cancel">Cancelar</button>
+      <button class="modal-btn-primary" id="reset-confirm" style="background:#e50914">Sí, borrar todo →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Radio Player -->
+<div id="radio-bar">
+  <span class="radio-icon">📻</span>
+  <div class="radio-info">
+    <div class="radio-title" id="radio-title">Seleccionando canción…</div>
+    <div class="radio-artist" id="radio-artist">Radio Mundial 2026</div>
+  </div>
+  <div class="radio-controls">
+    <button class="radio-btn" id="radio-prev" title="Anterior">⏮</button>
+    <button class="radio-btn play-btn" id="radio-play" title="Play/Pausa">▶</button>
+    <button class="radio-btn" id="radio-next" title="Siguiente">⏭</button>
+  </div>
+  <span class="radio-badge">🔀 ALEATORIO</span>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
