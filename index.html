@@ -17,7 +17,7 @@
     <source src="https://res.cloudinary.com/drchzbnpd/video/upload/es_OFICIAL__Nueva_Intro_para_la_Copa_del_Mundo_2026___HD_60fps_1080P_60FPS_eyp12s.mp4" type="video/mp4">
   </video>
 </div>
-
+ 
 <!-- WELCOME SCREEN -->
 <div id="ws">
   <div class="wc">
@@ -28,14 +28,14 @@
     <button class="wc-b" onclick="startAlbum()">⚽ INICIAR ÁLBUM</button>
   </div>
 </div>
-
+ 
 <!-- PANEL DE ACCESIBILIDAD -->
 <div id="a11y-panel" role="dialog" aria-label="Panel de accesibilidad" aria-hidden="true">
   <div class="a11y-header">
     <span class="a11y-title">♿ Accesibilidad</span>
     <button class="a11y-close" id="a11y-close" aria-label="Cerrar panel de accesibilidad">✕</button>
   </div>
-
+ 
   <!-- Tamaño de texto -->
   <div class="a11y-group">
     <div class="a11y-group-label">Tamaño de texto</div>
@@ -46,7 +46,7 @@
       <button class="a11y-font-btn" data-size="xlarge" aria-label="Texto muy grande">A</button>
     </div>
   </div>
-
+ 
   <!-- Modo visual -->
   <div class="a11y-group">
     <div class="a11y-group-label">Modo visual</div>
@@ -56,7 +56,7 @@
       <button class="a11y-mode-btn" data-mode="contrast" aria-label="Alto contraste">⬛ Contraste</button>
     </div>
   </div>
-
+ 
   <!-- Modo táctil ampliado -->
   <div class="a11y-group">
     <div class="a11y-group-label">Modo táctil ampliado</div>
@@ -68,7 +68,7 @@
       </div>
     </label>
   </div>
-
+ 
   <!-- Etiquetas de texto junto a iconos -->
   <div class="a11y-group">
     <div class="a11y-group-label">Etiquetas de texto en iconos</div>
@@ -80,7 +80,7 @@
       </div>
     </label>
   </div>
-
+ 
   <!-- Indicador visual radio -->
   <div class="a11y-group">
     <div class="a11y-group-label">Indicador visual de reproducción</div>
@@ -92,7 +92,7 @@
       </div>
     </label>
   </div>
-
+ 
   <!-- Reducir animaciones -->
   <div class="a11y-group">
     <div class="a11y-group-label">Reducir animaciones</div>
@@ -104,7 +104,7 @@
       </div>
     </label>
   </div>
-
+ 
   <!-- Navegación por teclado -->
   <div class="a11y-group">
     <div class="a11y-group-label">Navegación por teclado</div>
@@ -116,24 +116,24 @@
       </div>
     </label>
   </div>
-
+ 
 </div>
-
+ 
 <!-- Botón flotante de accesibilidad -->
 <button id="a11y-fab" aria-label="Abrir panel de accesibilidad" title="Accesibilidad">♿</button>
-
+ 
 <!-- Indicador visual radio (para usuarios que activen la opción) -->
 <div id="radio-visual-banner" aria-live="polite" aria-atomic="true">
   <span id="rvb-icon">🎵</span>
   <span id="rvb-text">Reproduciendo música</span>
 </div>
-
+ 
 <div id="app-header">
   <div class="header-eyebrow">Panini Official — Colección Digital</div>
   <h1>ÁLBUM MUNDIAL <span>2026</span></h1>
   <p class="header-sub">Haz clic en cualquier cromo para marcar TENGO / FALTA · Se guarda automáticamente</p>
 </div>
-
+ 
 <div id="stats-bar">
   <div class="stat-card" style="--accent:#f5c518"><span class="stat-value" id="s-total">0</span><span class="stat-label">Total Cromos</span></div>
   <div class="stat-card" style="--accent:#22c55e"><span class="stat-value" id="s-tengo">0</span><span class="stat-label">Tengo</span></div>
@@ -142,20 +142,20 @@
   <div class="stat-card" style="--accent:#f59e0b"><span class="stat-value" id="s-rep">0</span><span class="stat-label">🔄 Repetidas</span></div>
   <div class="stat-card" style="--accent:#818cf8"><span class="stat-value" id="s-res">0</span><span class="stat-label">📌 Reservadas</span></div>
 </div>
-
+ 
 <div id="vol-bar">
   <span class="vol-icon" id="vol-mute-btn" title="Silenciar/activar" aria-label="Silenciar o activar volumen">🔊</span>
   <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="60" style="--pct:60%" aria-label="Control de volumen">
   <span class="vol-label" id="vol-label">60%</span>
 </div>
-
+ 
 <div id="controls">
   <input type="text" id="search" placeholder="🔍  Buscar jugador o selección..." aria-label="Buscar jugador o selección">
   <button class="action-btn primary" id="btn-pdf" aria-label="Exportar PDF">📄 <span class="btn-label">Exportar PDF</span></button>
     <button class="action-btn" id="btn-radio" aria-label="Activar radio">📻 <span class="btn-label">Radio</span></button>
   <button class="action-btn" id="btn-reset" style="border-color:#e50914;color:#e57373" aria-label="Reiniciar álbum">🗑 <span class="btn-label">Reiniciar</span></button>
 </div>
-
+ 
 <div id="status-tabs" role="tablist" aria-label="Filtrar por estado">
   <button class="stab active" data-status="all" role="tab" aria-selected="true">Todos</button>
   <button class="stab" data-status="tengo" role="tab" aria-selected="false">✅ <span class="btn-label">Tengo</span></button>
@@ -163,10 +163,10 @@
   <button class="stab" data-status="repetida" style="--stab-active:#f59e0b" role="tab" aria-selected="false">🔄 <span class="btn-label">Repetidas</span></button>
   <button class="stab" data-status="reserva" style="--stab-active:#818cf8" role="tab" aria-selected="false">📌 <span class="btn-label">Reservadas</span></button>
 </div>
-
+ 
 <div id="group-tabs" role="tablist" aria-label="Filtrar por grupo"></div>
 <div id="groups-container"></div>
-
+ 
 <!-- Country Overlay -->
 <div id="country-overlay" role="dialog" aria-modal="true" aria-label="Detalle de selección">
   <div class="overlay-hero" id="ov-hero">
@@ -187,7 +187,7 @@
   </div>
   <div class="overlay-body" id="ov-body"></div>
 </div>
-
+ 
 <!-- PDF Modal -->
 <div class="modal-backdrop" id="pdf-modal" role="dialog" aria-modal="true" aria-label="Opciones de exportación PDF">
   <div class="modal-box">
@@ -206,7 +206,7 @@
     </div>
   </div>
 </div>
-
+ 
 <!-- Reset Modal -->
 <div class="modal-backdrop" id="reset-modal" role="dialog" aria-modal="true" aria-label="Confirmar reinicio">
   <div class="modal-box">
@@ -218,7 +218,7 @@
     </div>
   </div>
 </div>
-
+ 
 <!-- Radio Player -->
 <div id="radio-bar" role="region" aria-label="Radio Mundial 2026">
   <span class="radio-icon" aria-hidden="true">📻</span>
@@ -234,7 +234,7 @@
   </div>
   <span class="radio-badge" aria-hidden="true">🔀 ALEATORIO</span>
 </div>
-
+ 
 <script src="script.js"></script>
 </body>
 </html>
