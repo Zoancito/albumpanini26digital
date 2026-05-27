@@ -25,7 +25,29 @@
     <div class="wc-t1">ÁLBUM MUNDIAL <span>2026</span></div>
     <div class="wc-t2">CANADA · MÉXICO · USA</div>
     <p class="wc-d">Marca tus cromos, sigue tu progreso por grupo y selección, y exporta tu colección en PDF.</p>
-    <button class="wc-b" onclick="startAlbum()">⚽ INICIAR ÁLBUM</button>
+    <div class="wc-btns">
+      <button class="wc-b" onclick="startAlbum()">⚽ INICIAR ÁLBUM</button>
+      <button class="wc-b wc-b-sec" onclick="openMundiales()">🌍 HISTORIA MUNDIAL</button>
+      <button class="wc-b wc-b-ter" onclick="openCalendar()">📅 CALENDARIO 2026</button>
+    </div>
+  </div>
+</div>
+
+<!-- MUNDIALES OVERLAY -->
+<div id="mundiales-overlay" role="dialog" aria-modal="true" aria-label="Historia de los Mundiales">
+  <div id="mun-gallery-view">
+    <div class="mun-header">
+      <button class="mun-back-home" id="mun-close" aria-label="Volver al álbum">← Volver</button>
+      <div class="mun-header-titles">
+        <div class="mun-eyebrow">Panini · Experiencia Histórica</div>
+        <h2 class="mun-title">HISTORIA DE LOS <span>MUNDIALES</span></h2>
+        <p class="mun-sub">Pasa el cursor sobre cada edición para descubrirla · Haz clic para explorarla</p>
+      </div>
+    </div>
+    <div class="mun-grid" id="mun-grid"></div>
+  </div>
+  <div id="mun-detail-view" aria-hidden="true">
+    <div class="mun-detail-inner" id="mun-detail-inner"></div>
   </div>
 </div>
  
@@ -153,6 +175,7 @@
   <input type="text" id="search" placeholder="🔍  Buscar jugador o selección..." aria-label="Buscar jugador o selección">
   <button class="action-btn primary" id="btn-pdf" aria-label="Exportar PDF">📄 <span class="btn-label">Exportar PDF</span></button>
     <button class="action-btn" id="btn-radio" aria-label="Activar radio">📻 <span class="btn-label">Radio</span></button>
+  <button class="action-btn" id="btn-calendario" aria-label="Ver calendario de partidos" onclick="openCalendar()">📅 <span class="btn-label">Calendario</span></button>
   <button class="action-btn" id="btn-reset" style="border-color:#e50914;color:#e57373" aria-label="Reiniciar álbum">🗑 <span class="btn-label">Reiniciar</span></button>
 </div>
  
@@ -235,6 +258,28 @@
   <span class="radio-badge" aria-hidden="true">🔀 ALEATORIO</span>
 </div>
  
+<!-- CALENDAR OVERLAY -->
+<div id="calendar-overlay" role="dialog" aria-modal="true" aria-label="Calendario Mundial 2026">
+  <div class="cal-header">
+    <button class="cal-back-home" id="cal-close" aria-label="Volver">← Volver</button>
+    <div class="cal-header-titles">
+      <div class="cal-eyebrow">Panini · Fase de Grupos</div>
+      <h2 class="cal-title">CALENDARIO <span>MUNDIAL 2026</span></h2>
+      <p class="cal-sub">Selecciona tu zona horaria · Descarga los partidos a tu calendario</p>
+    </div>
+    <button class="cal-add-all-btn" id="cal-add-all" aria-label="Añadir todos los partidos al calendario">
+      📅 Todos los partidos (.ics)
+    </button>
+  </div>
+  <div class="cal-tz-wrap" id="cal-tz-tabs"></div>
+  <div class="cal-grp-wrap" id="cal-grp-tabs"></div>
+  <div class="cal-body">
+    <div id="cal-match-list"></div>
+  </div>
+</div>
+
 <script src="script.js"></script>
+<script src="mundiales.js"></script>
+<script src="calendario.js"></script>
 </body>
 </html>

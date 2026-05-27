@@ -407,7 +407,7 @@ function renderGroups() {
     const introPct = INTRO_DATA.length ? Math.round(introOwned / INTRO_DATA.length * 100) : 0;
 
     const introAcc = document.createElement('div');
-    introAcc.className = 'group-accordion open';
+    introAcc.className = 'group-accordion';
     introAcc.style.setProperty('--g-color', '#f5c518');
 
     introAcc.innerHTML = `
@@ -423,13 +423,22 @@ function renderGroups() {
             <span class="group-prog-pct" style="color:#f5c518">${introPct}%</span>
           </div>
         </div>
+        <svg class="group-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
-      <div class="group-body expanded">
+      <div class="group-body" id="body-INTRO">
         <ul class="sticker-list" id="intro-list"></ul>
       </div>
     `;
 
     container.appendChild(introAcc);
+
+    // Toggle intro accordion
+    introAcc.querySelector('.group-header').addEventListener('click', () => {
+      const isOpen = introAcc.classList.contains('open');
+      const introBody = document.getElementById('body-INTRO');
+      introAcc.classList.toggle('open', !isOpen);
+      introBody.classList.toggle('expanded', !isOpen);
+    });
 
     const introList = introAcc.querySelector('#intro-list');
     function renderIntroList() {
@@ -456,7 +465,7 @@ function renderGroups() {
           ? `<span class="s-sub-btn sub-${sub||'none'}">${subLabel}</span>`
           : '';
 
-        li.innerHTML = `<span class="s-num">#${ii+1}</span><span class="s-name">${name}</span>
+        li.innerHTML = `<span class="s-num">#${ii}</span><span class="s-name">${name}</span>
           ${subBtnHtml}
           <span class="s-badge">${st === 'tengo' ? 'TENGO' : st === 'falta' ? 'FALTA' : '—'}</span>`;
 
@@ -602,9 +611,10 @@ function renderCountries(grp) {
     const cs = getCountryStats(c);
     const cd = COUNTRY_DATA[c];
     const flagCode = cd ? cd.flag : 'xx';
+    const isComplete = cs.pct === 100;
 
     const sec = document.createElement('div');
-    sec.className = 'country-section';
+    sec.className = 'country-section' + (isComplete ? ' completed' : '');
 
     sec.innerHTML = `
       <div class="country-header" data-country="${c}">
@@ -670,7 +680,7 @@ function renderStickerList(country, listEl, gColor) {
       ? `<span class="s-sub-btn sub-${sub||'none'}">${subLabel}</span>`
       : '';
 
-    li.innerHTML = `<span class="s-num">#${i+1}</span><span class="s-name">${name}</span>
+    li.innerHTML = `<span class="s-num">#${i}</span><span class="s-name">${name}</span>
       ${subBtnHtml}
       <span class="s-badge">${st === 'tengo' ? 'TENGO' : st === 'falta' ? 'FALTA' : '—'}</span>`;
 
@@ -710,6 +720,9 @@ function updateCountryBar(country, gColor) {
   const text = document.querySelector(`.country-header[data-country="${country}"] .cp-text`);
   if (fill) { fill.style.width = cs.pct + '%'; fill.style.background = gColor; }
   if (text) text.textContent = `${cs.owned}/${cs.total} · ${cs.pct}%`;
+  // Update completed state
+  const hdr = document.querySelector(`.country-header[data-country="${CSS.escape(country)}"]`);
+  if (hdr) { const sec = hdr.closest('.country-section'); if (sec) sec.classList.toggle('completed', cs.pct === 100); }
   // also update group progress
   const grp = Object.keys(GROUPS).find(g => GROUPS[g].includes(country));
   if (grp) {
@@ -744,7 +757,10 @@ function openOverlay(country) {
   document.getElementById('ov-nick').textContent = cd ? cd.nick : '';
   document.getElementById('ov-name').textContent = country.replace(/^[\p{Emoji}\s]+/u, '');
   document.getElementById('ov-pbar').style.width = cs.pct + '%';
-  document.getElementById('ov-ptext').textContent = `${cs.owned} / ${cs.total} cromos (${cs.pct}%)`;
+  document.getElementById('ov-pbar').style.background = cs.pct === 100 ? 'var(--gold)' : 'var(--green)';
+  document.getElementById('ov-ptext').textContent = cs.pct === 100
+    ? `¡COLECCIÓN COMPLETA! ⭐ ${cs.owned}/${cs.total}`
+    : `${cs.owned} / ${cs.total} cromos (${cs.pct}%)`;
 
   // Badges
   const badgesEl = document.getElementById('ov-badges');
@@ -781,7 +797,7 @@ function openOverlay(country) {
       ? `<span class="pcard-sub sub-${sub||'none'}" data-action="sub">${subLabel}</span>`
       : '';
 
-    card.innerHTML = `<div class="pcard-num">#${i+1}</div><div class="pcard-name">${name}</div>${subHtml}`;
+    card.innerHTML = `<div class="pcard-num">#${i}</div><div class="pcard-name">${name}</div>${subHtml}`;
 
     // Main click → cycle primary
     card.addEventListener('click', (e) => {
@@ -926,9 +942,12 @@ function generatePDF(mode) {
   // Intro
   const introItems = [];
   INTRO_DATA.forEach((name, i) => {
-    const st = getStickerState('INTRO', i);
-    if (mode === 'owned' && st !== 'tengo') return;
-    if (mode === 'missing' && st !== 'falta') return;
+    const st  = getStickerState('INTRO', i);
+    const sub = getStickerSubState('INTRO', i);
+    if (mode === 'owned'    && st  !== 'tengo')    return;
+    if (mode === 'missing'  && st  !== 'falta')    return;
+    if (mode === 'repetida' && sub !== 'repetida') return;
+    if (mode === 'reserva'  && sub !== 'reserva')  return;
     introItems.push({name, st, i});
   });
 
@@ -971,7 +990,7 @@ function generatePDF(mode) {
       doc.setTextColor(50,60,80);
       doc.setFontSize(6);
       doc.setFont('helvetica','normal');
-      doc.text(`#${item.i + 1}`, x + 5, yy + 3.5);
+      doc.text(`#${item.i}`, x + 5, yy + 3.5);
 
       doc.setTextColor(20,30,50);
       doc.setFontSize(7);
@@ -1081,7 +1100,7 @@ function generatePDF(mode) {
         doc.setTextColor(50,60,80);
         doc.setFontSize(6);
         doc.setFont('helvetica','normal');
-        doc.text(`#${item.i+1}`, x+5, finalY+3.5);
+        doc.text(`#${item.i}`, x+5, finalY+3.5);
         doc.setTextColor(20,30,50);
         doc.setFontSize(7);
         const nameStr = item.name.length > 22 ? item.name.substring(0,20)+'…' : item.name;
@@ -1611,14 +1630,189 @@ function startAlbum(){
   document.getElementById('ws')?.classList.add('off');
   const video = document.getElementById('bg-video');
   if(video){
-    video.muted = false;
-    video.volume = getEffectiveVolume();
+    video.muted = true;   // muteado por defecto; el slider lo controla
     video.play().catch(() => {});
   }
   applyMasterVolume();
+  // Inject in-app buttons after album opens
+  _injectInAppBtns();
 }
 window.startAlbum = startAlbum;
+
+function _injectInAppBtns(){
+  const controls = document.getElementById('controls');
+  if (!controls || document.getElementById('btn-portada')) return;
+  // Mundiales button
+  const bMun = document.createElement('button');
+  bMun.className = 'action-btn'; bMun.id = 'btn-mundiales-inapp';
+  bMun.setAttribute('aria-label','Ver historia de los mundiales');
+  bMun.innerHTML = '🌍 <span class="btn-label">Mundiales</span>';
+  bMun.addEventListener('click', () => { if(window.openMundiales) window.openMundiales(); });
+  // Portada button
+  const bPort = document.createElement('button');
+  bPort.className = 'action-btn'; bPort.id = 'btn-portada';
+  bPort.setAttribute('aria-label','Volver a la portada');
+  bPort.innerHTML = '🏠 <span class="btn-label">Portada</span>';
+  bPort.addEventListener('click', () => {
+    // Stop radio if playing
+    const radioStop = document.getElementById('radio-stop');
+    if(radioStop) radioStop.click();
+    document.getElementById('ws')?.classList.remove('off');
+    const video = document.getElementById('bg-video');
+    if(video){ video.muted = true; }
+  });
+  const resetBtn = document.getElementById('btn-reset');
+  if(resetBtn){ controls.insertBefore(bPort, resetBtn); controls.insertBefore(bMun, bPort); }
+  else { controls.appendChild(bMun); controls.appendChild(bPort); }
+}
 
 loadA11yPrefs();
 setupA11yUI();
 applyA11yPrefs();
+
+// ════════════ COUNTDOWN INAUGURAL ════════════
+(function initCountdown() {
+  const TARGET = new Date('2026-06-11T19:00:00Z');
+
+  const el = document.createElement('div');
+  el.id = 'countdown-bar';
+  el.setAttribute('aria-label', 'Cuenta regresiva al partido inaugural México vs Sudáfrica');
+  el.innerHTML = `
+    <div class="cd-deco" aria-hidden="true">
+      <div class="cd-lines">
+        <span class="cd-dash"></span>
+        <span class="cd-dash"></span>
+        <span class="cd-dash"></span>
+      </div>
+      <span class="cd-ball">⚽</span>
+    </div>
+    <div class="cd-inner">
+      <div class="cd-label">MÉXICO vs SUDÁFRICA &nbsp;·&nbsp; PITAZO INICIAL</div>
+      <div class="cd-units">
+        <div class="cd-unit"><span class="cd-n" id="cd-d">--</span><span class="cd-l">DÍAS</span></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit"><span class="cd-n" id="cd-h">--</span><span class="cd-l">HRS</span></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit"><span class="cd-n" id="cd-m">--</span><span class="cd-l">MIN</span></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit"><span class="cd-n" id="cd-s">--</span><span class="cd-l">SEG</span></div>
+      </div>
+      <div class="cd-sub">11 Jun 2026 · 13:00 h CST · Estadio Azteca · Ciudad de México</div>
+    </div>
+    <div class="cd-deco cd-deco-r" aria-hidden="true">
+      <span class="cd-ball">⚽</span>
+      <div class="cd-lines">
+        <span class="cd-dash"></span>
+        <span class="cd-dash"></span>
+        <span class="cd-dash"></span>
+      </div>
+    </div>
+  `;
+
+  const header = document.getElementById('app-header');
+  if (header) header.appendChild(el);
+
+  function tick() {
+    const diff = TARGET - new Date();
+    if (diff <= 0) {
+      const units = el.querySelector('.cd-units');
+      if (units) units.innerHTML = '<div class="cd-started">¡EL MUNDIAL HA COMENZADO! ⚽</div>';
+      return;
+    }
+    const pad = n => String(n).padStart(2, '0');
+    const cdD = document.getElementById('cd-d');
+    if (!cdD) return;
+    cdD.textContent                              = pad(Math.floor(diff / 86400000));
+    document.getElementById('cd-h').textContent = pad(Math.floor((diff % 86400000) / 3600000));
+    document.getElementById('cd-m').textContent = pad(Math.floor((diff % 3600000) / 60000));
+    document.getElementById('cd-s').textContent = pad(Math.floor((diff % 60000) / 1000));
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+
+// ════════════ CÓDIGOS PANINI ════════════
+(function initPaniniCodes() {
+  const CODES = [
+    'COKEFWC26','MAILWC26GIFT','ALLTHEFEELS26','FEELITALL26',
+    'PANINIFWC26','COKEPANINI26','GIFTWC26PACK','PLAYWC26NOW',
+    'ALBUMPANINI26','COCACOLAFANS','PANINICOLLECT','FIFA2026PLAY',
+    'ALLTHEFEELS','WC26PANIAPP'
+  ];
+
+  // ── Inject trigger button into #controls ──
+  const controls = document.getElementById('controls');
+  if (controls) {
+    const triggerBtn = document.createElement('button');
+    triggerBtn.className = 'action-btn';
+    triggerBtn.id = 'btn-codes';
+    triggerBtn.setAttribute('aria-label', 'Ver códigos Panini');
+    triggerBtn.innerHTML = '🎫 <span class="btn-label">Códigos</span>';
+    // Insert before #btn-reset
+    const resetBtn = document.getElementById('btn-reset');
+    if (resetBtn) controls.insertBefore(triggerBtn, resetBtn);
+    else controls.appendChild(triggerBtn);
+  }
+
+  // ── Build modal ──
+  const modal = document.createElement('div');
+  modal.className = 'modal-backdrop';
+  modal.id = 'codes-modal';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-label', 'Códigos promocionales Panini');
+
+  modal.innerHTML = `
+    <div class="modal-box">
+      <div class="codes-mhead">
+        <div>
+          <h2>🎫 CÓDIGOS PANINI</h2>
+          <p class="codes-msub" style="padding:4px 0 0;margin:0">Panini &amp; FIFA · ${CODES.length} códigos disponibles</p>
+        </div>
+        <button class="codes-mclose" id="codes-close" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="codes-warn">
+        <span class="codes-warn-icon">⚠️</span>
+        <span><strong>Un solo uso por cuenta.</strong> Una vez canjeado, el código queda desactivado para esa cuenta. Úsalos en la app oficial de Panini o FIFA.</span>
+      </div>
+      <div class="codes-scroll">
+        <div class="codes-grid">
+          ${CODES.map(c => `
+            <div class="code-card">
+              <span class="code-txt">${c}</span>
+              <button class="code-copy" data-code="${c}" aria-label="Copiar código ${c}">📋 Copiar</button>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  // ── Open / Close ──
+  const open  = () => modal.classList.add('visible');
+  const close = () => modal.classList.remove('visible');
+
+  document.getElementById('btn-codes')?.addEventListener('click', open);
+  document.getElementById('codes-close').addEventListener('click', close);
+  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('visible')) close(); });
+
+  // ── Copy buttons ──
+  modal.querySelectorAll('.code-copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.dataset.code;
+      const restore = () => { btn.textContent = '📋 Copiar'; btn.classList.remove('copied'); };
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = '✅ Copiado'; btn.classList.add('copied');
+        setTimeout(restore, 2200);
+      }).catch(() => {
+        const ta = Object.assign(document.createElement('textarea'), {value: code});
+        Object.assign(ta.style, {position:'fixed', opacity:'0'});
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        btn.textContent = '✅ Copiado'; btn.classList.add('copied');
+        setTimeout(restore, 2200);
+      });
+    });
+  });
+})();
