@@ -11,9 +11,14 @@ const profileAvatarFallback = document.getElementById('profile-avatar-fallback')
 const logoutButton = document.getElementById('logout-btn');
 
 let accessMode = null;
+let currentUser = null;
+let cloudSyncTimer = null;
+let cloudSyncBusy = false;
 
 function showAuthScreen() {
   accessMode = null;
+  currentUser = null;
+  clearTimeout(cloudSyncTimer);
   authScreen?.classList.remove('off');
   document.getElementById('ws')?.classList.remove('off');
   renderUserProfile(null);
@@ -21,8 +26,10 @@ function showAuthScreen() {
 
 function enterAlbumShell(mode, user = null) {
   accessMode = mode;
+  currentUser = mode === 'google' ? user : null;
   authScreen?.classList.add('off');
   renderUserProfile(user);
+  if (currentUser) syncCloudState(currentUser);
 }
 
 function getUserDisplayName(user) {
@@ -107,6 +114,8 @@ supabase.auth.onAuthStateChange((event, session) => {
 });
 // ════════════ DATA ════════════
 const STORAGE_KEY = 'album_panini_2026_v2';
+const CLOUD_PROGRESS_TABLE = 'album_progress';
+const CLOUD_ALBUM_ID = 'wc2026';
 const INTRO_DATA = ["WE ARE PANINI Logo","Official Emblem /1","Official Emblem /2","Official Mascots","Official Slogan","Official Ball","Host Country Emblem - CAN","Host Country Emblem - MEX","Host Country Emblem - USA"];
 
 const albumData = {
@@ -363,8 +372,63 @@ function loadState() {
     state = raw ? JSON.parse(raw) : {};
   } catch(e) { state = {}; }
 }
-function saveState() {
+function saveLocalState() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+function saveState() {
+  saveLocalState();
+  scheduleCloudSave();
+}
+function hasProgress(data) {
+  return data && typeof data === 'object' && Object.keys(data).length > 0;
+}
+async function syncCloudState(user) {
+  if (!user || cloudSyncBusy) return;
+  cloudSyncBusy = true;
+  try {
+    const { data, error } = await supabase
+      .from(CLOUD_PROGRESS_TABLE)
+      .select('progress')
+      .eq('user_id', user.id)
+      .eq('album_id', CLOUD_ALBUM_ID)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error cargando progreso online:', error);
+      return;
+    }
+
+    if (hasProgress(data?.progress)) {
+      state = data.progress;
+      saveLocalState();
+      updateAll();
+      renderGroups();
+    } else if (hasProgress(state)) {
+      await saveCloudStateNow(user);
+    }
+  } finally {
+    cloudSyncBusy = false;
+  }
+}
+function scheduleCloudSave() {
+  if (!currentUser || accessMode !== 'google' || cloudSyncBusy) return;
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(() => {
+    saveCloudStateNow(currentUser);
+  }, 600);
+}
+async function saveCloudStateNow(user = currentUser) {
+  if (!user || accessMode !== 'google') return;
+  const { error } = await supabase
+    .from(CLOUD_PROGRESS_TABLE)
+    .upsert({
+      user_id: user.id,
+      album_id: CLOUD_ALBUM_ID,
+      progress: state,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id,album_id' });
+
+  if (error) console.error('Error guardando progreso online:', error);
 }
 function getStickerKey(country, idx) { return country + '::' + idx; }
 function getStickerState(country, idx) { return state[getStickerKey(country, idx)] || 'none'; }
