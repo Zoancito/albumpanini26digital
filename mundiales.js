@@ -7,7 +7,7 @@ const WORLD_CUPS = [
   {
     year:1930, host:'Uruguay', champion:'Uruguay', runnerUp:'Argentina',
     topScorer:'Guillermo Stábile (8 goles, ARG)', teams:13, matches:18, goals:70,
-    img:'https://files.catbox.moe/c88lew.jpeg',
+    img:'https://files.catbox.moe/os4dpg.jpeg',
     mascot:null, mascotName:null,
     song:null,
     hito:'El primer Mundial de la historia. Sin clasificación UEFA, muchos países europeos rechazaron viajar a Sudamérica.',
@@ -16,7 +16,7 @@ const WORLD_CUPS = [
   {
     year:1934, host:'Italia', champion:'Italia', runnerUp:'Checoslovaquia',
     topScorer:'Oldřich Nejedlý (5 goles, CZE)', teams:16, matches:17, goals:70,
-    img:'https://files.catbox.moe/yxhybn.png',
+    img:'https://files.catbox.moe/9xs49s.png',
     mascot:null, mascotName:null,
     song:null,
     hito:'Uruguay, campeón defensor, no participó en protesta por la baja asistencia europea en 1930. Primer Mundial con ronda eliminatoria desde la primera fase.',
@@ -25,7 +25,7 @@ const WORLD_CUPS = [
   {
     year:1938, host:'Francia', champion:'Italia', runnerUp:'Hungría',
     topScorer:'Leônidas (7 goles, BRA)', teams:15, matches:18, goals:84,
-    img:'https://files.catbox.moe/3po1wg.jpeg',
+    img:'https://files.catbox.moe/z1t0c2.jpeg',
     mascot:null, mascotName:null,
     song:null,
     hito:'Italia retuvo el título y se consagró bicampeona. Austria fue absorbida por Alemania antes del torneo y sus jugadores se repartieron entre Alemania y la abstención.',
@@ -34,7 +34,7 @@ const WORLD_CUPS = [
   {
     year:1950, host:'Brasil', champion:'Uruguay', runnerUp:'Brasil',
     topScorer:'Ademir (9 goles, BRA)', teams:13, matches:22, goals:88,
-    img:'https://files.catbox.moe/rqd548.jpeg',
+    img:'https://files.catbox.moe/sj944y.jpeg',
     mascot:null, mascotName:null,
     song:null,
     hito:'El "Maracanazo": Uruguay venció a Brasil ante ~200.000 personas en el Maracaná. No hubo partido de final oficial; fue una fase final de grupos.',
@@ -52,7 +52,7 @@ const WORLD_CUPS = [
   {
     year:1958, host:'Suecia', champion:'Brasil', runnerUp:'Suecia',
     topScorer:'Just Fontaine (13 goles, FRA)', teams:16, matches:35, goals:126,
-    img:'https://files.catbox.moe/vaufye.png',
+    img:'https://files.catbox.moe/15mwma.png',
     mascot:null, mascotName:null,
     song:null,
     hito:'Pelé (17 años) deslumbró al mundo con su primer Mundial. Just Fontaine marcó 13 goles, récord histórico que aún se mantiene.',
@@ -61,7 +61,7 @@ const WORLD_CUPS = [
   {
     year:1962, host:'Chile', champion:'Brasil', runnerUp:'Checoslovaquia',
     topScorer:'Garrincha / Vavá / L. Sánchez / Jerković / Albert / Ivanov (4 goles c/u)', teams:16, matches:32, goals:89,
-    img:'https://files.catbox.moe/thj7jt.png',
+    img:'https://files.catbox.moe/4opr3r.png',
     mascot:null, mascotName:null,
     song:{title:'Rock del Mundial', artist:'The Ramblers', url:'https://files.catbox.moe/yfc0l3.mp3'},
     hito:'La "Batalla de Santiago" entre Chile e Italia, uno de los partidos más violentos de la historia, con dos expulsados y lesiones graves.',
@@ -70,7 +70,7 @@ const WORLD_CUPS = [
   {
     year:1966, host:'Inglaterra', champion:'Inglaterra', runnerUp:'Alemania Occ.',
     topScorer:'Eusébio (9 goles, POR)', teams:16, matches:32, goals:89,
-    img:'https://files.catbox.moe/kak4v8.png',
+    img:'https://files.catbox.moe/uu6x32.png',
     mascot:'https://files.catbox.moe/m4qehn.png', mascotName:'Willie',
     song:{title:'World Cup Willie', artist:'Lonnie Donegan', url:'https://files.catbox.moe/62xicf.mp3'},
     hito:'El único título de Inglaterra. El trofeo Jules Rimet fue robado antes del torneo y encontrado por un perro llamado Pickles. Corea del Norte eliminó a Italia en la mayor sorpresa de la época.',
@@ -79,7 +79,7 @@ const WORLD_CUPS = [
   {
     year:1970, host:'México', champion:'Brasil', runnerUp:'Italia',
     topScorer:'Gerd Müller (10 goles, GER)', teams:16, matches:32, goals:95,
-    img:'https://files.catbox.moe/vsimff.png',
+    img:'https://files.catbox.moe/c6hi7m.png',
     mascot:'https://files.catbox.moe/cf2z01.png', mascotName:'Juanito',
     song:{title:'Fútbol México 70', artist:'Motto Continuo', url:'https://files.catbox.moe/h4gsar.mp3'},
     hito:'Brasil ganó el Jules Rimet definitivamente (3 títulos). El "Partido del Siglo" entre Italia y Alemania (4-3 en prórroga). Primera Copa del Mundo en colores por televisión.',
@@ -88,7 +88,7 @@ const WORLD_CUPS = [
   {
     year:1974, host:'Alemania Occ.', champion:'Alemania Occ.', runnerUp:'Países Bajos',
     topScorer:'Grzegorz Lato (7 goles, POL)', teams:16, matches:38, goals:97,
-    img:'https://files.catbox.moe/v1hli6.png',
+    img:'https://files.catbox.moe/qqh0ic.png',
     mascot:'https://files.catbox.moe/hwzawp.png', mascotName:'Tip & Tap',
     song:{title:'Football, Football', artist:'Maryla Rodowicz', url:'https://files.catbox.moe/7akpga.mp3'},
     hito:'El "Fútbol Total" de Holanda con Johan Cruyff revolucionó el mundo. La Copa Jules Rimet fue reemplazada por la actual Copa del Mundo FIFA.',
@@ -97,7 +97,7 @@ const WORLD_CUPS = [
   {
     year:1978, host:'Argentina', champion:'Argentina', runnerUp:'Países Bajos',
     topScorer:'Mario Kempes (6 goles, ARG)', teams:16, matches:38, goals:102,
-    img:'https://files.catbox.moe/iklyjx.png',
+    img:'https://files.catbox.moe/7r0t3t.png',
     mascot:'https://files.catbox.moe/4vb3yc.png', mascotName:'Gauchito',
     song:{title:'El Mundial', artist:'Ennio Morricone', url:'https://files.catbox.moe/adncff.mp3'},
     hito:'Argentina ganó su primer título en casa bajo la dictadura militar. La victoria ante Perú (6-0) que les clasificó a la final en lugar de Brasil generó polémica histórica.',
@@ -106,7 +106,7 @@ const WORLD_CUPS = [
   {
     year:1982, host:'España', champion:'Italia', runnerUp:'Alemania Occ.',
     topScorer:'Paolo Rossi (6 goles, ITA)', teams:24, matches:52, goals:146,
-    img:'https://files.catbox.moe/nz55cl.png',
+    img:'https://files.catbox.moe/lrfbdn.png',
     mascot:'https://files.catbox.moe/fciacf.png', mascotName:'Naranjito',
     song:{title:'El Mundial', artist:'Plácido Domingo', url:'https://files.catbox.moe/4rtp90.mp3'},
     hito:'Primera edición con 24 equipos. Paolo Rossi resurgió de una suspensión de 2 años para ser el máximo goleador. El Brasil de Zico, Falcão y Sócrates fue el más aplaudido sin ganar.',
@@ -115,7 +115,7 @@ const WORLD_CUPS = [
   {
     year:1986, host:'México', champion:'Argentina', runnerUp:'Alemania Occ.',
     topScorer:'Gary Lineker (6 goles, ENG)', teams:24, matches:52, goals:132,
-    img:'https://files.catbox.moe/mjo17t.png',
+    img:'https://files.catbox.moe/rpjwpm.png',
     mascot:'https://files.catbox.moe/ipu243.png', mascotName:'Pique',
     song:{title:'Mexico 86', artist:'Juan Carlos Abara & Los Hermanos Zavala', url:'https://files.catbox.moe/49sxll.mp3'},
     hito:'Maradona marcó "La Mano de Dios" y "El Gol del Siglo" ante Inglaterra en cuartos de final. El mejor Mundial individual de la historia.',
@@ -124,7 +124,7 @@ const WORLD_CUPS = [
   {
     year:1990, host:'Italia', champion:'Alemania Occ.', runnerUp:'Argentina',
     topScorer:'Salvatore Schillaci (6 goles, ITA)', teams:24, matches:52, goals:115,
-    img:'https://files.catbox.moe/ip9370.jpeg',
+    img:'https://files.catbox.moe/pzwarc.jpeg',
     mascot:'https://files.catbox.moe/v42lxl.png', mascotName:'Ciao',
     song:{title:"Un'estate italiana", artist:'Gianna Nannini & Edoardo Bennato', url:'https://files.catbox.moe/dg0j3e.mp3'},
     hito:'El Mundial más defensivo de la historia (1,97 goles por partido). Schillaci fue la sorpresa italiana. Roger Milla (38 años) convirtió a Camerún en los favoritos de todo el mundo.',
@@ -133,7 +133,7 @@ const WORLD_CUPS = [
   {
     year:1994, host:'EE. UU.', champion:'Brasil', runnerUp:'Italia',
     topScorer:'Hristo Stoichkov (6, BUL) / Oleg Salenko (6, RUS)', teams:24, matches:52, goals:141,
-    img:'https://files.catbox.moe/9kqhqf.jpeg',
+    img:'https://files.catbox.moe/03a95w.jpeg',
     mascot:'https://files.catbox.moe/oymmb8.png', mascotName:'Striker',
     song:{title:'Gloryland', artist:'Daryl Hall & Sounds of Blackness', url:'https://files.catbox.moe/p0avp7.mp3'},
     hito:'Primera final con tanda de penaltis (Brasil 3-2 Italia). Roberto Baggio falló el último y quedó desolado. Bulgaria llegó a semifinales eliminando a Alemania.',
@@ -142,7 +142,7 @@ const WORLD_CUPS = [
   {
     year:1998, host:'Francia', champion:'Francia', runnerUp:'Brasil',
     topScorer:'Davor Šuker (6 goles, CRO)', teams:32, matches:64, goals:171,
-    img:'https://files.catbox.moe/zbrwiy.png',
+    img:'https://files.catbox.moe/x2zroh.png',
     mascot:'https://files.catbox.moe/tr3us7.png', mascotName:'Footix',
     song:{title:'La Copa de la Vida (The Cup of Life)', artist:'Ricky Martin', url:'https://files.catbox.moe/0bekk2.mp3'},
     hito:'Primera edición con 32 equipos. Zidane marcó dos goles de cabeza en la final. El misterioso "affaire Ronaldo" — el astro brasileño convulsionó horas antes de la final y jugó en condiciones anormales.',
@@ -151,7 +151,7 @@ const WORLD_CUPS = [
   {
     year:2002, host:'Corea del Sur / Japón', champion:'Brasil', runnerUp:'Alemania',
     topScorer:'Ronaldo (8 goles, BRA)', teams:32, matches:64, goals:161,
-    img:'https://files.catbox.moe/0qt5h9.jpeg',
+    img:'https://files.catbox.moe/07d4v8.jpeg',
     mascot:'https://files.catbox.moe/z54isw.png', mascotName:'Ato, Kaz & Nik',
     song:{title:'Boom', artist:'Anastacia', url:'https://files.catbox.moe/g0x4kx.mp3'},
     hito:'Primer Mundial en Asia y con dos sedes. Corea del Sur llegó a semifinales eliminando a España, Italia y Portugal. Francia, Argentina e Italia quedaron eliminados en la fase de grupos.',
@@ -160,7 +160,7 @@ const WORLD_CUPS = [
   {
     year:2006, host:'Alemania', champion:'Italia', runnerUp:'Francia',
     topScorer:'Miroslav Klose (5 goles, GER)', teams:32, matches:64, goals:147,
-    img:'https://files.catbox.moe/fb7bhl.jpeg',
+    img:'https://files.catbox.moe/2rbdko.jpeg',
     mascot:'https://files.catbox.moe/p4xe2q.png', mascotName:'Goleo VI',
     song:{title:'The Time of Our Lives', artist:'Il Divo & Toni Braxton', url:'https://files.catbox.moe/569idm.mp3'},
     hito:'El cabezazo de Zidane a Materazzi en la final, la imagen más icónica y polémica de la historia del fútbol. Italia ganó en penaltis su cuarto título.',
@@ -169,7 +169,7 @@ const WORLD_CUPS = [
   {
     year:2010, host:'Sudáfrica', champion:'España', runnerUp:'Países Bajos',
     topScorer:'Thomas Müller (5 goles, GER)', teams:32, matches:64, goals:145,
-    img:'https://files.catbox.moe/ptafqc.jpeg',
+    img:'https://files.catbox.moe/krz8vw.jpeg',
     mascot:'https://files.catbox.moe/eurgtv.png', mascotName:'Zakumi',
     song:{title:'Waka Waka (Esto es África)', artist:'Shakira ft. Freshlyground', url:'https://files.catbox.moe/gxa7aq.mp3'},
     hito:'Primer Mundial en África. España ganó su único título con el "tiki-taka". El pulpo Paul acertó todos los resultados. La vuvuzela sonó en cada partido.',
@@ -178,7 +178,7 @@ const WORLD_CUPS = [
   {
     year:2014, host:'Brasil', champion:'Alemania', runnerUp:'Argentina',
     topScorer:'James Rodríguez (6 goles, COL)', teams:32, matches:64, goals:171,
-    img:'https://files.catbox.moe/hvis0d.jpeg',
+    img:'https://files.catbox.moe/dg7fcq.jpeg',
     mascot:'https://files.catbox.moe/xni3hn.png', mascotName:'Fuleco',
     song:{title:'We Are One (Ole Ola)', artist:'Pitbull ft. Jennifer Lopez & Claudia Leitte', url:'https://files.catbox.moe/0hok92.mp3'},
     hito:'El "Mineirazo": Alemania goleó 7-1 a Brasil en semifinales, la mayor goleada en la historia de las semis. Götze marcó el gol de la final en la prórroga ante Argentina.',
@@ -187,7 +187,7 @@ const WORLD_CUPS = [
   {
     year:2018, host:'Rusia', champion:'Francia', runnerUp:'Croacia',
     topScorer:'Harry Kane (6 goles, ENG)', teams:32, matches:64, goals:169,
-    img:'https://files.catbox.moe/4qmxx6.jpeg',
+    img:'https://files.catbox.moe/vmy4jz.jpeg',
     mascot:'https://files.catbox.moe/ngcr6i.png', mascotName:'Zabivaka',
     song:{title:'Live It Up', artist:'Nicky Jam, Will Smith & Era Istrefi', url:'https://files.catbox.moe/g8rb8x.mp3'},
     hito:'Croacia (4 millones de habitantes) llegó a la final. Mbappé fue la figura emergente. El VAR debutó en un Mundial generando debate.',
@@ -196,7 +196,7 @@ const WORLD_CUPS = [
   {
     year:2022, host:'Qatar', champion:'Argentina', runnerUp:'Francia',
     topScorer:'Kylian Mbappé (8 goles, FRA)', teams:32, matches:64, goals:172,
-    img:'https://files.catbox.moe/zwlaw0.jpeg',
+    img:'https://files.catbox.moe/v9okur.jpeg',
     mascot:'https://files.catbox.moe/j7q9dh.png', mascotName:"La'eeb",
     song:{title:'Hayya Hayya (Better Together)', artist:'Trinidad Cardona, Davido & Aisha', url:'https://files.catbox.moe/tsipl8.mp3'},
     hito:'La mejor final de la historia: Argentina ganó 3-3 y en penaltis. Mbappé marcó un hat-trick en la final. Messi por fin campeón del mundo. Marruecos llegó a semifinales, primer equipo africano y árabe en lograrlo.',
@@ -205,7 +205,7 @@ const WORLD_CUPS = [
   {
     year:2026, host:'Canadá · México · EE. UU.', champion:'Por definir', runnerUp:'Por definir',
     topScorer:'Por definir', teams:48, matches:104, goals:'Por definir',
-    img:'https://files.catbox.moe/eoesy5.jpeg',
+    img:'https://files.catbox.moe/1uogrk.jpeg',
     mascot:'https://files.catbox.moe/u7fj4i.png', mascotName:'Taini',
     song:{title:'Dai Dai', artist:'Shakira & Burna Boy', url:'https://files.catbox.moe/lay7sr.mp3'},
     hito:'El Mundial más grande de la historia: 48 selecciones, 3 países anfitriones, 104 partidos. Primer torneo con 12 grupos de 4 equipos. El pitazo inicial: México vs Sudáfrica el 11 de junio.',
