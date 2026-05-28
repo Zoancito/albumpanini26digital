@@ -1,3 +1,110 @@
+import { supabase } from './supabase.js'
+console.log('Supabase conectado:', supabase)
+
+const authScreen = document.getElementById('auth-screen');
+const loginButton = document.getElementById('google-login');
+const guestButton = document.getElementById('guest-login');
+const userProfile = document.getElementById('user-profile');
+const profileName = document.getElementById('profile-name');
+const profileAvatarImg = document.getElementById('profile-avatar-img');
+const profileAvatarFallback = document.getElementById('profile-avatar-fallback');
+const logoutButton = document.getElementById('logout-btn');
+
+let accessMode = null;
+
+function showAuthScreen() {
+  accessMode = null;
+  authScreen?.classList.remove('off');
+  document.getElementById('ws')?.classList.remove('off');
+  renderUserProfile(null);
+}
+
+function enterAlbumShell(mode, user = null) {
+  accessMode = mode;
+  authScreen?.classList.add('off');
+  renderUserProfile(user);
+}
+
+function getUserDisplayName(user) {
+  const metadata = user?.user_metadata || {};
+  return metadata.name || metadata.full_name || user?.email || 'Coleccionista';
+}
+
+function getUserAvatarUrl(user) {
+  const metadata = user?.user_metadata || {};
+  return metadata.avatar_url || metadata.picture || '';
+}
+
+function getInitials(name) {
+  return String(name || 'FC')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map(part => part[0])
+    .join('')
+    .toUpperCase() || 'FC';
+}
+
+function renderUserProfile(user) {
+  if (!userProfile) return;
+  if (!user) {
+    userProfile.hidden = true;
+    return;
+  }
+
+  const name = getUserDisplayName(user);
+  const avatarUrl = getUserAvatarUrl(user);
+
+  profileName.textContent = name;
+  profileAvatarFallback.textContent = getInitials(name);
+
+  if (avatarUrl) {
+    profileAvatarImg.src = avatarUrl;
+    profileAvatarImg.hidden = false;
+    profileAvatarFallback.hidden = true;
+  } else {
+    profileAvatarImg.removeAttribute('src');
+    profileAvatarImg.hidden = true;
+    profileAvatarFallback.hidden = false;
+  }
+
+  userProfile.hidden = false;
+}
+
+loginButton?.addEventListener('click', async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.href }
+  });
+
+  if (error) {
+    console.error('Error login:', error);
+  }
+});
+
+guestButton?.addEventListener('click', () => {
+  enterAlbumShell('guest');
+});
+
+logoutButton?.addEventListener('click', async () => {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error('Error logout:', error);
+    return;
+  }
+  showAuthScreen();
+});
+
+supabase.auth.getSession().then(({ data }) => {
+  const user = data?.session?.user || null;
+  if (user) enterAlbumShell('google', user);
+  else showAuthScreen();
+});
+
+supabase.auth.onAuthStateChange((event, session) => {
+  if (session?.user) enterAlbumShell('google', session.user);
+  else if (event === 'SIGNED_OUT') showAuthScreen();
+});
 // ════════════ DATA ════════════
 const STORAGE_KEY = 'album_panini_2026_v2';
 const INTRO_DATA = ["WE ARE PANINI Logo","Official Emblem /1","Official Emblem /2","Official Mascots","Official Slogan","Official Ball","Host Country Emblem - CAN","Host Country Emblem - MEX","Host Country Emblem - USA"];
@@ -1816,3 +1923,4 @@ applyA11yPrefs();
     });
   });
 })();
+

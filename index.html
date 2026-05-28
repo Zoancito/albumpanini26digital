@@ -19,6 +19,30 @@
 </div>
  
 <!-- WELCOME SCREEN -->
+<!-- AUTH SCREEN -->
+<div id="auth-screen" role="dialog" aria-modal="true" aria-label="Elegir tipo de acceso">
+  <div class="auth-card">
+    <div class="auth-ey">Album Mundial 2026</div>
+    <h2>Elige como entrar</h2>
+    <p class="auth-intro">Puedes guardar tu avance solo en este dispositivo o entrar con Google para habilitar tu perfil futbolero.</p>
+    <div class="auth-options">
+      <button class="auth-option auth-google" id="google-login" type="button">
+        <span class="auth-icon">G</span>
+        <span class="auth-copy">
+          <strong>Entrar con Google</strong>
+          <small>Guarda progreso online y habilita perfil</small>
+        </span>
+      </button>
+      <button class="auth-option auth-guest" id="guest-login" type="button">
+        <span class="auth-icon">90</span>
+        <span class="auth-copy">
+          <strong>Continuar como invitado</strong>
+          <small>Funciona localmente con localStorage, sin progreso online</small>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
 <div id="ws">
   <div class="wc">
     <div class="wc-ey">Experiencia Virtual Panini</div>
@@ -154,6 +178,18 @@
   <div class="header-eyebrow">Panini Official — Colección Digital</div>
   <h1>ÁLBUM MUNDIAL <span>2026</span></h1>
   <p class="header-sub">Haz clic en cualquier cromo para marcar TENGO / FALTA · Se guarda automáticamente</p>
+  <div id="user-profile" class="user-profile" hidden>
+    <div class="profile-avatar" aria-hidden="true">
+      <img id="profile-avatar-img" alt="" hidden>
+      <span id="profile-avatar-fallback">FC</span>
+    </div>
+    <div class="profile-copy">
+      <span class="profile-kicker">Perfil Futbolero</span>
+      <strong id="profile-name">Usuario</strong>
+      <span class="profile-status">Conectado</span>
+    </div>
+    <button id="logout-btn" class="profile-logout" type="button">Cerrar sesion</button>
+  </div>
 </div>
  
 <div id="stats-bar">
@@ -278,9 +314,10 @@
   </div>
 </div>
 
-<script src="script.js"></script>
-<script src="mundiales.js"></script>
-<script src="calendario.js"></script>
-<script src="predicciones.js"></script>
+<script type="module" src="script.js"></script>
+<script type="module" src="mundiales.js"></script>
+<script type="module" src="calendario.js"></script>
+<script type="module" src="predicciones.js"></script>
 </body>
 </html>
+
