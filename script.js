@@ -14,6 +14,7 @@ let accessMode = null;
 let currentUser = null;
 let cloudSyncTimer = null;
 let cloudSyncBusy = false;
+let lastCloudSave = '';
 
 function showAuthScreen() {
   accessMode = null;
@@ -76,6 +77,12 @@ function renderUserProfile(user) {
   }
 
   userProfile.hidden = false;
+  setProfileStatus('Conectado');
+}
+
+function setProfileStatus(text) {
+  const status = userProfile?.querySelector('.profile-status');
+  if (status) status.textContent = text;
 }
 
 loginButton?.addEventListener('click', async () => {
@@ -379,12 +386,25 @@ function saveState() {
   saveLocalState();
   scheduleCloudSave();
 }
+window.addEventListener('beforeunload', () => {
+  if (cloudSyncTimer && currentUser && accessMode === 'google') {
+    clearTimeout(cloudSyncTimer);
+    saveCloudStateNow(currentUser, { silent: true });
+  }
+});
 function hasProgress(data) {
   return data && typeof data === 'object' && Object.keys(data).length > 0;
+}
+function mergeProgress(localProgress, cloudProgress) {
+  return {
+    ...(localProgress && typeof localProgress === 'object' ? localProgress : {}),
+    ...(cloudProgress && typeof cloudProgress === 'object' ? cloudProgress : {})
+  };
 }
 async function syncCloudState(user) {
   if (!user || cloudSyncBusy) return;
   cloudSyncBusy = true;
+  setProfileStatus('Sincronizando...');
   try {
     const { data, error } = await supabase
       .from(CLOUD_PROGRESS_TABLE)
@@ -395,40 +415,57 @@ async function syncCloudState(user) {
 
     if (error) {
       console.error('Error cargando progreso online:', error);
+      setProfileStatus('Error sync');
       return;
     }
 
     if (hasProgress(data?.progress)) {
-      state = data.progress;
+      state = mergeProgress(state, data.progress);
       saveLocalState();
       updateAll();
       renderGroups();
+      setProfileStatus('Sincronizado');
+      if (hasProgress(state)) await saveCloudStateNow(user, { silent: true });
     } else if (hasProgress(state)) {
       await saveCloudStateNow(user);
+    } else {
+      setProfileStatus('Sincronizado');
     }
   } finally {
     cloudSyncBusy = false;
   }
 }
 function scheduleCloudSave() {
-  if (!currentUser || accessMode !== 'google' || cloudSyncBusy) return;
+  if (!currentUser || accessMode !== 'google') return;
   clearTimeout(cloudSyncTimer);
+  setProfileStatus('Guardando...');
   cloudSyncTimer = setTimeout(() => {
     saveCloudStateNow(currentUser);
-  }, 600);
+  }, 250);
 }
-async function saveCloudStateNow(user = currentUser) {
+async function saveCloudStateNow(user = currentUser, opts = {}) {
   if (!user || accessMode !== 'google') return;
-  const { error } = await supabase
-    .from(CLOUD_PROGRESS_TABLE)
-    .upsert({
-      user_id: user.id,
-      album_id: CLOUD_ALBUM_ID,
-      progress: state,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id,album_id' });
+  const payload = {
+    user_id: user.id,
+    album_id: CLOUD_ALBUM_ID,
+    progress: state,
+    updated_at: new Date().toISOString()
+  };
 
-  if (error) console.error('Error guardando progreso online:', error);
+  const { data, error } = await supabase
+    .from(CLOUD_PROGRESS_TABLE)
+    .upsert(payload, { onConflict: 'user_id,album_id' })
+    .select('updated_at')
+    .single();
+
+  if (error) {
+    console.error('Error guardando progreso online:', error);
+    setProfileStatus('Error sync');
+    return;
+  }
+
+  lastCloudSave = data?.updated_at || payload.updated_at;
+  if (!opts.silent) setProfileStatus('Sincronizado');
 }
 function getStickerKey(country, idx) { return country + '::' + idx; }
 function getStickerState(country, idx) { return state[getStickerKey(country, idx)] || 'none'; }
