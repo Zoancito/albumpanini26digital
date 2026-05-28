@@ -59,7 +59,7 @@ function fmtICS(ms) {
 
 // ── Datos de partidos (72 · Fase de Grupos) ───────
 // Formato: [grupo, utcMs, homeEmoji, home, awayEmoji, away, venue]
-const MATCHES = [
+export const MATCHES = [
   // ── GRUPO A ──
   ['A', et('2026-06-11',15), '🇲🇽','México',        '🇿🇦','Sudáfrica',          'Estadio Azteca, Ciudad de México'],
   ['A', et('2026-06-11',22), '🇰🇷','Corea del Sur', '🇨🇿','República Checa',   'Estadio Akron, Zapopan'],
@@ -145,6 +145,8 @@ const MATCHES = [
   ['L', et('2026-06-27',17), '🇵🇦','Panamá',         '🏴󠁧󠁢󠁥󠁮󠁧󠁿','Inglaterra',  'MetLife Stadium, East Rutherford'],
   ['L', et('2026-06-27',17), '🇭🇷','Croacia',        '🇬🇭','Ghana',           'Lincoln Financial Field, Filadelfia']
 ];
+
+window.MATCHES = MATCHES;
 
 // ── ICS generator ─────────────────────────────────
 function generateICS() {

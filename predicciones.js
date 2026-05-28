@@ -1,3 +1,5 @@
+import { MATCHES } from './calendario.js';
+
 // ════════════════════════════════════════════════════
 //  PREDICCIONES.JS — Mis Predicciones · FIFA World Cup 2026
 //  v9b-i · Resultados + Favoritos del Torneo
