@@ -227,18 +227,13 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
 <div id="pf-toast"></div>
 
 <script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+import { supabase } from '../supabase.js'
 import {
   getFriendshipStatus,
   sendFriendRequest,
   acceptFriendRequest,
   removeFriendship
 } from '../friendships.js'
-
-const supabase = createClient(
-  'https://snptinuwoeakenejwhzl.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNucHRpbnV3b2Vha2VuZWp3aHpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NTYyMzgsImV4cCI6MjA5NTUzMjIzOH0.Qw60gFhE8501Q5tHRQNXKd3I2-XETZzQ4l1bMTs_7ns'
-)
 
 // ── Album data ────────────────────────────────────
 const INTRO_DATA = ["WE ARE PANINI Logo","Official Emblem /1","Official Emblem /2","Official Mascots","Official Slogan","Official Ball","Host Country Emblem - CAN","Host Country Emblem - MEX","Host Country Emblem - USA"];
