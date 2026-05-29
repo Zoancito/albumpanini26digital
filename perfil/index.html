@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Perfil Futbolero · Álbum Mundial 2026</title>
-<meta name="description" content="Perfil futbolero · Álbum Digital Panini Mundial 2026">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -17,246 +16,210 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{
-  font-family:'Barlow',sans-serif;
-  background:var(--bg);
-  background-image:radial-gradient(circle,#1a2840 1px,transparent 1px);
-  background-size:32px 32px;
-  color:var(--text);min-height:100vh;
-}
+body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radial-gradient(circle,#1a2840 1px,transparent 1px);background-size:32px 32px;color:var(--text);min-height:100vh}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:#1e2f4a;border-radius:3px}
 
-/* ── Back to album link ── */
-.back-bar{
-  max-width:560px;margin:0 auto;padding:20px 20px 0;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.back-link{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:8px 16px;border-radius:20px;
-  border:1px solid var(--border);background:var(--card);
-  color:var(--dim);font-family:'Barlow Condensed',sans-serif;
-  font-size:.82rem;font-weight:700;letter-spacing:.06em;
-  text-decoration:none;transition:all .2s;
-}
+/* ── Layout ── */
+.page-wrap{max-width:720px;margin:0 auto;padding:0 16px 80px}
+.back-bar{display:flex;align-items:center;justify-content:space-between;padding:20px 0 0}
+.back-link{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.06em;text-decoration:none;transition:all .2s}
 .back-link:hover{background:var(--card2);color:var(--text);border-color:#334a6e}
-.back-eyebrow{
-  font-family:'Barlow Condensed',sans-serif;font-size:.7rem;
-  font-weight:700;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;
-}
+.back-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.2em;color:var(--gold);text-transform:uppercase}
 
-/* ── Card ── */
-.profile-card{
-  max-width:560px;margin:20px auto 60px;padding:0 16px;
-}
-.card-inner{
-  background:rgba(7,11,22,.93);
-  border:1px solid rgba(245,197,24,.22);
-  border-radius:22px;
-  overflow:hidden;
-  box-shadow:0 24px 64px rgba(0,0,0,.6),0 0 60px rgba(245,197,24,.05);
-}
-
-/* ── Hero ── */
-.card-hero{
-  position:relative;
-  background:linear-gradient(135deg,#0c1526 0%,#101e38 50%,#0a1220 100%);
-  padding:36px 28px 28px;
-  border-bottom:1px solid rgba(245,197,24,.14);
-  overflow:hidden;
-}
-.card-hero::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 50% 0%,rgba(245,197,24,.1) 0%,transparent 70%);
-  pointer-events:none;
-}
-.card-hero-eyebrow{
-  font-family:'Barlow Condensed',sans-serif;font-size:.65rem;
-  font-weight:700;letter-spacing:.28em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:20px;opacity:.85;
-}
-.card-hero-main{display:flex;align-items:center;gap:20px}
-.card-avatar{
-  width:80px;height:80px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  overflow:hidden;
-  background:linear-gradient(135deg,var(--gold) 0%,#22c55e 100%);
-  color:#08101f;font-family:'Bebas Neue',sans-serif;font-size:2rem;
-  border:3px solid rgba(255,255,255,.15);
-  box-shadow:0 8px 24px rgba(0,0,0,.4),0 0 0 1px rgba(245,197,24,.2);
-}
+/* ── Profile card ── */
+.profile-card{margin:20px 0 0}
+.card-inner{background:rgba(7,11,22,.93);border:1px solid rgba(245,197,24,.22);border-radius:22px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.6),0 0 60px rgba(245,197,24,.05)}
+.card-hero{position:relative;background:linear-gradient(135deg,#0c1526,#101e38,#0a1220);padding:32px 24px 24px;border-bottom:1px solid rgba(245,197,24,.14);overflow:hidden}
+.card-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(245,197,24,.1),transparent 70%);pointer-events:none}
+.card-hero-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;opacity:.85}
+.card-hero-main{display:flex;align-items:center;gap:18px;position:relative;z-index:1}
+.card-avatar{width:74px;height:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,var(--gold),#22c55e);color:#08101f;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;border:3px solid rgba(255,255,255,.15);box-shadow:0 8px 24px rgba(0,0,0,.4)}
 .card-avatar img{width:100%;height:100%;object-fit:cover;display:block}
-.card-hero-info{flex:1;min-width:0}
-.card-full-name{
-  font-family:'Bebas Neue',sans-serif;font-size:2.2rem;
-  letter-spacing:.03em;line-height:1;color:#fff;
-}
-.card-username{
-  font-family:'Barlow Condensed',sans-serif;font-size:.85rem;
-  font-weight:700;letter-spacing:.12em;color:var(--gold);margin-top:5px;
-}
-.card-bio{
-  font-size:.88rem;line-height:1.6;color:var(--dim);
-  margin-top:8px;font-style:italic;
-}
+.card-full-name{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.03em;line-height:1;color:#fff}
+.card-username{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.12em;color:var(--gold);margin-top:4px}
+.card-bio{font-size:.85rem;line-height:1.55;color:var(--dim);margin-top:6px;font-style:italic}
+.card-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.card-stat{background:var(--card);padding:14px 18px;display:flex;flex-direction:column;gap:4px}
+.card-stat-label{font-family:'Barlow Condensed',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.card-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--text);letter-spacing:.03em}
 
-/* ── Stats ── */
-.card-stats{
-  display:grid;grid-template-columns:1fr 1fr;gap:1px;
-  background:var(--border);
-  border-top:1px solid var(--border);
-}
-.card-stat{
-  background:var(--card);padding:18px 20px;
-  display:flex;flex-direction:column;gap:6px;
-}
-.card-stat-label{
-  font-family:'Barlow Condensed',sans-serif;font-size:.62rem;
-  font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
-}
-.card-stat-val{
-  font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;
-  font-weight:700;color:var(--text);letter-spacing:.03em;
-}
+/* ── Album section ── */
+.album-section{margin-top:20px;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.album-section-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#0c1526,#0e1628)}
+.album-section-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.album-section-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.04em;color:#fff;line-height:1}
 
-/* ── Footer ── */
-.card-footer{
-  padding:16px 20px 20px;
-  border-top:1px solid var(--border);
-  background:var(--bg2);
-  text-align:center;
-}
-.card-footer-label{
-  font-family:'Barlow Condensed',sans-serif;font-size:.6rem;
-  font-weight:700;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--muted);margin-bottom:8px;
-}
-.card-footer-brand{
-  font-family:'Bebas Neue',sans-serif;font-size:1.1rem;
-  letter-spacing:.12em;color:var(--gold);
-}
+/* ── Stats bar ── */
+.album-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border)}
+.album-stat{background:var(--bg2);padding:12px 8px;text-align:center;position:relative;overflow:hidden}
+.album-stat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--a-accent,var(--gold));opacity:.6}
+.album-stat-v{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;line-height:1;color:var(--a-accent,var(--gold));display:block}
+.album-stat-l{font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px;display:block;font-family:'Barlow Condensed',sans-serif}
 
-/* ── Call to action ── */
-.cta-section{
-  max-width:560px;margin:0 auto 40px;padding:0 16px;
-  text-align:center;
-}
-.cta-text{
-  color:var(--dim);font-size:.88rem;margin-bottom:14px;line-height:1.55;
-}
-.cta-btn{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:13px 32px;border-radius:999px;
-  border:none;
-  background:var(--gold);color:#0a0f1e;
-  font-family:'Barlow Condensed',sans-serif;font-weight:700;
-  font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
-  text-decoration:none;cursor:pointer;
-  box-shadow:0 6px 24px rgba(245,197,24,.3);
-  transition:transform .2s,box-shadow .2s;
-}
+/* ── Filter tabs ── */
+.album-tabs{display:flex;gap:6px;padding:12px 14px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border)}
+.album-tabs::-webkit-scrollbar{display:none}
+.atab{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--dim);font-size:.78rem;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.atab:hover{background:var(--card2);color:var(--text)}
+.atab.active{background:var(--gold);color:#111;border-color:var(--gold)}
+
+/* ── Sticker groups ── */
+.album-body{padding:12px 14px}
+.sgroup{margin-bottom:14px;border-radius:10px;border:1px solid var(--border);overflow:hidden;background:var(--bg2)}
+.sgroup-header{display:flex;align-items:center;gap:10px;padding:10px 13px;cursor:pointer;user-select:none;transition:background .2s}
+.sgroup-header:hover{background:rgba(255,255,255,.03)}
+.sgroup-letter{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#000;flex-shrink:0}
+.sgroup-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;color:var(--text);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sgroup-prog{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.sgroup-track{width:60px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.sgroup-fill{height:100%;border-radius:2px;transition:width .4s}
+.sgroup-pct{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;color:var(--dim);min-width:30px;text-align:right}
+.sgroup-chev{color:var(--muted);transition:transform .3s;flex-shrink:0;font-size:.7rem}
+.sgroup.open .sgroup-chev{transform:rotate(180deg)}
+.sgroup-body{display:none;border-top:1px solid var(--border)}
+.sgroup.open .sgroup-body{display:block}
+.sticker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:5px;padding:10px}
+.sc{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:7px;background:var(--bg3);border:1px solid transparent}
+.sc.s-tengo{background:#0c2818;border-color:rgba(34,197,94,.35)}
+.sc.s-falta{background:#1a0808;border-color:rgba(229,9,20,.2)}
+.sc.s-repetida{background:#1e1200;border-color:rgba(245,158,11,.35)}
+.sc.s-reserva{background:#0e0d28;border-color:rgba(129,140,248,.35)}
+.sc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--muted)}
+.s-tengo .sc-dot{background:var(--green);box-shadow:0 0 8px rgba(34,197,94,.6)}
+.s-falta .sc-dot{background:var(--red)}
+.s-repetida .sc-dot{background:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,.5)}
+.s-reserva .sc-dot{background:#818cf8;box-shadow:0 0 8px rgba(129,140,248,.5)}
+.sc-num{font-family:'Bebas Neue',sans-serif;font-size:.78rem;color:var(--muted);min-width:16px;flex-shrink:0}
+.sc-name{flex:1;font-size:.78rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-tengo .sc-name{color:#6ee7b7}
+.s-falta .sc-name{color:#fca5a5}
+.s-repetida .sc-name{color:#fcd34d}
+.s-reserva .sc-name{color:#a5b4fc}
+.sc-badge{font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.05em;flex-shrink:0}
+.s-tengo .sc-badge{background:#052912;color:var(--green);border:1px solid #1a5e34}
+.s-falta .sc-badge{background:#1a0808;color:#e57373;border:1px solid #3a1515}
+.s-repetida .sc-badge{background:#422006;color:#f59e0b;border:1px solid #92400e}
+.s-reserva .sc-badge{background:#1e1b4b;color:#818cf8;border:1px solid #3730a3}
+
+/* ── No-progress state ── */
+.album-empty{text-align:center;padding:40px 20px;color:var(--dim)}
+.album-empty-icon{font-size:2.5rem;margin-bottom:10px}
+.album-empty-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.04em;color:var(--text);margin-bottom:6px}
+.album-empty-sub{font-size:.85rem;line-height:1.5}
+
+/* ── Loading ── */
+#state-loading{max-width:560px;margin:80px auto;padding:40px 20px;text-align:center}
+.loading-dots span{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);margin:0 3px;animation:ldot 1.2s ease-in-out infinite}
+.loading-dots span:nth-child(2){animation-delay:.2s}.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes ldot{0%,80%,100%{transform:scale(.4);opacity:.4}40%{transform:scale(1);opacity:1}}
+.state-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.04em;margin-top:12px}
+.state-sub{color:var(--dim);font-size:.9rem;margin-top:6px}
+#state-error{max-width:560px;margin:80px auto;padding:40px 20px;text-align:center}
+.state-icon{font-size:2.5rem;margin-bottom:12px}
+#state-content{display:none}
+
+/* ── CTA ── */
+.cta-section{text-align:center;margin:20px 0 0;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:16px}
+.cta-text{color:var(--dim);font-size:.85rem;margin-bottom:12px;line-height:1.5}
+.cta-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 28px;border-radius:999px;border:none;background:var(--gold);color:#0a0f1e;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;box-shadow:0 6px 24px rgba(245,197,24,.3);transition:transform .2s,box-shadow .2s}
 .cta-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(245,197,24,.42)}
 
-/* ── Loading / Error ── */
-#state-loading,#state-error,#state-content{transition:opacity .3s}
-#state-loading,#state-error{
-  max-width:560px;margin:80px auto;padding:40px 20px;text-align:center;
-}
-.state-icon{font-size:3rem;margin-bottom:16px}
-.state-title{
-  font-family:'Bebas Neue',sans-serif;font-size:2rem;
-  letter-spacing:.04em;color:var(--text);margin-bottom:8px;
-}
-.state-sub{color:var(--dim);font-size:.9rem;line-height:1.55}
-.loading-dots span{
-  display:inline-block;width:8px;height:8px;border-radius:50%;
-  background:var(--gold);margin:0 3px;
-  animation:ldot 1.2s ease-in-out infinite;
-}
-.loading-dots span:nth-child(2){animation-delay:.2s}
-.loading-dots span:nth-child(3){animation-delay:.4s}
-@keyframes ldot{0%,80%,100%{transform:scale(.4);opacity:.4}40%{transform:scale(1);opacity:1}}
-
-/* ── Scrollbar ── */
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:var(--bg2)}
-::-webkit-scrollbar-thumb{background:#1e2f4a;border-radius:3px}
-
-/* ── Responsive ── */
-@media(max-width:480px){
-  .card-hero{padding:24px 18px 20px}
-  .card-full-name{font-size:1.7rem}
-  .card-avatar{width:64px;height:64px;font-size:1.5rem}
-}
+@media(max-width:500px){.album-stats{grid-template-columns:repeat(3,1fr)}.card-hero{padding:22px 16px 18px}.card-full-name{font-size:1.6rem}.sticker-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
 <div id="state-loading">
-  <div class="state-icon">
-    <div class="loading-dots">
-      <span></span><span></span><span></span>
-    </div>
-  </div>
+  <div class="loading-dots"><span></span><span></span><span></span></div>
   <div class="state-title">CARGANDO PERFIL</div>
   <div class="state-sub">Un momento...</div>
 </div>
 
 <div id="state-error" style="display:none">
   <div class="state-icon">🔴</div>
-  <div class="state-title">PERFIL NO ENCONTRADO</div>
-  <div class="state-sub" id="error-msg">Este username no existe o el perfil fue eliminado.</div>
+  <div class="state-title" style="font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.04em">PERFIL NO ENCONTRADO</div>
+  <div class="state-sub" id="error-msg" style="color:var(--dim);font-size:.9rem;margin-top:8px">Este username no existe o fue eliminado.</div>
   <br>
-  <a href="https://albumpanini26digital.vercel.app" class="cta-btn" style="margin-top:8px">← Volver al álbum</a>
+  <a href="https://albumpanini26digital.vercel.app" class="cta-btn" style="margin-top:14px;display:inline-flex">← Volver al álbum</a>
 </div>
 
-<div id="state-content" style="display:none">
-  <div class="back-bar">
-    <a href="https://albumpanini26digital.vercel.app" class="back-link">⚽ Álbum Mundial 2026</a>
-    <span class="back-eyebrow">Panini Digital · Perfil</span>
-  </div>
+<div id="state-content">
+  <div class="page-wrap">
+    <div class="back-bar">
+      <a href="https://albumpanini26digital.vercel.app" class="back-link">⚽ Álbum Mundial 2026</a>
+      <span class="back-eyebrow">Panini Digital · Perfil</span>
+    </div>
 
-  <div class="profile-card">
-    <div class="card-inner">
-      <!-- Hero -->
-      <div class="card-hero">
-        <div class="card-hero-eyebrow">Panini Official · Colección Digital · Mundial 2026</div>
-        <div class="card-hero-main">
-          <div class="card-avatar" id="pc-avatar">
-            <img id="pc-avatar-img" alt="" hidden>
-            <span id="pc-avatar-fb">FC</span>
-          </div>
-          <div class="card-hero-info">
-            <div class="card-full-name" id="pc-fullname">—</div>
-            <div class="card-username" id="pc-username">@—</div>
-            <div class="card-bio" id="pc-bio"></div>
+    <!-- Profile card -->
+    <div class="profile-card">
+      <div class="card-inner">
+        <div class="card-hero">
+          <div class="card-hero-eyebrow">Panini Official · Colección Digital · Mundial 2026</div>
+          <div class="card-hero-main">
+            <div class="card-avatar" id="pc-avatar">
+              <img id="pc-avatar-img" alt="" hidden>
+              <span id="pc-avatar-fb">FC</span>
+            </div>
+            <div>
+              <div class="card-full-name" id="pc-fullname">—</div>
+              <div class="card-username" id="pc-username">@—</div>
+              <div class="card-bio" id="pc-bio" style="display:none"></div>
+            </div>
           </div>
         </div>
+        <div class="card-stats">
+          <div class="card-stat">
+            <span class="card-stat-label">⚽ Equipo favorito</span>
+            <span class="card-stat-val" id="pc-team">—</span>
+          </div>
+          <div class="card-stat">
+            <span class="card-stat-label">🧤 Posición</span>
+            <span class="card-stat-val" id="pc-position">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Album section -->
+    <div class="album-section" id="album-section">
+      <div class="album-section-header">
+        <div class="album-section-eyebrow">Colección · Mundial 2026</div>
+        <div class="album-section-title" id="album-section-title">ÁLBUM DE ...</div>
       </div>
 
       <!-- Stats -->
-      <div class="card-stats">
-        <div class="card-stat">
-          <span class="card-stat-label">⚽ Equipo favorito</span>
-          <span class="card-stat-val" id="pc-team">—</span>
-        </div>
-        <div class="card-stat">
-          <span class="card-stat-label">🧤 Posición</span>
-          <span class="card-stat-val" id="pc-position">—</span>
-        </div>
+      <div class="album-stats">
+        <div class="album-stat" style="--a-accent:#f5c518"><span class="album-stat-v" id="as-total">0</span><span class="album-stat-l">Total</span></div>
+        <div class="album-stat" style="--a-accent:#22c55e"><span class="album-stat-v" id="as-tengo">0</span><span class="album-stat-l">Tengo</span></div>
+        <div class="album-stat" style="--a-accent:#f43f5e"><span class="album-stat-v" id="as-falta">0</span><span class="album-stat-l">Faltan</span></div>
+        <div class="album-stat" style="--a-accent:#f59e0b"><span class="album-stat-v" id="as-rep">0</span><span class="album-stat-l">🔄 Repet.</span></div>
+        <div class="album-stat" style="--a-accent:#818cf8"><span class="album-stat-v" id="as-res">0</span><span class="album-stat-l">📌 Reserv.</span></div>
       </div>
 
-      <!-- Footer brand -->
-      <div class="card-footer">
-        <div class="card-footer-label">Coleccionista oficial</div>
-        <div class="card-footer-brand">ÁLBUM MUNDIAL 2026 · PANINI</div>
+      <!-- Tabs -->
+      <div class="album-tabs">
+        <button class="atab active" data-filter="all">Todos</button>
+        <button class="atab" data-filter="tengo">✅ Tengo</button>
+        <button class="atab" data-filter="falta">❌ Faltan</button>
+        <button class="atab" data-filter="repetida">🔄 Repetidas</button>
+        <button class="atab" data-filter="reserva">📌 Reservadas</button>
+      </div>
+
+      <!-- Groups body -->
+      <div class="album-body" id="album-body">
+        <div class="album-empty">
+          <div class="album-empty-icon">⏳</div>
+          <div class="album-empty-title">Cargando álbum...</div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- CTA -->
-  <div class="cta-section">
-    <p class="cta-text">¿Quieres tu propio perfil futbolero y seguir el progreso del álbum?</p>
-    <a href="https://albumpanini26digital.vercel.app" class="cta-btn">⚽ Crear mi álbum</a>
+    <!-- CTA -->
+    <div class="cta-section">
+      <div class="cta-text">¿Querés tu propio perfil y álbum digital del Mundial 2026?</div>
+      <a href="https://albumpanini26digital.vercel.app" class="cta-btn">⚽ Crear mi álbum gratis</a>
+    </div>
+
   </div>
 </div>
 
@@ -268,78 +231,318 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNucHRpbnV3b2Vha2VuZWp3aHpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NTYyMzgsImV4cCI6MjA5NTUzMjIzOH0.Qw60gFhE8501Q5tHRQNXKd3I2-XETZzQ4l1bMTs_7ns'
 )
 
-// ── Obtener username de la URL ──────────────────
-// Soporta tanto /perfil/username como /perfil/index.html (fallback)
-// Soporta tanto /perfil/username como /perfil/?u=username (via 404 redirect)
-const params = new URLSearchParams(window.location.search);
-const usernameFromQuery = params.get('u');
-const usernameFromPath = window.location.pathname.replace(/\/$/, '').split('/').pop();
-const username = usernameFromQuery 
-  || (usernameFromPath && usernameFromPath !== 'index.html' ? usernameFromPath : null);
+// ── Album data ────────────────────────────────────
+const INTRO_DATA = ["WE ARE PANINI Logo","Official Emblem /1","Official Emblem /2","Official Mascots","Official Slogan","Official Ball","Host Country Emblem - CAN","Host Country Emblem - MEX","Host Country Emblem - USA"];
 
-if (!username || username === 'index.html' || username === 'perfil') {
-  showError('No se especificó ningún username en la URL.')
-} else {
-  loadProfile(username)
+const albumData = {
+  "🇲🇽 México":["Mexico Logo","Luis Malagón","Johan Vásquez","César Montes","Jesús Gallardo","Israel Reyes","Edson Álvarez","Marcel Ruiz","Hirving Lozano","Raúl Jiménez","Alexis Vega","Roberto Alvarado"],
+  "🇿🇦 Sudáfrica":["South Africa Logo","Ronwen Williams","Aubrey Modiba","Mbekezeli Mbokazi","Siyabonga Ngezana","Khuliso Mudau","Teboho Mokoena","Yaya Sithole","Bathusi Aubaas","Sipho Mbule","Lyle Foster","Oswin Appollis"],
+  "🇰🇷 República de Corea":["Korea Republic Logo","Hyeonwoo Jo","Minjae Kim","Yumin Cho","Youngwoo Seol","Jaesung Lee","Inbeom Hwang","Kangin Lee","Jens Castrop","Heungmin Son","Heechan Hwang","Hyeongyu Oh"],
+  "🇨🇿 República Checa":["Czechia Logo","Matěj Kovář","Ladislav Krejčí","Vladimír Coufal","Jaroslav Zelený","Lukáš Provod","Lukáš Červ","Tomáš Souček","Pavel Šulc","Václav Černý","Adam Hložek","Patrik Schick"],
+  "🇨🇦 Canadá":["Canada Logo","Dayne St. Clair","Alphonso Davies","Richie Laryea","Derek Cornelius","Stephen Eustáquio","Ismaël Koné","Jacob Shaffelburg","Niko Sigur","Tajon Buchanan","Cyle Larin","Jonathan David"],
+  "🇧🇦 Bosnia y Herzegovina":["Bosnia-Herzegovina Logo","Nikola Vasilj","Amar Dedić","Sead Kolašinac","Tarik Muharemović","Nikola Katić","Benjamin Tahirović","Ivan Šunjić","Ermedin Demirović","Esmir Bajraktarević","Edin Džeko","Amar Memić"],
+  "🇶🇦 Catar":["Qatar Logo","Meshaal Barsham","Sultan Albrake","Boualem Khoukhi","Pedro Miguel","Mohammed Mannai","Karim Boudiaf","Assim Madibo","Edmílson Junior","Akram Hassan Afif","Ahmed Al-Ganehi","Almoez Ali"],
+  "🇨🇭 Suiza":["Switzerland Logo","Gregor Kobel","Manuel Akanji","Ricardo Rodríguez","Nico Elvedi","Silvan Widmer","Granit Xhaka","Remo Freuler","Fabian Rieder","Breel Embolo","Rubén Vargas","Dan Ndoye"],
+  "🇧🇷 Brasil":["Brazil Logo","Alisson","Marquinhos","Éder Militão","Gabriel Magalhães","Casemiro","Bruno Guimarães","Vinícius Júnior","Rodrygo","Matheus Cunha","Raphinha","Estêvão"],
+  "🇲🇦 Marruecos":["Morocco Logo","Yassine Bounou","Achraf Hakimi","Noussair Mazraoui","Nayef Aguerd","Romain Saïss","Sofyan Amrabat","Eliesse Ben Seghir","Bilal El Khannouss","Ismael Saibari","Youssef En-Nesyri","Brahim Díaz"],
+  "🇭🇹 Haití":["Haiti Logo","Johny Placide","Carlens Arcus","Ricardo Adé","Duke Lacroix","Leverton Pierre","Danley Jean Jacques","Jean-Ricner Bellegarde","Josué Casimir","Ruben Providence","Duckens Nazon","Frantzdy Pierrot"],
+  "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia":["Scotland Logo","Angus Gunn","Aaron Hickey","Andrew Robertson","John Souttar","Grant Hanley","Scott McTominay","Lewis Ferguson","Ryan Christie","John McGinn","Ché Adams","Ben Gannon-Doak"],
+  "🇺🇸 EE. UU.":["USA Logo","Matt Freese","Chris Richards","Tim Ream","Mark McKenzie","Tyler Adams","Weston McKennie","Timothy Weah","Malik Tillman","Christian Pulisic","Brenden Aaronson","Folarin Balogun"],
+  "🇵🇾 Paraguay":["Paraguay Logo","Orlando Gill","Gustavo Gómez","Juan José Cáceres","Omar Alderete","Júnior Alonso","Diego Gómez","Andrés Cubas","Julio Enciso","Miguel Almirón","Ramón Sosa","Antonio Sanabria"],
+  "🇦🇺 Australia":["Australia Logo","Mathew Ryan","Harry Souttar","Aziz Behich","Cameron Burgess","Lewis Miller","Jackson Irvine","Riley McGree","Aiden O'Neill","Connor Metcalfe","Kusini Yengi","Nestory Irankunda"],
+  "🇹🇷 Turquía":["Turkey Logo","Uğurcan Çakır","Mert Müldür","Abdülkerim Bardakcı","Merih Demiral","Ferdi Kadıoğlu","Hakan Çalhanoğlu","Orkun Kökçü","Arda Güler","Can Uzun","Kerem Aktürkoğlu","Kenan Yıldız"],
+  "🇩🇪 Alemania":["Germany Logo","Marc-André ter Stegen","Antonio Rüdiger","Jonathan Tah","David Raum","Florian Wirtz","Joshua Kimmich","Leon Goretzka","Jamal Musiala","Serge Gnabry","Kai Havertz","Nick Woltemade"],
+  "🇨🇼 Curaçao":["Curaçao Logo","Eloy Room","Armando Obispo","Sherel Floranus","Roshon van Eijma","Shurandy Sambo","Livano Comenencia","Juninho Bacuna","Leandro Bacuna","Kenji Gorré","Jürgen Locadia","Sontje Hansen"],
+  "🇨🇮 Costa de Marfil":["Côte d'Ivoire Logo","Yahia Fofana","Ghislain Konan","Wilfried Singo","Evan Ndicka","Willy Boly","Franck Kessié","Seko Fofana","Ibrahim Sangaree","Sébastien Haller","Simon Adingra","Evann Guessand"],
+  "🇪🇨 Ecuador":["Ecuador Logo","Hernán Galíndez","Piero Hincapié","Pervis Estupiñán","Willian Pacho","Ángelo Preciado","Kendry Páez","Moisés Caicedo","Alan Franco","Pedro Vite","Gonzalo Plata","Enner Valencia"],
+  "🇳🇱 Países Bajos":["Netherlands Logo","Bart Verbruggen","Virgil van Dijk","Micky van de Ven","Denzel Dumfries","Tijjani Reijnders","Ryan Gravenberch","Frenkie de Jong","Xavi Simons","Memphis Depay","Donyell Malen","Cody Gakpo"],
+  "🇯🇵 Japón":["Japan Logo","Zion Suzuki","Tsuyoshi Watanabe","Kaishu Sano","Ao Tanaka","Daichi Kamada","Ritsu Doan","Keito Nakamura","Takumi Minamino","Takefusa Kubo","Shuto Machino","Ayase Ueda"],
+  "🇸🇪 Suecia":["Sweden Logo","Viktor Johansson","Isak Hien","Emil Holm","Victor Nilsson Lindelöf","Lucas Bergvall","Yasin Ayari","Daniel Svensson","Dejan Kulusevski","Anthony Elanga","Alexander Isak","Viktor Gyökeres"],
+  "🇹🇳 Túnez":["Tunisia Logo","Aymen Dahmen","Montassar Talbi","Yassine Meriah","Ali Abdi","Ferjani Sassi","Ellyes Skhiri","Aïssa Laïdouni","Hannibal Mejbri","Naïm Sliti","Elias Achouri","Hazem Mastouri"],
+  "🇧🇪 Bélgica":["Belgium Logo","Thibaut Courtois","Arthur Theate","Timothy Castagne","Maxim De Cuyper","Youri Tielemans","Kevin De Bruyne","Amadou Onana","Jérémy Doku","Charles De Ketelaere","Leandro Trossard","Romelu Lukaku"],
+  "🇪🇬 Egipto":["Egypt Logo","Mohamed Elshenawy","Mohamed Hany","Yasser Ibrahim","Ramy Rabia","Marwan Attia","Zizo","Hamdy Fathy","Omar Marmoush","Mohamed Salah","Mostafa Mohamed","Trezeguet"],
+  "🇮🇷 RI de Irán":["IR Iran Logo","Alireza Beiranvand","Shojae Khalilzadeh","Milad Mohammadi","Ramin Rezaeian","Hossein Kanaani","Saeed Ezatolahi","Saman Ghoddos","Mohammad Mohebi","Mehdi Taremi","Sardar Azmoun","Alireza Jahanbakhsh"],
+  "🇳🇿 Nueva Zelanda":["New Zealand Logo","Max Crocombe","Michael Boxall","Liberato Cacace","Tim Payne","Finn Surman","Marko Stamenić","Joe Bell","Sarpreet Singh","Matthew Garbett","Chris Wood","Elijah Just"],
+  "🇪🇸 España":["Spain Logo","Unai Simón","Robin Le Normand","Dean Huijsen","Marc Cucurella","Rodri","Martín Zubimendi","Pedri","Fabián Ruiz","Lamine Yamal","Nico Williams","Mikel Oyarzabal"],
+  "🇨🇻 Cabo Verde":["Cabo Verde Logo","Vozinha","Logan Costa","Pico","Steven Moreira","João Paulo","Kevin Pina","Jamiro Monteiro","Yannick Semedo","Ryan Mendes","Jovane Cabral","Dailon Livramento"],
+  "🇸🇦 Arabia Saudí":["Saudi Arabia Logo","Nawaf Alaqidi","Hassan Altambakti","Jehad Thikri","Saud Abdulhamid","Nasser Aldawsari","Abdullah Alkhaibari","Musab Aljuwayr","Feras Albrikan","Salem Aldawsari","Saleh Abu Alshamat","Saleh Alshehri"],
+  "🇺🇾 Uruguay":["Uruguay Logo","Sergio Rochet","José María Giménez","Ronald Araújo","Sebastián Cáceres","Mathías Olivera","Nahitan Nández","Federico Valverde","Rodrigo Bentancur","Manuel Ugarte","Facundo Pellistri","Darwin Núñez"],
+  "🇫🇷 Francia":["France Logo","Mike Maignan","William Saliba","Jules Koundé","Théo Hernández","Aurélien Tchouaméni","Eduaco Camavinga","Ousmane Dembélé","Kylian Mbappé","Bradley Barcola","Désiré Doué","Hugo Ekitiké"],
+  "🇸🇳 Senegal":["Senegal Logo","Édouard Mendy","Kalidou Koulibaly","Moussa Niakhaté","El Hadji Malick Diouf","Idrissa Gana Gueye","Pape Matar Sarr","Sadio Mané","Iliman Ndiaye","Krépin Diatta","Ismaïla Sarr","Nicolas Jackson"],
+  "🇮🇶 Irak":["Iraq Logo","Jalal Hassan","Hussein Ali","Akam Hashem","Merchas Doski","Zaid Tahseen","Zidane Iqbal","Amir Al-Ammari","Ibrahim Bayesh","Ali Jasim","Aimar Sher","Mohanad Ali"],
+  "🇳🇴 Noruega":["Norway Logo","Ørjan Nyland","Julian Ryerson","Kristoffer Vassbakk Ajer","David Møller Wolfe","Martin Ødegaard","Sander Berge","Patrick Berg","Erling Haaland","Antonio Nusa","Oscar Bobb","Alexander Sørloth"],
+  "🇦🇷 Argentina":["Argentina Logo","Emiliano Martínez","Nahuel Molina","Cristian Romero","Nicolás Otamendi","Enzo Fernández","Alexis Mac Allister","Rodrigo De Paul","Julián Alvarez","Lionel Messi","Giuliano Simeone","Lautaro Martínez"],
+  "🇩🇿 Argelia":["Algeria Logo","Alexis Guendouz","Rayan Aït-Nouri","Ramy Bensebaini","Youcef Atal","Aïssa Mandi","Nabil Bentaleb","Riyad Mahrez","Saïd Benrahma","Amine Gouiri","Mohamed Amoura","Baghdad Bounedjah"],
+  "🇦🇹 Austria":["Austria Logo","Alexander Schlager","David Alaba","Kevin Danso","Philipp Lienhart","Konrad Laimer","Nicolas Seiwald","Marcel Sabitzer","Florian Grillitsch","Marko Arnautović","Christoph Baumgartner","Michael Gregoritsch"],
+  "🇯🇴 Jordania":["Jordan Logo","Yazeed Abulaila","Mohammad Abu Hashish","Yazan Al-Arab","Abdallah Nasib","Ibrahim Saadeh","Nizar Al-Rashdan","Noor Al-Rawabdeh","Yazan Al-Naimat","Mousa Al-Taamari","Mahmoud Al-Mardi","Ali Olwan"],
+  "🇵🇹 Portugal":["Portugal Logo","Diogo Costa","Rúben Dias","Nuno Mendes","Vitinha","Bernardo Silva","Bruno Fernandes","Rúben Neves","Cristiano Ronaldo","João Félix","Pedro Neto","Rafael Leão"],
+  "🇨🇩 República Democrática del Congo":["Congo DR Logo","Lionel Mpasi","Aaron Wan-Bissaka","Axel Tuanzebe","Arthur Masuaku","Chancel Mbemba","Ngal'ayel Mukau","Samuel Moutoussamy","Noah Sadiki","Théo Bongonda","Yoane Wissa","Cédric Bakambu"],
+  "🇺🇿 Uzbekistán":["Uzbekistan Logo","Utkir Yusupov","Abdukodir Khusanov","Farrukh Sayfiev","Sherzod Nasrullaev","Husniddin Aliqulov","Rustam Ashurmatov","Khojiakbar Alijonov","Odiljon Hamrobekov","Otabek Shukurov","Eldor Shomurodov","Abbosbek Fayzullaev"],
+  "🇨🇴 Colombia":["Colombia Logo","Camilo Vargas","Dávinson Sánchez","Yerry Mina","Daniel Muñoz","James Rodríguez","Jefferson Lerma","Richard Ríos","Juan Fernando Quintero","Luis Díaz","Jhon Arias","Luis Suárez"],
+  "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra":["England Logo","Jordan Pickford","Reece James","John Stones","Jude Bellingham","Declan Rice","Jordan Henderson","Phil Foden","Harry Kane","Bukayo Saka","Cole Palmer","Marcus Rashford"],
+  "🇭🇷 Croacia":["Croatia Logo","Dominik Livaković","Duje Ćaleta-Car","Joško Gvardiol","Josip Stanišić","Ivan Perišić","Luka Modrić","Mateo Kovačić","Lovro Majer","Mario Pašalić","Ante Budimir","Andrej Kramarić"],
+  "🇬🇭 Ghana":["Ghana Logo","Lawrence Ati Zigi","Alidu Seidu","Alexander Djiku","Gideon Mensah","Caleb Yirenkyi","Thomas Partey","Abdul Issahaku Fatawu","Mohammed Kudus","Kamaldeen Sulemana","Jordan Ayew","Antoine Semenyo"],
+  "🇵🇦 Panamá":["Panama Logo","Orlando Mosquera","Michael Amir Murillo","Andrés Andrade","Fidel Escobar","Aníbal Godoy","Cristian Martínez","Adalberto Carrasquilla","Édgar Bárcenas","José Fajardo","Ismael Díaz","José Luis Rodríguez"]
+};
+
+
+
+const GROUPS
+const GROUPS = {
+  A:['🇲🇽 México','🇿🇦 Sudáfrica','🇰🇷 República de Corea','🇨🇿 República Checa'],
+  B:['🇨🇦 Canadá','🇧🇦 Bosnia y Herzegovina','🇶🇦 Catar','🇨🇭 Suiza'],
+  C:['🇧🇷 Brasil','🇲🇦 Marruecos','🇭🇹 Haití','🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia'],
+  D:['🇺🇸 EE. UU.','🇵🇾 Paraguay','🇦🇺 Australia','🇹🇷 Turquía'],
+  E:['🇩🇪 Alemania','🇨🇼 Curaçao','🇨🇮 Costa de Marfil','🇪🇨 Ecuador'],
+  F:['🇳🇱 Países Bajos','🇯🇵 Japón','🇸🇪 Suecia','🇹🇳 Túnez'],
+  G:['🇧🇪 Bélgica','🇪🇬 Egipto','🇮🇷 RI de Irán','🇳🇿 Nueva Zelanda'],
+  H:['🇪🇸 España','🇨🇻 Cabo Verde','🇸🇦 Arabia Saudí','🇺🇾 Uruguay'],
+  I:['🇫🇷 Francia','🇸🇳 Senegal','🇮🇶 Irak','🇳🇴 Noruega'],
+  J:['🇦🇷 Argentina','🇩🇿 Argelia','🇦🇹 Austria','🇯🇴 Jordania'],
+  K:['🇵🇹 Portugal','🇨🇩 República Democrática del Congo','🇺🇿 Uzbekistán','🇨🇴 Colombia'],
+  L:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra','🇭🇷 Croacia','🇬🇭 Ghana','🇵🇦 Panamá']
+};
+
+
+
+const GROUP_COLORS
+const GROUP_COLORS = {
+  A:'#ff6b35',B:'#2dd4bf',C:'#fbbf24',D:'#f43f5e',
+  E:'#4ade80',F:'#a78bfa',G:'#fb923c',H:'#38bdf8',
+  I:'#e879f9',J:'#34d399',K:'#c084fc',L:'#f87171'
+};
+
+const GROUP_COLORS2 = {
+  A:'#ff6b35',B:'#2dd4bf',C:'#fbbf24',D:'#f43f5e',
+  E:'#4ade80',F:'#a78bfa',G:'#fb923c',H:'#38bdf8',
+  I:'#e879f9',J:'#34d399',K:'#c084fc',L:'#f87171'
 }
 
-async function loadProfile(uname) {
+// ── URL parsing ───────────────────────────────────
+const params = new URLSearchParams(window.location.search)
+const usernameFromQuery = params.get('u')
+const usernameFromPath  = window.location.pathname.replace(/\/$/, '').split('/').pop()
+const username = usernameFromQuery
+  || (usernameFromPath && usernameFromPath !== 'index.html' ? usernameFromPath : null)
+
+if (!username) {
+  showError('No se especificó ningún username.')
+} else {
+  loadPage(username)
+}
+
+// ── Load profile + album ──────────────────────────
+async function loadPage(uname) {
   try {
-    const { data, error } = await supabase
+    // 1. Perfil
+    const { data: profile, error: pErr } = await supabase
       .from('profiles')
       .select('*')
       .eq('username', uname.toLowerCase())
       .single()
 
-    if (error || !data) {
-      showError(`No existe ningún perfil con el username "@${uname}".`)
-      return
-    }
+    if (pErr || !profile) { showError(`No existe el perfil "@${uname}".`); return }
 
-    renderProfile(data)
+    renderProfile(profile)
+
+    // 2. Álbum (puede ser null si no tiene progreso cloud)
+    const { data: albumRow } = await supabase
+      .from('album_progress')
+      .select('progress')
+      .eq('user_id', profile.id)
+      .eq('album_id', 'wc2026')
+      .maybeSingle()
+
+    const progress = albumRow?.progress || {}
+    renderAlbum(profile, progress)
+
+    // Show page
+    document.getElementById('state-loading').style.display = 'none'
+    document.getElementById('state-content').style.display = ''
+    document.title = `${profile.full_name || profile.username} · Álbum Mundial 2026`
+
   } catch (err) {
     console.error(err)
-    showError('Error al cargar el perfil. Intenta más tarde.')
+    showError('Error al cargar. Intenta de nuevo.')
   }
 }
 
+// ── Render profile card ───────────────────────────
 function renderProfile(p) {
-  // Avatar
   const img = document.getElementById('pc-avatar-img')
   const fb  = document.getElementById('pc-avatar-fb')
   if (p.avatar_url) {
     img.src = p.avatar_url; img.hidden = false; fb.hidden = true
   } else {
     img.hidden = true; fb.hidden = false
-    fb.textContent = (p.full_name || p.username || 'FC')
-      .trim().split(/\s+/).slice(0,2).map(x => x[0]).join('').toUpperCase() || 'FC'
+    fb.textContent = (p.full_name || p.username || 'FC').trim()
+      .split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase() || 'FC'
   }
-
   document.getElementById('pc-fullname').textContent  = p.full_name || p.username
   document.getElementById('pc-username').textContent  = '@' + p.username
   document.getElementById('pc-team').textContent      = p.favorite_team || '—'
   document.getElementById('pc-position').textContent  = p.favorite_position || '—'
-
   const bioEl = document.getElementById('pc-bio')
-  if (p.bio) {
-    bioEl.textContent = p.bio
-    bioEl.style.display = ''
-  } else {
-    bioEl.style.display = 'none'
-  }
-
-  // Meta + title
-  document.title = `${p.full_name || p.username} · Álbum Mundial 2026`
-
-  // Show content
-  document.getElementById('state-loading').style.display = 'none'
-  document.getElementById('state-content').style.display = ''
+  if (p.bio) { bioEl.textContent = p.bio; bioEl.style.display = '' }
+  document.getElementById('album-section-title').textContent =
+    'ÁLBUM DE ' + (p.full_name || p.username).toUpperCase().split(' ')[0]
 }
 
+// ── Render album ──────────────────────────────────
+let _progress = {}
+let _filter   = 'all'
+
+function renderAlbum(profile, progress) {
+  _progress = progress
+
+  // Stats
+  let total=0, tengo=0, falta=0, rep=0, res=0
+  const allCountries = ['INTRO', ...Object.keys(albumData)]
+  allCountries.forEach(country => {
+    const stickers = country === 'INTRO' ? INTRO_DATA : albumData[country]
+    stickers.forEach((_, idx) => {
+      total++
+      const k = country + '::'  + idx
+      const st = progress[k] || 'none'
+      const sub = progress[k + '::sub'] || null
+      if (st === 'tengo') { tengo++ }
+      else if (st === 'falta') { falta++ }
+      if (sub === 'repetida') rep++
+      if (sub === 'reserva')  res++
+    })
+  })
+  const pct = total > 0 ? Math.round((tengo/total)*100) + '%' : '0%'
+
+  document.getElementById('as-total').textContent = total
+  document.getElementById('as-tengo').textContent = tengo
+  document.getElementById('as-falta').textContent = falta
+  document.getElementById('as-rep').textContent   = rep
+  document.getElementById('as-res').textContent   = res
+
+  // Tabs labels
+  const tabAll = document.querySelector('.atab[data-filter="all"]')
+  if (tabAll) tabAll.textContent = `Todos · ${pct}`
+
+  // Setup tab listeners once
+  document.querySelectorAll('.atab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.atab').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      _filter = btn.dataset.filter
+      renderGroups()
+    })
+  })
+
+  renderGroups()
+}
+
+function renderGroups() {
+  const body = document.getElementById('album-body')
+  const html = []
+
+  // Build group entries: letter → countries
+  const groupEntries = Object.entries(GROUPS)
+
+  // Also add INTRO as special
+  const allEntries = [
+    { letter: '🌍', countries: ['INTRO'], color: '#f5c518', label: 'Introducción' },
+    ...groupEntries.map(([l, countries]) => ({
+      letter: l, countries, color: GROUP_COLORS[l], label: 'Grupo ' + l
+    }))
+  ]
+
+  for (const { letter, countries, color, label } of allEntries) {
+    let groupHtml = ''
+    let gTotal=0, gTengo=0, hasVisible=false
+
+    for (const country of countries) {
+      const stickers = country === 'INTRO' ? INTRO_DATA : albumData[country]
+      const countryStickers = []
+
+      stickers.forEach((name, idx) => {
+        const k   = country + '::' + idx
+        const st  = _progress[k] || 'none'
+        const sub = _progress[k + '::sub'] || null
+        gTotal++
+        if (st === 'tengo') gTengo++
+
+        // Filter logic
+        if (_filter === 'all') {}
+        else if (_filter === 'tengo'    && st !== 'tengo') return
+        else if (_filter === 'falta'    && st !== 'falta') return
+        else if (_filter === 'repetida' && sub !== 'repetida') return
+        else if (_filter === 'reserva'  && sub !== 'reserva') return
+
+        hasVisible = true
+        let cls = 'sc'
+        let badge = ''
+        if (st === 'tengo')       { cls += ' s-tengo';    badge = 'TENGO' }
+        else if (st === 'falta')  { cls += ' s-falta';    badge = 'FALTA' }
+        if (sub === 'repetida')   { cls += ' s-repetida'; badge = '🔄' }
+        if (sub === 'reserva')    { cls += ' s-reserva';  badge = '📌' }
+
+        countryStickers.push(`
+          <div class="${cls}">
+            <span class="sc-dot"></span>
+            <span class="sc-num">${idx+1}</span>
+            <span class="sc-name">${esc(name)}</span>
+            ${badge ? `<span class="sc-badge">${badge}</span>` : ''}
+          </div>`)
+      })
+
+      if (countryStickers.length > 0) {
+        const countryLabel = country === 'INTRO' ? 'Introducción Panini' : country
+        groupHtml += `
+          <div style="padding:4px 10px 2px;font-family:'Barlow Condensed',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border-top:1px solid var(--border);margin-top:4px">
+            ${esc(countryLabel)}
+          </div>
+          <div class="sticker-grid">${countryStickers.join('')}</div>`
+      }
+    }
+
+    if (_filter !== 'all' && !hasVisible) continue
+
+    const pct = gTotal > 0 ? Math.round((gTengo/gTotal)*100) : 0
+
+    html.push(`
+      <div class="sgroup open">
+        <div class="sgroup-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="sgroup-letter" style="background:${color}">${esc(letter)}</div>
+          <div class="sgroup-name">${esc(label)}</div>
+          <div class="sgroup-prog">
+            <div class="sgroup-track">
+              <div class="sgroup-fill" style="width:${pct}%;background:${color}"></div>
+            </div>
+            <span class="sgroup-pct">${pct}%</span>
+          </div>
+          <span class="sgroup-chev">▼</span>
+        </div>
+        <div class="sgroup-body">${groupHtml || '<div style="padding:14px 16px;color:var(--muted);font-size:.82rem;font-family:Barlow Condensed,sans-serif">Sin cromos en este filtro</div>'}</div>
+      </div>`)
+  }
+
+  if (html.length === 0) {
+    body.innerHTML = `<div class="album-empty">
+      <div class="album-empty-icon">😕</div>
+      <div class="album-empty-title">Sin cromos en este filtro</div>
+      <div class="album-empty-sub">Este coleccionista no tiene cromos marcados aquí todavía</div>
+    </div>`
+  } else {
+    body.innerHTML = html.join('')
+  }
+}
+
+// ── Helpers ───────────────────────────────────────
 function showError(msg) {
   document.getElementById('state-loading').style.display = 'none'
   document.getElementById('error-msg').textContent = msg
   document.getElementById('state-error').style.display = ''
+}
+
+function esc(str) {
+  return String(str || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
 }
 </script>
 </body>
