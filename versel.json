@@ -1,9 +1,8 @@
 {
-  "cleanUrls": true,
-  "rewrites": [
+  "routes": [
     {
-      "source": "/perfil/(.*)",
-      "destination": "/perfil/index.html"
+      "src": "/perfil/(.*)",
+      "dest": "/perfil/index.html"
     }
   ]
 }
