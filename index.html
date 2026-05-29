@@ -186,9 +186,11 @@
     <div class="profile-copy">
       <span class="profile-kicker">Perfil Futbolero</span>
       <strong id="profile-name">Usuario</strong>
+      <span id="profile-username" class="profile-username"></span>
       <span class="profile-status">Conectado</span>
     </div>
-    <button id="logout-btn" class="profile-logout" type="button">Cerrar sesion</button>
+    <button id="profile-view-btn" class="profile-view-btn" type="button" title="Ver mi perfil" hidden>👤 Mi Perfil</button>
+    <button id="logout-btn" class="profile-logout" type="button">Cerrar sesión</button>
   </div>
 </div>
  
@@ -311,6 +313,120 @@
   <div class="cal-grp-wrap" id="cal-grp-tabs"></div>
   <div class="cal-body">
     <div id="cal-match-list"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL: PERFIL SETUP (primera vez / edición)
+     ═══════════════════════════════════════════════════ -->
+<div id="profile-setup-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Completa tu perfil futbolero">
+  <div class="modal-box psetup-box">
+    <div class="psetup-eyebrow">⚽ Primera vez · Álbum Mundial 2026</div>
+    <h2 class="psetup-title">COMPLETA TU PERFIL <span>FUTBOLERO</span></h2>
+    <p class="psetup-intro">Personaliza tu identidad. Tu perfil será público en la URL que te asignamos.</p>
+    <form id="psetup-form" novalidate>
+      <div class="psetup-fields">
+
+        <div class="psetup-field">
+          <label class="psetup-label" for="psetup-fullname">Nombre</label>
+          <input type="text" id="psetup-fullname" maxlength="60" placeholder="Tu nombre completo" autocomplete="name">
+        </div>
+
+        <div class="psetup-field">
+          <label class="psetup-label" for="psetup-username">Username <span class="psetup-req">*</span></label>
+          <div class="psetup-input-wrap">
+            <span class="psetup-at">@</span>
+            <input type="text" id="psetup-username" maxlength="30"
+              placeholder="martinfutbol" autocomplete="off" spellcheck="false"
+              inputmode="url">
+            <span class="psetup-check" id="psetup-user-check"></span>
+          </div>
+          <small class="psetup-hint" id="psetup-user-hint">Solo letras, números y _ · 3–30 caracteres</small>
+        </div>
+
+        <div class="psetup-row">
+          <div class="psetup-field">
+            <label class="psetup-label" for="psetup-team">Equipo favorito</label>
+            <input type="text" id="psetup-team" maxlength="50" placeholder="Ej: River Plate...">
+          </div>
+          <div class="psetup-field">
+            <label class="psetup-label" for="psetup-position">Posición favorita</label>
+            <select id="psetup-position">
+              <option value="">Seleccionar...</option>
+              <option>Portero</option>
+              <option>Defensa central</option>
+              <option>Lateral derecho</option>
+              <option>Lateral izquierdo</option>
+              <option>Mediocentro</option>
+              <option>Mediapunta</option>
+              <option>Extremo derecho</option>
+              <option>Extremo izquierdo</option>
+              <option>Delantero centro</option>
+              <option>Solo hincha ⚽</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="psetup-field">
+          <label class="psetup-label" for="psetup-bio">Bio corta</label>
+          <textarea id="psetup-bio" maxlength="120" rows="2"
+            placeholder="Coleccionista apasionado del fútbol..."></textarea>
+          <small class="psetup-hint" style="text-align:right">
+            <span id="psetup-bio-count">0</span>/120
+          </small>
+        </div>
+
+      </div><!-- /psetup-fields -->
+      <div class="modal-actions">
+        <button type="button" id="psetup-skip" class="modal-btn-cancel">Ahora no</button>
+        <button type="submit" id="psetup-save" class="modal-btn-primary" disabled>Crear perfil →</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL: VER PERFIL
+     ═══════════════════════════════════════════════════ -->
+<div id="profile-view-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Mi perfil futbolero">
+  <div class="modal-box pview-box">
+
+    <div class="pview-header">
+      <div class="pview-avatar">
+        <img id="pview-avatar-img" alt="" hidden>
+        <span id="pview-avatar-fb">FC</span>
+      </div>
+      <div class="pview-meta">
+        <div class="pview-fullname" id="pview-fullname">—</div>
+        <div class="pview-username" id="pview-username">@—</div>
+      </div>
+      <button id="pview-close" class="codes-mclose" aria-label="Cerrar">✕</button>
+    </div>
+
+    <div class="pview-bio" id="pview-bio">—</div>
+
+    <div class="pview-stats">
+      <div class="pview-stat">
+        <span class="pview-stat-label">⚽ EQUIPO FAVORITO</span>
+        <span class="pview-stat-val" id="pview-team">—</span>
+      </div>
+      <div class="pview-stat">
+        <span class="pview-stat-label">🧤 POSICIÓN</span>
+        <span class="pview-stat-val" id="pview-position">—</span>
+      </div>
+    </div>
+
+    <div class="pview-link-box">
+      <span class="pview-link-label">🔗 Tu perfil público:</span>
+      <a href="#" id="pview-public-link" target="_blank" rel="noopener" class="pview-link">—</a>
+      <button id="pview-copy-link" class="code-copy" type="button">📋 Copiar enlace</button>
+    </div>
+
+    <div class="modal-actions">
+      <button id="pview-edit-btn" class="modal-btn-cancel" type="button">✏️ Editar perfil</button>
+      <button id="pview-close-btn" class="modal-btn-primary" type="button">Cerrar</button>
+    </div>
+
   </div>
 </div>
 

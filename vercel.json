@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/perfil/:username",
+      "destination": "/perfil/index.html"
+    }
+  ]
+}

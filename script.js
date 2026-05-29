@@ -1,3 +1,9 @@
+import {
+  checkAndHandleFirstLogin,
+  updateHeaderProfile,
+  openProfileViewModal,
+  setupProfileViewButton,
+} from './profiles.js'
 import { supabase } from './supabase.js'
 console.log('Supabase conectado:', supabase)
 
@@ -30,8 +36,15 @@ function enterAlbumShell(mode, user = null) {
   currentUser = mode === 'google' ? user : null;
   authScreen?.classList.add('off');
   renderUserProfile(user);
-  if (currentUser) syncCloudState(currentUser);
+  if (currentUser) {
+    syncCloudState(currentUser);
+    // Verificar/crear perfil (non-blocking)
+    checkAndHandleFirstLogin(currentUser).catch(console.error);
+  }
 }
+
+// Inicializar botón de perfil al cargar
+setupProfileViewButton();
 
 function getUserDisplayName(user) {
   const metadata = user?.user_metadata || {};
@@ -57,6 +70,10 @@ function renderUserProfile(user) {
   if (!userProfile) return;
   if (!user) {
     userProfile.hidden = true;
+    const usernameEl = document.getElementById('profile-username');
+    if (usernameEl) usernameEl.textContent = '';
+    const viewBtn = document.getElementById('profile-view-btn');
+    if (viewBtn) viewBtn.hidden = true;
     return;
   }
 
