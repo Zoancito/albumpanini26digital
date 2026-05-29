@@ -4,6 +4,7 @@ import {
   openProfileViewModal,
   setupProfileViewButton,
 } from './profiles.js'
+import { initAmigos } from './amigos.js'
 import { supabase } from './supabase.js'
 console.log('Supabase conectado:', supabase)
 
@@ -43,8 +44,9 @@ function enterAlbumShell(mode, user = null) {
   }
 }
 
-// Inicializar botón de perfil al cargar
+// Inicializar botón de perfil y amigos al cargar
 setupProfileViewButton();
+initAmigos();
 
 function getUserDisplayName(user) {
   const metadata = user?.user_metadata || {};

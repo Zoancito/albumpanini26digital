@@ -1504,3 +1504,186 @@ html[data-theme="contrast"] .pview-link-box{background:#000;border-color:#fff}
 html[data-theme="contrast"] .profile-view-btn{
   background:rgba(255,255,0,.1);border-color:#ff0;color:#ff0;
 }
+
+
+/* ═══════════════════════════════════════════════════
+   SISTEMA DE AMIGOS — BUSCAR COLECCIONISTAS
+   ═══════════════════════════════════════════════════ */
+
+#amigos-overlay{
+  position:fixed;inset:0;z-index:9800;
+  background:var(--bg);
+  display:none;flex-direction:column;overflow:hidden;
+}
+#amigos-overlay.visible{display:flex}
+
+/* ── Header ── */
+.amigos-header{
+  display:flex;align-items:flex-start;gap:20px;
+  padding:24px 28px 16px;border-bottom:1px solid var(--border);flex-shrink:0;
+  background:linear-gradient(135deg,#0a0f1e 0%,#0e1628 50%,#0a0f1e 100%);
+}
+.amigos-back{
+  padding:8px 18px;border-radius:8px;border:1px solid var(--border);
+  background:var(--card);color:var(--dim);
+  font-family:'Barlow Condensed',sans-serif;font-size:.85rem;
+  font-weight:700;letter-spacing:.08em;cursor:pointer;transition:all .2s;
+  white-space:nowrap;flex-shrink:0;margin-top:4px;
+}
+.amigos-back:hover{background:var(--card2);color:var(--text);border-color:#3a5280}
+.amigos-eyebrow{
+  font-family:'Barlow Condensed',sans-serif;font-size:.65rem;
+  font-weight:700;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:4px;
+}
+.amigos-title{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);
+  letter-spacing:.03em;line-height:1;color:var(--text);
+}
+.amigos-title span{color:var(--gold)}
+.amigos-sub{
+  font-family:'Barlow Condensed',sans-serif;font-size:.8rem;
+  color:var(--dim);margin-top:4px;letter-spacing:.04em;
+}
+
+/* ── Search bar ── */
+.amigos-search-wrap{
+  padding:16px 28px;flex-shrink:0;border-bottom:1px solid var(--border);
+  background:var(--bg2);
+}
+.amigos-search-box{
+  position:relative;max-width:560px;margin:0 auto;
+  display:flex;align-items:center;
+}
+.amigos-search-icon{
+  position:absolute;left:14px;font-size:1rem;pointer-events:none;z-index:1;
+}
+.amigos-input{
+  width:100%;padding:12px 44px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;color:var(--text);font-size:.9rem;
+  font-family:'Barlow',sans-serif;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.amigos-input:focus{
+  border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,197,24,.1);
+}
+.amigos-input::placeholder{color:var(--muted)}
+.amigos-clear{
+  position:absolute;right:12px;background:none;border:none;
+  color:var(--muted);font-size:.9rem;cursor:pointer;padding:4px;
+  transition:color .2s;
+}
+.amigos-clear:hover{color:var(--text)}
+
+/* ── Body ── */
+.amigos-body{flex:1;overflow-y:auto;padding:20px 28px 40px}
+.amigos-count{
+  font-family:'Barlow Condensed',sans-serif;font-size:.72rem;
+  font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:14px;
+}
+
+/* ── Results grid ── */
+.amigos-grid{display:flex;flex-direction:column;gap:8px;max-width:700px;margin:0 auto}
+
+/* ── Card ── */
+.amigos-card{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;border-radius:12px;
+  border:1px solid var(--border);background:var(--card);
+  cursor:pointer;transition:all .22s;
+  position:relative;overflow:hidden;
+}
+.amigos-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(245,197,24,.04),transparent);
+  opacity:0;transition:opacity .2s;
+}
+.amigos-card:hover{
+  border-color:rgba(245,197,24,.35);background:var(--card2);
+  transform:translateX(3px);
+}
+.amigos-card:hover::before{opacity:1}
+.amigos-card:focus-visible{
+  outline:none;border-color:var(--gold);box-shadow:0 0 0 2px rgba(245,197,24,.25);
+}
+
+.amigos-card-avatar{
+  width:50px;height:50px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background:linear-gradient(135deg,var(--gold),#22c55e);
+  border:2px solid rgba(255,255,255,.12);
+}
+.amigos-card-avatar-img{width:100%;height:100%;object-fit:cover;display:block}
+.amigos-card-avatar-fb{
+  font-family:'Bebas Neue',sans-serif;font-size:1.2rem;
+  color:#08101f;letter-spacing:.04em;
+}
+
+.amigos-card-info{flex:1;min-width:0}
+.amigos-card-name{
+  font-family:'Barlow Condensed',sans-serif;font-size:1rem;
+  font-weight:700;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.amigos-card-username{
+  font-family:'Barlow Condensed',sans-serif;font-size:.75rem;
+  font-weight:700;letter-spacing:.1em;color:var(--gold);margin-top:2px;
+}
+.amigos-card-bio{
+  font-size:.75rem;color:var(--dim);margin-top:3px;
+  font-style:italic;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.amigos-card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.amigos-card-tag{
+  font-family:'Barlow Condensed',sans-serif;font-size:.65rem;
+  font-weight:700;letter-spacing:.06em;
+  padding:2px 8px;border-radius:20px;
+  border:1px solid var(--border);background:var(--bg3);color:var(--dim);
+}
+
+.amigos-card-arrow{
+  font-size:1.1rem;color:var(--muted);flex-shrink:0;
+  transition:transform .2s,color .2s;
+}
+.amigos-card:hover .amigos-card-arrow{transform:translateX(3px);color:var(--gold)}
+
+/* ── Empty state ── */
+.amigos-empty{
+  text-align:center;padding:60px 20px;color:var(--dim);max-width:400px;margin:0 auto;
+}
+.amigos-empty-icon{font-size:3rem;margin-bottom:12px;display:block}
+.amigos-empty-title{
+  font-family:'Bebas Neue',sans-serif;font-size:1.5rem;
+  letter-spacing:.04em;color:var(--text);margin-bottom:6px;
+}
+.amigos-empty-sub{font-size:.85rem;line-height:1.55}
+
+/* ── Theme overrides ── */
+html[data-theme="light"] .amigos-header{
+  background:linear-gradient(135deg,#eef3fb,#dde8f7,#eef3fb);
+}
+html[data-theme="light"] .amigos-search-wrap{background:#f5f8fd}
+html[data-theme="light"] .amigos-input{background:#fff;border-color:#c6d3e6;color:#0d1a2b}
+html[data-theme="light"] .amigos-card{background:#fff;border-color:#c6d3e6}
+html[data-theme="light"] .amigos-card:hover{background:#f5f8fd;border-color:rgba(212,164,0,.5)}
+html[data-theme="light"] .amigos-card-tag{background:#eef3fb;border-color:#c6d3e6}
+
+html[data-theme="contrast"] #amigos-overlay{background:#000}
+html[data-theme="contrast"] .amigos-header{background:#000;border-bottom:2px solid #fff}
+html[data-theme="contrast"] .amigos-back{background:#000;border-color:#fff;color:#fff}
+html[data-theme="contrast"] .amigos-input{background:#111;border-color:#fff;color:#fff}
+html[data-theme="contrast"] .amigos-card{background:#000;border-color:#fff}
+html[data-theme="contrast"] .amigos-card:hover{border-color:#ff0}
+html[data-theme="contrast"] .amigos-card-arrow{color:#ff0}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  .amigos-header{padding:14px 16px 12px;gap:12px;flex-direction:column}
+  .amigos-search-wrap{padding:12px 14px}
+  .amigos-body{padding:14px 14px 60px}
+  .amigos-card{padding:12px}
+  .amigos-card-avatar{width:44px;height:44px}
+}
