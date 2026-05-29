@@ -1,8 +1,8 @@
 {
-  "routes": [
+  "rewrites": [
     {
-      "src": "/perfil/(.*)",
-      "dest": "/perfil/index.html"
+      "source": "/perfil/:username",
+      "destination": "/perfil/index.html"
     }
   ]
 }
