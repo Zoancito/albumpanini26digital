@@ -373,7 +373,7 @@ async function loadPage(uname) {
 
     // 6. Mostrar página
     document.getElementById('state-loading').style.display = 'none'
-    document.getElementById('state-content').style.display = ''
+    document.getElementById('state-content').style.display = 'block'
     document.title = `${profile.full_name || profile.username} · Álbum Mundial 2026`
 
   } catch (err) {
