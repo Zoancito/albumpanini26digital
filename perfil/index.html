@@ -43,6 +43,31 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
 .card-stat-label{font-family:'Barlow Condensed',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
 .card-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--text);letter-spacing:.03em}
 
+/* ── Friend action area ── */
+.friend-zone{padding:16px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.friend-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:999px;border:1px solid;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.07em;cursor:pointer;transition:all .2s;text-decoration:none;white-space:nowrap}
+.friend-btn.primary{background:var(--gold);color:#0a0f1e;border-color:var(--gold)}
+.friend-btn.primary:hover{background:#e0b200;box-shadow:0 6px 20px rgba(245,197,24,.35)}
+.friend-btn.secondary{background:transparent;color:var(--dim);border-color:var(--border)}
+.friend-btn.secondary:hover{background:var(--card2);color:var(--text);border-color:#334a6e}
+.friend-btn.pending{background:rgba(245,197,24,.08);color:var(--gold);border-color:rgba(245,197,24,.3)}
+.friend-btn.pending:hover{background:rgba(229,9,20,.1);color:#e57373;border-color:rgba(229,9,20,.3)}
+.friend-btn.confirmed{background:rgba(34,197,94,.08);color:var(--green);border-color:rgba(34,197,94,.3)}
+.friend-btn.confirmed:hover{background:rgba(229,9,20,.08);color:#e57373;border-color:rgba(229,9,20,.25)}
+.friend-btn.danger{background:transparent;color:#e57373;border-color:rgba(229,9,20,.3);font-size:.78rem;padding:7px 14px}
+.friend-btn.danger:hover{background:rgba(229,9,20,.1)}
+.friend-actions-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.friend-status-label{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+
+/* ── Album locked state ── */
+.album-locked{text-align:center;padding:48px 24px}
+.album-locked-icon{font-size:3rem;margin-bottom:14px;filter:grayscale(1);opacity:.5}
+.album-locked-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.04em;color:var(--text);margin-bottom:8px}
+.album-locked-sub{font-size:.88rem;line-height:1.6;color:var(--dim);max-width:340px;margin:0 auto 20px}
+.album-pct-preview{display:inline-flex;flex-direction:column;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:14px 28px;margin-top:4px}
+.album-pct-val{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;color:var(--gold);line-height:1}
+.album-pct-label{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+
 /* ── Album section ── */
 .album-section{margin-top:20px;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
 .album-section-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#0c1526,#0e1628)}
@@ -124,7 +149,11 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
 .cta-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 28px;border-radius:999px;border:none;background:var(--gold);color:#0a0f1e;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;box-shadow:0 6px 24px rgba(245,197,24,.3);transition:transform .2s,box-shadow .2s}
 .cta-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(245,197,24,.42)}
 
-@media(max-width:500px){.album-stats{grid-template-columns:repeat(3,1fr)}.card-hero{padding:22px 16px 18px}.card-full-name{font-size:1.6rem}.sticker-grid{grid-template-columns:1fr}}
+/* ── Toast ── */
+#pf-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--card);border:1px solid var(--border);border-radius:999px;padding:11px 22px;font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:700;letter-spacing:.06em;color:var(--text);box-shadow:0 8px 28px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:9999;white-space:nowrap}
+#pf-toast.visible{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:500px){.album-stats{grid-template-columns:repeat(3,1fr)}.card-hero{padding:22px 16px 18px}.card-full-name{font-size:1.6rem}.sticker-grid{grid-template-columns:1fr}.friend-zone{flex-direction:column;align-items:stretch}.friend-btn{justify-content:center}}
 </style>
 </head>
 <body>
@@ -177,42 +206,14 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
             <span class="card-stat-val" id="pc-position">—</span>
           </div>
         </div>
+
+        <!-- Zona de amistad: se rellena dinámicamente -->
+        <div class="friend-zone" id="friend-zone" style="display:none"></div>
       </div>
     </div>
 
-    <!-- Album section -->
-    <div class="album-section" id="album-section">
-      <div class="album-section-header">
-        <div class="album-section-eyebrow">Colección · Mundial 2026</div>
-        <div class="album-section-title" id="album-section-title">ÁLBUM DE ...</div>
-      </div>
-
-      <!-- Stats -->
-      <div class="album-stats">
-        <div class="album-stat" style="--a-accent:#f5c518"><span class="album-stat-v" id="as-total">0</span><span class="album-stat-l">Total</span></div>
-        <div class="album-stat" style="--a-accent:#22c55e"><span class="album-stat-v" id="as-tengo">0</span><span class="album-stat-l">Tengo</span></div>
-        <div class="album-stat" style="--a-accent:#f43f5e"><span class="album-stat-v" id="as-falta">0</span><span class="album-stat-l">Faltan</span></div>
-        <div class="album-stat" style="--a-accent:#f59e0b"><span class="album-stat-v" id="as-rep">0</span><span class="album-stat-l">🔄 Repet.</span></div>
-        <div class="album-stat" style="--a-accent:#818cf8"><span class="album-stat-v" id="as-res">0</span><span class="album-stat-l">📌 Reserv.</span></div>
-      </div>
-
-      <!-- Tabs -->
-      <div class="album-tabs">
-        <button class="atab active" data-filter="all">Todos</button>
-        <button class="atab" data-filter="tengo">✅ Tengo</button>
-        <button class="atab" data-filter="falta">❌ Faltan</button>
-        <button class="atab" data-filter="repetida">🔄 Repetidas</button>
-        <button class="atab" data-filter="reserva">📌 Reservadas</button>
-      </div>
-
-      <!-- Groups body -->
-      <div class="album-body" id="album-body">
-        <div class="album-empty">
-          <div class="album-empty-icon">⏳</div>
-          <div class="album-empty-title">Cargando álbum...</div>
-        </div>
-      </div>
-    </div>
+    <!-- Album section: se rellena dinámicamente según nivel -->
+    <div id="album-section"></div>
 
     <!-- CTA -->
     <div class="cta-section">
@@ -223,8 +224,16 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
   </div>
 </div>
 
+<div id="pf-toast"></div>
+
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+import {
+  getFriendshipStatus,
+  sendFriendRequest,
+  acceptFriendRequest,
+  removeFriendship
+} from '../friendships.js'
 
 const supabase = createClient(
   'https://snptinuwoeakenejwhzl.supabase.co',
@@ -285,8 +294,6 @@ const albumData = {
   "🇵🇦 Panamá":["Panama Logo","Orlando Mosquera","Michael Amir Murillo","Andrés Andrade","Fidel Escobar","Aníbal Godoy","Cristian Martínez","Adalberto Carrasquilla","Édgar Bárcenas","José Fajardo","Ismael Díaz","José Luis Rodríguez"]
 };
 
-
-
 const GROUPS = {
   A:['🇲🇽 México','🇿🇦 Sudáfrica','🇰🇷 República de Corea','🇨🇿 República Checa'],
   B:['🇨🇦 Canadá','🇧🇦 Bosnia y Herzegovina','🇶🇦 Catar','🇨🇭 Suiza'],
@@ -302,16 +309,21 @@ const GROUPS = {
   L:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra','🇭🇷 Croacia','🇬🇭 Ghana','🇵🇦 Panamá']
 };
 
-
-
 const GROUP_COLORS = {
   A:'#ff6b35',B:'#2dd4bf',C:'#fbbf24',D:'#f43f5e',
   E:'#4ade80',F:'#a78bfa',G:'#fb923c',H:'#38bdf8',
   I:'#e879f9',J:'#34d399',K:'#c084fc',L:'#f87171'
 }
 
+// ── Estado global de la página ────────────────────
+let _currentUser   = null   // usuario logueado (o null)
+let _profileData   = null   // perfil público que se muestra
+let _friendship    = null   // relación actual con ese perfil
+let _progress      = {}
+let _filter        = 'all'
+
 // ── URL parsing ───────────────────────────────────
-const params = new URLSearchParams(window.location.search)
+const params          = new URLSearchParams(window.location.search)
 const usernameFromQuery = params.get('u')
 const usernameFromPath  = window.location.pathname.replace(/\/$/, '').split('/').pop()
 const username = usernameFromQuery
@@ -323,10 +335,14 @@ if (!username) {
   loadPage(username)
 }
 
-// ── Load profile + album ──────────────────────────
+// ── Carga principal ───────────────────────────────
 async function loadPage(uname) {
   try {
-    // 1. Perfil
+    // 1. Sesión actual (puede ser null si no está logueado)
+    const { data: { user } } = await supabase.auth.getUser()
+    _currentUser = user
+
+    // 2. Perfil público del username en la URL
     const { data: profile, error: pErr } = await supabase
       .from('profiles')
       .select('*')
@@ -334,21 +350,33 @@ async function loadPage(uname) {
       .single()
 
     if (pErr || !profile) { showError(`No existe el perfil "@${uname}".`); return }
+    _profileData = profile
 
+    // 3. Determinar nivel de acceso
+    const level = await determineLevel(user, profile)
+
+    // 4. Renderizar perfil y zona de amistad
     renderProfile(profile)
+    renderFriendZone(level)
 
-    // 2. Álbum (puede ser null si no tiene progreso cloud)
-    const { data: albumRow } = await supabase
-      .from('album_progress')
-      .select('progress')
-      .eq('user_id', profile.id)
-      .eq('album_id', 'wc2026')
-      .maybeSingle()
+    // 5. Renderizar sección de álbum según nivel
+    if (level === 'own' || level === 2) {
+      // Intentar cargar progreso (RLS lo permite solo si son amigos o es el dueño)
+      const { data: albumRow } = await supabase
+        .from('album_progress')
+        .select('progress')
+        .eq('user_id', profile.id)
+        .eq('album_id', 'wc2026')
+        .maybeSingle()
 
-    const progress = albumRow?.progress || {}
-    renderAlbum(profile, progress)
+      renderFullAlbumSection(profile, albumRow?.progress || {})
+    } else {
+      // Calcular % sin necesitar el progreso detallado (stats públicos)
+      const pct = await getPublicPct(profile.id)
+      renderLockedAlbumSection(level, pct)
+    }
 
-    // Show page
+    // 6. Mostrar página
     document.getElementById('state-loading').style.display = 'none'
     document.getElementById('state-content').style.display = ''
     document.title = `${profile.full_name || profile.username} · Álbum Mundial 2026`
@@ -359,7 +387,46 @@ async function loadPage(uname) {
   }
 }
 
-// ── Render profile card ───────────────────────────
+// ── Nivel de acceso ───────────────────────────────
+async function determineLevel(user, profile) {
+  if (!user) return 0                          // anónimo
+  if (user.id === profile.id) return 'own'     // propio perfil
+
+  _friendship = await getFriendshipStatus(profile.id)
+  if (_friendship?.status === 'accepted') return 2   // amigos
+  return 1                                           // logueado, no amigo
+}
+
+// ── % público (sin RLS) ───────────────────────────
+// Usamos la policy pública de solo-lectura del progreso si existe,
+// si no, devolvemos null y el locked state no muestra el %.
+async function getPublicPct(userId) {
+  try {
+    const { data } = await supabase
+      .from('album_progress')
+      .select('progress')
+      .eq('user_id', userId)
+      .eq('album_id', 'wc2026')
+      .maybeSingle()
+
+    if (!data?.progress) return null
+    const prog = data.progress
+    let total = 0, tengo = 0
+    const allCountries = ['INTRO', ...Object.keys(albumData)]
+    allCountries.forEach(country => {
+      const stickers = country === 'INTRO' ? INTRO_DATA : albumData[country]
+      stickers.forEach((_, idx) => {
+        total++
+        if ((prog[country + '::' + idx] || 'none') === 'tengo') tengo++
+      })
+    })
+    return total > 0 ? Math.round((tengo / total) * 100) : 0
+  } catch {
+    return null
+  }
+}
+
+// ── Render: tarjeta de perfil ─────────────────────
 function renderProfile(p) {
   const img = document.getElementById('pc-avatar-img')
   const fb  = document.getElementById('pc-avatar-fb')
@@ -370,55 +437,209 @@ function renderProfile(p) {
     fb.textContent = (p.full_name || p.username || 'FC').trim()
       .split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase() || 'FC'
   }
-  document.getElementById('pc-fullname').textContent  = p.full_name || p.username
-  document.getElementById('pc-username').textContent  = '@' + p.username
-  document.getElementById('pc-team').textContent      = p.favorite_team || '—'
-  document.getElementById('pc-position').textContent  = p.favorite_position || '—'
+  document.getElementById('pc-fullname').textContent = p.full_name || p.username
+  document.getElementById('pc-username').textContent = '@' + p.username
+  document.getElementById('pc-team').textContent     = p.favorite_team || '—'
+  document.getElementById('pc-position').textContent = p.favorite_position || '—'
   const bioEl = document.getElementById('pc-bio')
   if (p.bio) { bioEl.textContent = p.bio; bioEl.style.display = '' }
-  document.getElementById('album-section-title').textContent =
-    'ÁLBUM DE ' + (p.full_name || p.username).toUpperCase().split(' ')[0]
 }
 
-// ── Render album ──────────────────────────────────
-let _progress = {}
-let _filter   = 'all'
+// ── Render: zona de amistad ───────────────────────
+function renderFriendZone(level) {
+  const zone = document.getElementById('friend-zone')
+  if (!zone) return
 
-function renderAlbum(profile, progress) {
+  // Propio perfil o anónimo sin relación → no mostrar nada
+  if (level === 'own' || level === 0) { zone.style.display = 'none'; return }
+
+  zone.style.display = 'flex'
+  const f = _friendship
+
+  // Sin relación previa
+  if (!f) {
+    zone.innerHTML = `
+      <span class="friend-status-label">Coleccionista</span>
+      <button class="friend-btn primary" id="btn-add">➕ Agregar amigo</button>`
+    document.getElementById('btn-add').addEventListener('click', handleAdd)
+    return
+  }
+
+  // Solicitud enviada por mí
+  if (f.status === 'pending' && f.sender_id === _currentUser.id) {
+    zone.innerHTML = `
+      <span class="friend-status-label">Solicitud enviada</span>
+      <button class="friend-btn pending" id="btn-cancel">⏳ Pendiente · Cancelar</button>`
+    document.getElementById('btn-cancel').addEventListener('click', handleRemove)
+    return
+  }
+
+  // Solicitud recibida de este usuario
+  if (f.status === 'pending' && f.receiver_id === _currentUser.id) {
+    zone.innerHTML = `
+      <span class="friend-status-label">Te envió una solicitud</span>
+      <div class="friend-actions-row">
+        <button class="friend-btn primary" id="btn-accept">✅ Aceptar</button>
+        <button class="friend-btn danger"   id="btn-reject">✗ Rechazar</button>
+      </div>`
+    document.getElementById('btn-accept').addEventListener('click', handleAccept)
+    document.getElementById('btn-reject').addEventListener('click', handleRemove)
+    return
+  }
+
+  // Amigos confirmados
+  if (f.status === 'accepted') {
+    zone.innerHTML = `
+      <span class="friend-status-label">✓ Son amigos</span>
+      <button class="friend-btn confirmed" id="btn-remove">✓ Amigos · Eliminar</button>`
+    document.getElementById('btn-remove').addEventListener('click', handleRemove)
+    return
+  }
+}
+
+// ── Handlers de amistad ───────────────────────────
+async function handleAdd() {
+  const btn = document.getElementById('btn-add')
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando...' }
+  try {
+    _friendship = await sendFriendRequest(_profileData.id)
+    showToast('✅ Solicitud enviada')
+    renderFriendZone(1)
+  } catch (err) {
+    console.error(err)
+    showToast('⚠️ Error al enviar la solicitud')
+    if (btn) { btn.disabled = false; btn.textContent = '➕ Agregar amigo' }
+  }
+}
+
+async function handleAccept() {
+  const btn = document.getElementById('btn-accept')
+  if (btn) { btn.disabled = true; btn.textContent = 'Aceptando...' }
+  try {
+    _friendship = await acceptFriendRequest(_friendship.id)
+    showToast('🎉 ¡Ahora son amigos!')
+    renderFriendZone(2)
+    // Recargar el álbum completo ahora que son amigos
+    const { data: albumRow } = await supabase
+      .from('album_progress')
+      .select('progress')
+      .eq('user_id', _profileData.id)
+      .eq('album_id', 'wc2026')
+      .maybeSingle()
+    renderFullAlbumSection(_profileData, albumRow?.progress || {})
+  } catch (err) {
+    console.error(err)
+    showToast('⚠️ Error al aceptar')
+  }
+}
+
+async function handleRemove() {
+  if (!_friendship) return
+  const confirmed = window.confirm('¿Confirmar? Se eliminará la solicitud o amistad.')
+  if (!confirmed) return
+  try {
+    await removeFriendship(_friendship.id)
+    _friendship = null
+    showToast('Amistad eliminada')
+    renderFriendZone(1)
+    // Volver a bloquear el álbum
+    const pct = await getPublicPct(_profileData.id)
+    renderLockedAlbumSection(1, pct)
+  } catch (err) {
+    console.error(err)
+    showToast('⚠️ Error al eliminar')
+  }
+}
+
+// ── Render: álbum bloqueado (nivel 0 y 1) ────────
+function renderLockedAlbumSection(level, pct) {
+  const section = document.getElementById('album-section')
+  if (!section) return
+
+  const pctHtml = pct !== null
+    ? `<div class="album-pct-preview">
+        <span class="album-pct-val">${pct}%</span>
+        <span class="album-pct-label">Completado</span>
+       </div>`
+    : ''
+
+  const msg = level === 0
+    ? 'Iniciá sesión y agregalo como amigo para ver su álbum completo con estados de cada figurita.'
+    : 'Agregalo como amigo para desbloquear su álbum completo con todos los estados.'
+
+  const cta = level === 0
+    ? `<a href="https://albumpanini26digital.vercel.app" class="friend-btn primary" style="display:inline-flex;margin-top:8px">
+        🔑 Iniciar sesión
+       </a>`
+    : ''
+
+  section.innerHTML = `
+    <div class="album-section" style="margin-top:20px">
+      <div class="album-section-header">
+        <div class="album-section-eyebrow">Colección · Mundial 2026</div>
+        <div class="album-section-title">ÁLBUM DE ${esc(((_profileData.full_name || _profileData.username).toUpperCase().split(' ')[0]))}</div>
+      </div>
+      <div class="album-locked">
+        <div class="album-locked-icon">🔒</div>
+        <div class="album-locked-title">Álbum privado</div>
+        <div class="album-locked-sub">${msg}</div>
+        ${pctHtml}
+        ${cta}
+      </div>
+    </div>`
+}
+
+// ── Render: álbum completo (nivel 2 / propio) ────
+function renderFullAlbumSection(profile, progress) {
   _progress = progress
+  const section = document.getElementById('album-section')
+  if (!section) return
 
-  // Stats
+  // Calcular stats
   let total=0, tengo=0, falta=0, rep=0, res=0
   const allCountries = ['INTRO', ...Object.keys(albumData)]
   allCountries.forEach(country => {
     const stickers = country === 'INTRO' ? INTRO_DATA : albumData[country]
     stickers.forEach((_, idx) => {
       total++
-      const k = country + '::'  + idx
-      const st = progress[k] || 'none'
+      const k   = country + '::' + idx
+      const st  = progress[k] || 'none'
       const sub = progress[k + '::sub'] || null
-      if (st === 'tengo') { tengo++ }
-      else if (st === 'falta') { falta++ }
+      if (st === 'tengo') tengo++
+      else if (st === 'falta') falta++
       if (sub === 'repetida') rep++
       if (sub === 'reserva')  res++
     })
   })
   const pct = total > 0 ? Math.round((tengo/total)*100) + '%' : '0%'
 
-  document.getElementById('as-total').textContent = total
-  document.getElementById('as-tengo').textContent = tengo
-  document.getElementById('as-falta').textContent = falta
-  document.getElementById('as-rep').textContent   = rep
-  document.getElementById('as-res').textContent   = res
+  section.innerHTML = `
+    <div class="album-section" style="margin-top:20px">
+      <div class="album-section-header">
+        <div class="album-section-eyebrow">Colección · Mundial 2026</div>
+        <div class="album-section-title" id="album-section-title">ÁLBUM DE ${esc((profile.full_name || profile.username).toUpperCase().split(' ')[0])}</div>
+      </div>
+      <div class="album-stats">
+        <div class="album-stat" style="--a-accent:#f5c518"><span class="album-stat-v" id="as-total">${total}</span><span class="album-stat-l">Total</span></div>
+        <div class="album-stat" style="--a-accent:#22c55e"><span class="album-stat-v" id="as-tengo">${tengo}</span><span class="album-stat-l">Tengo</span></div>
+        <div class="album-stat" style="--a-accent:#f43f5e"><span class="album-stat-v" id="as-falta">${falta}</span><span class="album-stat-l">Faltan</span></div>
+        <div class="album-stat" style="--a-accent:#f59e0b"><span class="album-stat-v" id="as-rep">${rep}</span><span class="album-stat-l">🔄 Repet.</span></div>
+        <div class="album-stat" style="--a-accent:#818cf8"><span class="album-stat-v" id="as-res">${res}</span><span class="album-stat-l">📌 Reserv.</span></div>
+      </div>
+      <div class="album-tabs">
+        <button class="atab active" data-filter="all">Todos · ${pct}</button>
+        <button class="atab" data-filter="tengo">✅ Tengo</button>
+        <button class="atab" data-filter="falta">❌ Faltan</button>
+        <button class="atab" data-filter="repetida">🔄 Repetidas</button>
+        <button class="atab" data-filter="reserva">📌 Reservadas</button>
+      </div>
+      <div class="album-body" id="album-body"></div>
+    </div>`
 
-  // Tabs labels
-  const tabAll = document.querySelector('.atab[data-filter="all"]')
-  if (tabAll) tabAll.textContent = `Todos · ${pct}`
-
-  // Setup tab listeners once
-  document.querySelectorAll('.atab').forEach(btn => {
+  // Tab listeners
+  section.querySelectorAll('.atab').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.atab').forEach(b => b.classList.remove('active'))
+      section.querySelectorAll('.atab').forEach(b => b.classList.remove('active'))
       btn.classList.add('active')
       _filter = btn.dataset.filter
       renderGroups()
@@ -428,17 +649,15 @@ function renderAlbum(profile, progress) {
   renderGroups()
 }
 
+// ── Render grupos de figuritas ────────────────────
 function renderGroups() {
   const body = document.getElementById('album-body')
+  if (!body) return
   const html = []
 
-  // Build group entries: letter → countries
-  const groupEntries = Object.entries(GROUPS)
-
-  // Also add INTRO as special
   const allEntries = [
     { letter: '🌍', countries: ['INTRO'], color: '#f5c518', label: 'Introducción' },
-    ...groupEntries.map(([l, countries]) => ({
+    ...Object.entries(GROUPS).map(([l, countries]) => ({
       letter: l, countries, color: GROUP_COLORS[l], label: 'Grupo ' + l
     }))
   ]
@@ -458,7 +677,6 @@ function renderGroups() {
         gTotal++
         if (st === 'tengo') gTengo++
 
-        // Filter logic
         if (_filter === 'all') {}
         else if (_filter === 'tengo'    && st !== 'tengo') return
         else if (_filter === 'falta'    && st !== 'falta') return
@@ -466,12 +684,11 @@ function renderGroups() {
         else if (_filter === 'reserva'  && sub !== 'reserva') return
 
         hasVisible = true
-        let cls = 'sc'
-        let badge = ''
-        if (st === 'tengo')       { cls += ' s-tengo';    badge = 'TENGO' }
-        else if (st === 'falta')  { cls += ' s-falta';    badge = 'FALTA' }
-        if (sub === 'repetida')   { cls += ' s-repetida'; badge = '🔄' }
-        if (sub === 'reserva')    { cls += ' s-reserva';  badge = '📌' }
+        let cls = 'sc', badge = ''
+        if (st === 'tengo')      { cls += ' s-tengo';    badge = 'TENGO' }
+        else if (st === 'falta') { cls += ' s-falta';    badge = 'FALTA' }
+        if (sub === 'repetida')  { cls += ' s-repetida'; badge = '🔄' }
+        if (sub === 'reserva')   { cls += ' s-reserva';  badge = '📌' }
 
         countryStickers.push(`
           <div class="${cls}">
@@ -495,7 +712,6 @@ function renderGroups() {
     if (_filter !== 'all' && !hasVisible) continue
 
     const pct = gTotal > 0 ? Math.round((gTengo/gTotal)*100) : 0
-
     html.push(`
       <div class="sgroup open">
         <div class="sgroup-header" onclick="this.parentElement.classList.toggle('open')">
@@ -529,6 +745,15 @@ function showError(msg) {
   document.getElementById('state-loading').style.display = 'none'
   document.getElementById('error-msg').textContent = msg
   document.getElementById('state-error').style.display = ''
+}
+
+function showToast(msg) {
+  const t = document.getElementById('pf-toast')
+  if (!t) return
+  t.textContent = msg
+  t.classList.add('visible')
+  clearTimeout(t._timer)
+  t._timer = setTimeout(() => t.classList.remove('visible'), 3000)
 }
 
 function esc(str) {
