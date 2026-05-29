@@ -270,8 +270,12 @@ const supabase = createClient(
 
 // ── Obtener username de la URL ──────────────────
 // Soporta tanto /perfil/username como /perfil/index.html (fallback)
-const parts = window.location.pathname.replace(/\/$/, '').split('/')
-const username = parts[parts.length - 1]
+// Soporta tanto /perfil/username como /perfil/?u=username (via 404 redirect)
+const params = new URLSearchParams(window.location.search);
+const usernameFromQuery = params.get('u');
+const usernameFromPath = window.location.pathname.replace(/\/$/, '').split('/').pop();
+const username = usernameFromQuery 
+  || (usernameFromPath && usernameFromPath !== 'index.html' ? usernameFromPath : null);
 
 if (!username || username === 'index.html' || username === 'perfil') {
   showError('No se especificó ningún username en la URL.')
