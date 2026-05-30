@@ -11,11 +11,47 @@ import {
 } from './friendships.js'
 
 let _searchTimer = null
-let _currentUser = null  // se carga al abrir el panel
+let _currentUser = null
 let _friends = []
 let _activeChatFriend = null
 let _chatRefreshTimer = null
 let _lastChatSignature = ''
+
+// ── FIX: debounce + guard para evitar refreshes superpuestos ─────
+let _friendsRefreshing = false
+let _friendsDebounceTimer = null
+
+function debouncedFriendsRefresh(userOverride) {
+  clearTimeout(_friendsDebounceTimer)
+  _friendsDebounceTimer = setTimeout(async () => {
+    if (_friendsRefreshing) return
+    _friendsRefreshing = true
+    try { await refreshFriendsPanel(userOverride) }
+    finally { _friendsRefreshing = false }
+  }, 350)
+}
+
+// ── FIX: getSessionUser con timeout propio ───────────────────────
+// supabase.auth.getSession() puede colgar indefinidamente si la
+// conexión se enfrió. Le damos 6 s y como fallback usamos getUser().
+async function getSessionUser() {
+  try {
+    const result = await Promise.race([
+      supabase.auth.getSession(),
+      new Promise((_, rej) =>
+        setTimeout(() => rej(new Error('auth-timeout')), 6000)
+      )
+    ])
+    return result?.data?.session?.user || null
+  } catch {
+    try {
+      const { data } = await supabase.auth.getUser()
+      return data?.user || null
+    } catch {
+      return null
+    }
+  }
+}
 
 function withTimeout(promise, ms = 12000) {
   return Promise.race([
@@ -28,16 +64,10 @@ function withTimeout(promise, ms = 12000) {
   ])
 }
 
-async function getSessionUser() {
-  const { data } = await supabase.auth.getSession()
-  return data?.session?.user || null
-}
-
 function getSupabaseErrorKind(error) {
   const status = error?.status
   const code = String(error?.code || '')
   const msg = String(error?.message || error?.details || '').toLowerCase()
-
   if (error?.name === 'SocialTimeoutError') return 'timeout'
   if (status === 401 || msg.includes('jwt') || msg.includes('session') || msg.includes('auth')) return 'auth'
   if (status === 403 || code === '42501' || msg.includes('permission') || msg.includes('rls')) return 'permission'
@@ -47,17 +77,17 @@ function getSupabaseErrorKind(error) {
 
 function renderSocialError(error, area = 'friends') {
   const kind = getSupabaseErrorKind(error)
-  if (kind === 'timeout') return 'Supabase tardó demasiado. Intenta actualizar en unos segundos.'
-  if (kind === 'auth') return 'Tu sesión expiró. Cierra sesión y vuelve a entrar con Google.'
+  if (kind === 'timeout') return 'Supabase tardó demasiado. Pulsa ↻ para reintentar.'
+  if (kind === 'auth') return 'Tu sesión expiró. Cierra sesión y volvé a entrar con Google.'
   if (kind === 'permission') return area === 'chat'
-    ? 'No tienes permiso para ver este chat. Confirma que siguen siendo amigos.'
-    : 'No tienes permiso para cargar amigos. Revisa las policies de friendships/profiles.'
+    ? 'No tienes permiso para ver este chat. Confirmá que siguen siendo amigos.'
+    : 'No tienes permiso para cargar amigos. Revisá las policies de friendships/profiles.'
   if (kind === 'missing-table') return area === 'chat'
     ? 'Falta ejecutar el SQL del chat en Supabase.'
     : 'Falta una tabla necesaria en Supabase.'
   return area === 'chat'
-    ? 'No se pudo cargar el chat. Intenta nuevamente.'
-    : 'No se pudieron cargar tus amigos. Intenta nuevamente.'
+    ? 'No se pudo cargar el chat. Intentá nuevamente.'
+    : 'No se pudieron cargar tus amigos. Pulsá ↻ para reintentar.'
 }
 
 // ── Inicializar ───────────────────────────────────
@@ -65,30 +95,40 @@ export function initAmigos() {
   injectButton()
   injectOverlay()
   setupListeners()
-  refreshFriendsPanel()
-  supabase.auth.onAuthStateChange((event, session) => refreshFriendsPanel(session?.user || null))
+  debouncedFriendsRefresh()
+
+  // ── FIX: solo reaccionar a login/logout real, NO a TOKEN_REFRESHED ───
+  // TOKEN_REFRESHED dispara cada hora y getSession() puede colgar en ese momento
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+      _currentUser = session?.user || null
+      debouncedFriendsRefresh(_currentUser)
+    }
+  })
+
+  // ── FIX: refrescar al volver a la pestaña tras inactividad ──────────
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') debouncedFriendsRefresh()
+  })
 }
 
 // ── Inyectar botón en #controls ───────────────────
 function injectButton() {
   const controls = document.getElementById('controls')
   if (!controls || document.getElementById('btn-amigos')) return
-
   const btn = document.createElement('button')
   btn.className = 'action-btn'
   btn.id = 'btn-amigos'
   btn.setAttribute('aria-label', 'Buscar amigos coleccionistas')
   btn.innerHTML = '🔎 <span class="btn-label">Amigos</span>'
-
   const resetBtn = document.getElementById('btn-reset')
   if (resetBtn) controls.insertBefore(btn, resetBtn)
   else controls.appendChild(btn)
 }
 
-// ── Inyectar overlay en el body ───────────────────
+// ── Inyectar overlay ──────────────────────────────
 function injectOverlay() {
   if (document.getElementById('amigos-overlay')) return
-
   const overlay = document.createElement('div')
   overlay.id = 'amigos-overlay'
   overlay.setAttribute('role', 'dialog')
@@ -103,23 +143,15 @@ function injectOverlay() {
         <p class="amigos-sub">Encontrá otros coleccionistas · Hacé clic para ver su álbum</p>
       </div>
     </div>
-
     <div class="amigos-search-wrap">
       <div class="amigos-search-box">
         <span class="amigos-search-icon" aria-hidden="true">🔍</span>
-        <input
-          type="text"
-          id="amigos-input"
-          class="amigos-input"
+        <input type="text" id="amigos-input" class="amigos-input"
           placeholder="Buscar por username o nombre..."
-          maxlength="30"
-          autocomplete="off"
-          spellcheck="false"
-        >
+          maxlength="30" autocomplete="off" spellcheck="false">
         <button class="amigos-clear" id="amigos-clear" aria-label="Limpiar búsqueda" hidden>✕</button>
       </div>
     </div>
-
     <div class="amigos-body">
       <div id="amigos-results" class="amigos-results">
         <div class="amigos-empty" id="amigos-initial">
@@ -128,40 +160,34 @@ function injectOverlay() {
           <div class="amigos-empty-sub">Encontrá coleccionistas y mirá su álbum</div>
         </div>
       </div>
-    </div>
-  `
+    </div>`
   document.body.appendChild(overlay)
 }
 
 // ── Event listeners ───────────────────────────────
 function setupListeners() {
   document.getElementById('btn-amigos')?.addEventListener('click', openAmigos)
-  document.getElementById('friends-refresh')?.addEventListener('click', refreshFriendsPanel)
+
+  // ── FIX: botón ↻ usa debouncedFriendsRefresh ────────────────────
+  document.getElementById('friends-refresh')?.addEventListener('click', () => debouncedFriendsRefresh())
 
   document.addEventListener('click', e => {
     if (e.target?.id === 'amigos-close') closeAmigos()
   })
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      const ov = document.getElementById('amigos-overlay')
-      if (ov?.classList.contains('visible')) closeAmigos()
-    }
+    if (e.key === 'Escape' && document.getElementById('amigos-overlay')?.classList.contains('visible')) closeAmigos()
   })
-
   document.addEventListener('input', e => {
     if (e.target?.id !== 'amigos-input') return
     const val = e.target.value.trim()
     const clearBtn = document.getElementById('amigos-clear')
     if (clearBtn) clearBtn.hidden = !val
-
     clearTimeout(_searchTimer)
     if (!val) { showInitial(); return }
     if (val.length < 2) { showMsg('Escribe al menos 2 caracteres...', '⏳'); return }
-
     showMsg('Buscando...', '⏳')
     _searchTimer = setTimeout(() => doSearch(val), 380)
   })
-
   document.addEventListener('click', e => {
     if (e.target?.id !== 'amigos-clear') return
     const input = document.getElementById('amigos-input')
@@ -169,15 +195,12 @@ function setupListeners() {
     document.getElementById('amigos-clear').hidden = true
     showInitial()
   })
-
   document.addEventListener('click', handleFriendsPanelClick)
 }
 
 async function openAmigos() {
-  // Obtener sesión actual al abrir (puede haber cambiado)
   const user = await getSessionUser()
   _currentUser = user
-
   document.getElementById('amigos-overlay')?.classList.add('visible')
   setTimeout(() => document.getElementById('amigos-input')?.focus(), 180)
 }
@@ -186,7 +209,7 @@ function closeAmigos() {
   document.getElementById('amigos-overlay')?.classList.remove('visible')
 }
 
-// ── Búsqueda en Supabase ──────────────────────────
+// ── Refresh del panel de amigos ───────────────────
 export async function refreshFriendsPanel(userOverride) {
   const body = document.getElementById('friends-panel-body')
   if (!body) return
@@ -222,7 +245,7 @@ export async function refreshFriendsPanel(userOverride) {
           <div class="social-section-title">Mis amigos</div>
           <div class="social-list">${friends.map(renderFriendPanelCard).join('')}</div>
         </section>`
-      : '<div class="social-empty">Todavía no tienes amigos aceptados. Usa el buscador para encontrar coleccionistas.</div>'
+      : '<div class="social-empty">Todavía no tenés amigos aceptados. Usá el buscador para encontrar coleccionistas.</div>'
 
     body.innerHTML = pendingHtml + friendsHtml
 
@@ -233,9 +256,15 @@ export async function refreshFriendsPanel(userOverride) {
     }
   } catch (err) {
     console.error('[amigos] refreshFriendsPanel:', err)
-    body.innerHTML = `<div class="social-empty">${renderSocialError(err, 'friends')}</div>`
+    body.innerHTML = `<div class="social-empty">
+      ${renderSocialError(err, 'friends')}
+      <br><button onclick="window.debouncedFriendsRefresh?.()" class="social-retry-btn" style="margin-top:10px">↻ Reintentar</button>
+    </div>`
   }
 }
+
+// Exponer para el botón inline de error
+window.debouncedFriendsRefresh = () => debouncedFriendsRefresh()
 
 async function loadAcceptedFriends(userId) {
   const { data, error } = await withTimeout(
@@ -245,13 +274,10 @@ async function loadAcceptedFriends(userId) {
       .eq('status', 'accepted')
       .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
   )
-
   if (error) throw error
-
   const rows = data || []
   const friendIds = rows.map(f => f.sender_id === userId ? f.receiver_id : f.sender_id)
   const profiles = await loadProfilesByIds(friendIds)
-
   return rows
     .map(f => {
       const friendId = f.sender_id === userId ? f.receiver_id : f.sender_id
@@ -271,12 +297,9 @@ async function loadPendingRequestsForPanel(userId) {
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
   )
-
   if (error) throw error
-
   const rows = data || []
   const profiles = await loadProfilesByIds(rows.map(f => f.sender_id))
-
   return rows
     .map(f => {
       const profile = profiles[f.sender_id]
@@ -288,16 +311,13 @@ async function loadPendingRequestsForPanel(userId) {
 async function loadProfilesByIds(ids) {
   const cleanIds = [...new Set((ids || []).filter(Boolean))]
   if (cleanIds.length === 0) return {}
-
   const { data, error } = await withTimeout(
     supabase
       .from('profiles')
       .select('id, username, full_name, avatar_url, favorite_team')
       .in('id', cleanIds)
   )
-
   if (error) throw error
-
   const map = {}
   ;(data || []).forEach(p => { map[p.id] = p })
   return map
@@ -312,7 +332,7 @@ function renderFriendPanelCard(p) {
         <span class="social-user">@${escHtml(p.username)}${p.favorite_team ? ' · ' + escHtml(p.favorite_team) : ''}</span>
         <span class="social-card-actions">
           <button class="social-mini-btn primary" data-chat-friend="${escHtml(p.id)}" type="button">Chat</button>
-          <a class="social-mini-link" href="/perfil/${encodeURIComponent(p.username)}">Perfil</a>
+          <a class="social-mini-link" href="/perfil/?u=${encodeURIComponent(p.username)}">Perfil</a>
         </span>
       </span>
     </div>`
@@ -336,7 +356,6 @@ function renderPendingRequest(p) {
 function renderSocialAvatar(p) {
   const initials = (p.full_name || p.username || 'FC')
     .trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toUpperCase() || 'FC'
-
   return p.avatar_url
     ? `<span class="social-avatar"><img src="${escHtml(p.avatar_url)}" alt=""></span>`
     : `<span class="social-avatar">${escHtml(initials)}</span>`
@@ -349,14 +368,11 @@ async function handleFriendsPanelClick(e) {
     if (friend) openChat(friend)
     return
   }
-
   const actionBtn = e.target.closest('[data-friend-action]')
   if (!actionBtn) return
-
   const card = actionBtn.closest('[data-friendship-id]')
   const friendshipId = card?.dataset.friendshipId
   if (!friendshipId) return
-
   actionBtn.disabled = true
   try {
     if (actionBtn.dataset.friendAction === 'accept') {
@@ -407,7 +423,6 @@ function markActiveFriend() {
 function renderChatShell(friend) {
   const body = document.getElementById('chat-panel-body')
   if (!body) return
-
   body.innerHTML = `
     <div class="chat-thread">
       <div class="chat-peer">
@@ -421,12 +436,13 @@ function renderChatShell(friend) {
         <div class="social-empty">Cargando mensajes...</div>
       </div>
       <form class="chat-form" id="chat-form">
-        <textarea class="chat-input" id="chat-input" maxlength="500" rows="1" placeholder="Escribe un mensaje..." aria-label="Mensaje para ${escHtml(friend.username)}"></textarea>
+        <textarea class="chat-input" id="chat-input" maxlength="500" rows="1"
+          placeholder="Escribe un mensaje..."
+          aria-label="Mensaje para ${escHtml(friend.username)}"></textarea>
         <button class="chat-send" type="submit" aria-label="Enviar mensaje">➤</button>
       </form>
       <div class="chat-note">Solo tú y este amigo pueden ver esta conversación.</div>
     </div>`
-
   document.getElementById('chat-form')?.addEventListener('submit', sendChatMessage)
 }
 
@@ -434,7 +450,6 @@ async function loadChatMessages(opts = {}) {
   if (!_currentUser || !_activeChatFriend) return
   const box = document.getElementById('chat-messages')
   if (!box) return
-
   let result
   try {
     result = await withTimeout(
@@ -450,30 +465,23 @@ async function loadChatMessages(opts = {}) {
     )
   } catch (err) {
     console.error('[amigos] loadChatMessages timeout:', err)
-    box.innerHTML = '<div class="social-empty">Supabase tardó demasiado cargando este chat.</div>'
+    if (opts.scroll) box.innerHTML = '<div class="social-empty">Supabase tardó demasiado cargando el chat.</div>'
     return
   }
-
   const { data, error } = result
-
   if (error) {
     console.error('[amigos] loadChatMessages:', error)
-    box.innerHTML = `<div class="social-empty">${renderSocialError(error, 'chat')}</div>`
+    if (opts.scroll) box.innerHTML = `<div class="social-empty">${renderSocialError(error, 'chat')}</div>`
     return
   }
-
   const messages = (data || []).slice().reverse()
   const signature = messages.map(m => m.id).join(',')
   if (!opts.scroll && signature === _lastChatSignature) return
   _lastChatSignature = signature
-
   box.innerHTML = messages.length
     ? messages.map(renderChatMessage).join('')
-    : '<div class="social-empty">Aún no hay mensajes. Manda el primero.</div>'
-
-  if (opts.scroll || isChatNearBottom(box)) {
-    box.scrollTop = box.scrollHeight
-  }
+    : '<div class="social-empty">Aún no hay mensajes. Mandá el primero.</div>'
+  if (opts.scroll || isChatNearBottom(box)) box.scrollTop = box.scrollHeight
 }
 
 function renderChatMessage(msg) {
@@ -488,25 +496,20 @@ function renderChatMessage(msg) {
 async function sendChatMessage(e) {
   e.preventDefault()
   if (!_currentUser || !_activeChatFriend) return
-
   const input = document.getElementById('chat-input')
   const button = e.currentTarget.querySelector('.chat-send')
   const body = input?.value.trim()
   if (!body) return
-
   input.disabled = true
   if (button) button.disabled = true
-
   let result
   try {
     result = await withTimeout(
-      supabase
-        .from('friend_messages')
-        .insert({
-          sender_id: _currentUser.id,
-          receiver_id: _activeChatFriend.id,
-          body
-        })
+      supabase.from('friend_messages').insert({
+        sender_id: _currentUser.id,
+        receiver_id: _activeChatFriend.id,
+        body
+      })
     )
   } catch (err) {
     console.error('[amigos] sendChatMessage timeout:', err)
@@ -514,17 +517,10 @@ async function sendChatMessage(e) {
     if (button) button.disabled = false
     return
   }
-
   const { error } = result
-
   input.disabled = false
   if (button) button.disabled = false
-
-  if (error) {
-    console.error('[amigos] sendChatMessage:', error)
-    return
-  }
-
+  if (error) { console.error('[amigos] sendChatMessage:', error); return }
   input.value = ''
   input.focus()
   await loadChatMessages({ scroll: true })
@@ -540,42 +536,29 @@ function formatChatTime(value) {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
+// ── Búsqueda ──────────────────────────────────────
 async function doSearch(query) {
   try {
     const clean = query.toLowerCase().replace(/^@/, '')
-
     const { data, error } = await supabase
       .from('profiles')
       .select('id, username, full_name, favorite_team, favorite_position, bio, avatar_url')
       .or(`username.ilike.%${clean}%,full_name.ilike.%${clean}%`)
       .order('username', { ascending: true })
       .limit(24)
-
     if (error) throw error
-
-    if (!data || data.length === 0) {
-      showMsg(`No hay coleccionistas con "${query}"`, '😕')
-      return
-    }
-
-    // Si el usuario está logueado, enriquecer con estado de amistad
+    if (!data || data.length === 0) { showMsg(`No hay coleccionistas con "${query}"`, '😕'); return }
     let friendships = {}
-    if (_currentUser) {
-      friendships = await batchFriendshipStatus(data.map(p => p.id))
-    }
-
+    if (_currentUser) friendships = await batchFriendshipStatus(data.map(p => p.id))
     renderResults(data, friendships)
   } catch (err) {
     console.error('[amigos] doSearch:', err)
-    showMsg('Error al buscar. Intenta de nuevo.', '⚠️')
+    showMsg('Error al buscar. Intentá de nuevo.', '⚠️')
   }
 }
 
-// ── Batch de estados de amistad ───────────────────
-// Una sola query para todos los resultados, evita N+1
 async function batchFriendshipStatus(profileIds) {
   if (!_currentUser || profileIds.length === 0) return {}
-
   try {
     const { data } = await supabase
       .from('friendships')
@@ -586,72 +569,45 @@ async function batchFriendshipStatus(profileIds) {
           `and(sender_id.eq.${id},receiver_id.eq.${_currentUser.id})`
         ).join(',')
       )
-
     const map = {}
     ;(data || []).forEach(f => {
       const otherId = f.sender_id === _currentUser.id ? f.receiver_id : f.sender_id
       map[otherId] = f
     })
     return map
-  } catch {
-    return {}
-  }
+  } catch { return {} }
 }
 
-// ── Render resultados ─────────────────────────────
 function renderResults(profiles, friendships = {}) {
   const container = document.getElementById('amigos-results')
   if (!container) return
-
-  // Filtrar el propio usuario de los resultados
-  const filtered = _currentUser
-    ? profiles.filter(p => p.id !== _currentUser.id)
-    : profiles
-
-  if (filtered.length === 0) {
-    showMsg('No hay otros coleccionistas con ese nombre', '😕')
-    return
-  }
-
+  const filtered = _currentUser ? profiles.filter(p => p.id !== _currentUser.id) : profiles
+  if (filtered.length === 0) { showMsg('No hay otros coleccionistas con ese nombre', '😕'); return }
   container.innerHTML = `
     <div class="amigos-count">${filtered.length} coleccionista${filtered.length !== 1 ? 's' : ''} encontrado${filtered.length !== 1 ? 's' : ''}</div>
-    <div class="amigos-grid">
-      ${filtered.map(p => renderCard(p, friendships[p.id])).join('')}
-    </div>
-  `
-
-  // Listener en botones de agregar (delegado)
+    <div class="amigos-grid">${filtered.map(p => renderCard(p, friendships[p.id])).join('')}</div>`
   container.addEventListener('click', handleCardClick)
 }
 
 async function handleCardClick(e) {
-  // Clic en botón agregar
   const addBtn = e.target.closest('.amigos-add-btn')
   if (addBtn) {
     e.stopPropagation()
-    if (!_currentUser) {
-      window.location.href = 'https://albumpanini26digital.vercel.app'
-      return
-    }
+    if (!_currentUser) { window.location.href = 'https://albumpanini26digital.vercel.app'; return }
     const profileId = addBtn.dataset.profileId
     if (!profileId) return
-    addBtn.disabled = true
-    addBtn.textContent = '⏳'
+    addBtn.disabled = true; addBtn.textContent = '⏳'
     try {
       await sendFriendRequest(profileId)
       addBtn.textContent = '✓ Enviado'
-      addBtn.classList.remove('amigos-add-btn')
-      addBtn.classList.add('amigos-sent-btn')
-      refreshFriendsPanel()
+      addBtn.classList.replace('amigos-add-btn', 'amigos-sent-btn')
+      debouncedFriendsRefresh()
     } catch (err) {
       console.error('[amigos] sendFriendRequest:', err)
-      addBtn.disabled = false
-      addBtn.textContent = '➕'
+      addBtn.disabled = false; addBtn.textContent = '➕'
     }
     return
   }
-
-  // Clic en la card → abrir perfil
   const card = e.target.closest('.amigos-card')
   if (card) {
     const username = card.dataset.username
@@ -659,22 +615,16 @@ async function handleCardClick(e) {
   }
 }
 
-// ── Render card individual ────────────────────────
 function renderCard(p, friendship) {
   const initials = (p.full_name || p.username || 'FC')
     .trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toUpperCase() || 'FC'
-
   const avatarHtml = p.avatar_url
     ? `<img src="${escHtml(p.avatar_url)}" alt="" class="amigos-card-avatar-img">`
     : `<span class="amigos-card-avatar-fb">${escHtml(initials)}</span>`
-
   const team     = p.favorite_team     ? `<span class="amigos-card-tag">⚽ ${escHtml(p.favorite_team)}</span>` : ''
   const position = p.favorite_position ? `<span class="amigos-card-tag">🧤 ${escHtml(p.favorite_position)}</span>` : ''
   const bio      = p.bio ? `<div class="amigos-card-bio">${escHtml(p.bio)}</div>` : ''
-
-  // Badge / botón de amistad
   const friendBadge = renderFriendBadge(p, friendship)
-
   return `
     <div class="amigos-card" data-username="${escHtml(p.username)}" data-profile-id="${escHtml(p.id)}"
          role="button" tabindex="0" aria-label="Ver álbum de @${escHtml(p.username)}">
@@ -686,42 +636,28 @@ function renderCard(p, friendship) {
         <div class="amigos-card-tags">${team}${position}</div>
       </div>
       ${friendBadge}
-    </div>
-  `
+    </div>`
 }
 
 function renderFriendBadge(p, friendship) {
-  // No logueado: solo flecha
-  if (!_currentUser) {
-    return `<div class="amigos-card-arrow">→</div>`
-  }
-
-  // Sin relación previa → botón agregar
-  if (!friendship) {
-    return `<button class="amigos-add-btn" data-profile-id="${escHtml(p.id)}"
-              title="Agregar amigo" aria-label="Agregar a @${escHtml(p.username)}">➕</button>`
-  }
-
-  if (friendship.status === 'accepted') {
+  if (!_currentUser) return `<div class="amigos-card-arrow">→</div>`
+  if (!friendship) return `<button class="amigos-add-btn" data-profile-id="${escHtml(p.id)}"
+    title="Agregar amigo" aria-label="Agregar a @${escHtml(p.username)}">➕</button>`
+  if (friendship.status === 'accepted')
     return `<span class="amigos-friend-badge accepted" title="Son amigos">✓</span>`
-  }
-
   if (friendship.status === 'pending') {
     const isSender = friendship.sender_id === _currentUser.id
     return `<span class="amigos-friend-badge pending" title="${isSender ? 'Solicitud enviada' : 'Te envió una solicitud'}">
-              ${isSender ? '⏳' : '📩'}
-            </span>`
+      ${isSender ? '⏳' : '📩'}</span>`
   }
-
   return `<div class="amigos-card-arrow">→</div>`
 }
 
-// ── UI helpers ────────────────────────────────────
 function showInitial() {
   const container = document.getElementById('amigos-results')
   if (!container) return
   container.innerHTML = `
-    <div class="amigos-empty" id="amigos-initial">
+    <div class="amigos-empty">
       <div class="amigos-empty-icon">⚽</div>
       <div class="amigos-empty-title">Escribí un username o nombre</div>
       <div class="amigos-empty-sub">Encontrá coleccionistas y mirá su álbum</div>

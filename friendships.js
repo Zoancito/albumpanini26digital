@@ -1,14 +1,28 @@
 // ═══════════════════════════════════════════════════
 //  ÁLBUM MUNDIAL 2026 — friendships.js
+//  FIX: getUser() con timeout para evitar cuelgues
 // ═══════════════════════════════════════════════════
 import { supabase } from './supabase.js'
+
+// Obtiene el usuario con timeout de 6s para evitar cuelgues
+async function getCurrentUser() {
+  try {
+    const result = await Promise.race([
+      supabase.auth.getUser(),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('auth-timeout')), 6000))
+    ])
+    return result?.data?.user || null
+  } catch {
+    return null
+  }
+}
 
 /**
  * Devuelve la relación entre el usuario logueado y otro usuario.
  * Retorna: null | { id, status, sender_id, receiver_id }
  */
 export async function getFriendshipStatus(otherUserId) {
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getCurrentUser()
   if (!user) return null
 
   const { data } = await supabase
@@ -25,7 +39,7 @@ export async function getFriendshipStatus(otherUserId) {
 
 /** Envía solicitud de amistad */
 export async function sendFriendRequest(receiverId) {
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getCurrentUser()
   if (!user) throw new Error('No autenticado')
 
   const { data, error } = await supabase
@@ -61,7 +75,7 @@ export async function removeFriendship(friendshipId) {
 
 /** Lista de amigos confirmados del usuario actual */
 export async function getMyFriends() {
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getCurrentUser()
   if (!user) return []
 
   const { data } = await supabase
@@ -82,7 +96,7 @@ export async function getMyFriends() {
 
 /** Solicitudes pendientes recibidas por el usuario actual */
 export async function getPendingRequests() {
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getCurrentUser()
   if (!user) return []
 
   const { data } = await supabase
