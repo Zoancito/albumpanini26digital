@@ -33,6 +33,33 @@ async function getSessionUser() {
   return data?.session?.user || null
 }
 
+function getSupabaseErrorKind(error) {
+  const status = error?.status
+  const code = String(error?.code || '')
+  const msg = String(error?.message || error?.details || '').toLowerCase()
+
+  if (error?.name === 'SocialTimeoutError') return 'timeout'
+  if (status === 401 || msg.includes('jwt') || msg.includes('session') || msg.includes('auth')) return 'auth'
+  if (status === 403 || code === '42501' || msg.includes('permission') || msg.includes('rls')) return 'permission'
+  if (code === '42P01' || msg.includes('does not exist') || msg.includes('schema cache')) return 'missing-table'
+  return 'unknown'
+}
+
+function renderSocialError(error, area = 'friends') {
+  const kind = getSupabaseErrorKind(error)
+  if (kind === 'timeout') return 'Supabase tardó demasiado. Intenta actualizar en unos segundos.'
+  if (kind === 'auth') return 'Tu sesión expiró. Cierra sesión y vuelve a entrar con Google.'
+  if (kind === 'permission') return area === 'chat'
+    ? 'No tienes permiso para ver este chat. Confirma que siguen siendo amigos.'
+    : 'No tienes permiso para cargar amigos. Revisa las policies de friendships/profiles.'
+  if (kind === 'missing-table') return area === 'chat'
+    ? 'Falta ejecutar el SQL del chat en Supabase.'
+    : 'Falta una tabla necesaria en Supabase.'
+  return area === 'chat'
+    ? 'No se pudo cargar el chat. Intenta nuevamente.'
+    : 'No se pudieron cargar tus amigos. Intenta nuevamente.'
+}
+
 // ── Inicializar ───────────────────────────────────
 export function initAmigos() {
   injectButton()
@@ -206,10 +233,7 @@ export async function refreshFriendsPanel(userOverride) {
     }
   } catch (err) {
     console.error('[amigos] refreshFriendsPanel:', err)
-    const msg = err?.name === 'SocialTimeoutError'
-      ? 'Supabase tardó demasiado cargando amigos. Intenta actualizar en unos segundos.'
-      : 'No se pudieron cargar tus amigos. Revisa permisos de friendships/profiles.'
-    body.innerHTML = `<div class="social-empty">${msg}</div>`
+    body.innerHTML = `<div class="social-empty">${renderSocialError(err, 'friends')}</div>`
   }
 }
 
@@ -434,7 +458,7 @@ async function loadChatMessages(opts = {}) {
 
   if (error) {
     console.error('[amigos] loadChatMessages:', error)
-    box.innerHTML = '<div class="social-empty">Para activar el chat, ejecuta primero el SQL de mensajes en Supabase.</div>'
+    box.innerHTML = `<div class="social-empty">${renderSocialError(error, 'chat')}</div>`
     return
   }
 
