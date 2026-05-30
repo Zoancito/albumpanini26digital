@@ -4,7 +4,7 @@ import {
   openProfileViewModal,
   setupProfileViewButton,
 } from './profiles.js'
-import { initAmigos } from './amigos.js'
+import { initAmigos, refreshFriendsPanel } from './amigos.js'
 import { supabase } from './supabase.js'
 console.log('Supabase conectado:', supabase)
 
@@ -39,6 +39,7 @@ function enterAlbumShell(mode, user = null) {
   renderUserProfile(user);
   if (currentUser) {
     syncCloudState(currentUser);
+    refreshFriendsPanel(currentUser).catch(console.error);
     // Verificar/crear perfil (non-blocking)
     checkAndHandleFirstLogin(currentUser).catch(console.error);
   }
@@ -102,6 +103,9 @@ function renderUserProfile(user) {
 function setProfileStatus(text) {
   const status = userProfile?.querySelector('.profile-status');
   if (status) status.textContent = text;
+}
+function getProfileStatus() {
+  return userProfile?.querySelector('.profile-status')?.textContent || '';
 }
 
 loginButton?.addEventListener('click', async () => {
@@ -414,6 +418,16 @@ window.addEventListener('beforeunload', () => {
 function hasProgress(data) {
   return data && typeof data === 'object' && Object.keys(data).length > 0;
 }
+function withTimeout(promise, ms = 12000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => {
+      const error = new Error('Tiempo de espera agotado')
+      error.name = 'SyncTimeoutError'
+      reject(error)
+    }, ms))
+  ]);
+}
 function mergeProgress(localProgress, cloudProgress) {
   return {
     ...(localProgress && typeof localProgress === 'object' ? localProgress : {}),
@@ -425,12 +439,14 @@ async function syncCloudState(user) {
   cloudSyncBusy = true;
   setProfileStatus('Sincronizando...');
   try {
-    const { data, error } = await supabase
-      .from(CLOUD_PROGRESS_TABLE)
-      .select('progress')
-      .eq('user_id', user.id)
-      .eq('album_id', CLOUD_ALBUM_ID)
-      .maybeSingle();
+    const { data, error } = await withTimeout(
+      supabase
+        .from(CLOUD_PROGRESS_TABLE)
+        .select('progress')
+        .eq('user_id', user.id)
+        .eq('album_id', CLOUD_ALBUM_ID)
+        .maybeSingle()
+    );
 
     if (error) {
       console.error('Error cargando progreso online:', error);
@@ -450,7 +466,18 @@ async function syncCloudState(user) {
     } else {
       setProfileStatus('Sincronizado');
     }
+  } catch (err) {
+    if (err?.name === 'SyncTimeoutError') {
+      console.warn('La sincronización online está tardando más de lo esperado. La app sigue con el progreso local.');
+      setProfileStatus('Local listo');
+    } else {
+      console.error('Error inesperado sincronizando progreso online:', err);
+      setProfileStatus('Error sync');
+    }
   } finally {
+    if (getProfileStatus() === 'Sincronizando...') {
+      setProfileStatus('Local listo');
+    }
     cloudSyncBusy = false;
   }
 }
@@ -471,15 +498,30 @@ async function saveCloudStateNow(user = currentUser, opts = {}) {
     updated_at: new Date().toISOString()
   };
 
-  const { data, error } = await supabase
-    .from(CLOUD_PROGRESS_TABLE)
-    .upsert(payload, { onConflict: 'user_id,album_id' })
-    .select('updated_at')
-    .single();
+  let result;
+  try {
+    result = await withTimeout(
+      supabase
+        .from(CLOUD_PROGRESS_TABLE)
+        .upsert(payload, { onConflict: 'user_id,album_id' })
+        .select('updated_at')
+        .single()
+    );
+  } catch (err) {
+    if (err?.name === 'SyncTimeoutError') {
+      console.warn('El guardado online está tardando más de lo esperado. Se mantiene el guardado local.');
+      if (!opts.silent) setProfileStatus('Sync pendiente');
+    } else {
+      console.error('Error inesperado guardando progreso online:', err);
+      if (!opts.silent) setProfileStatus('Error sync');
+    }
+    return;
+  }
 
+  const { data, error } = result;
   if (error) {
     console.error('Error guardando progreso online:', error);
-    setProfileStatus('Error sync');
+    if (!opts.silent) setProfileStatus('Error sync');
     return;
   }
 
@@ -2043,4 +2085,3 @@ applyA11yPrefs();
     });
   });
 })();
-

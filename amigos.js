@@ -3,16 +3,43 @@
 //  Sistema de búsqueda de amigos y coleccionistas
 // ═══════════════════════════════════════════════════
 import { supabase } from './supabase.js'
-import { getFriendshipStatus, sendFriendRequest } from './friendships.js'
+import {
+  acceptFriendRequest,
+  getFriendshipStatus,
+  removeFriendship,
+  sendFriendRequest
+} from './friendships.js'
 
 let _searchTimer = null
 let _currentUser = null  // se carga al abrir el panel
+let _friends = []
+let _activeChatFriend = null
+let _chatRefreshTimer = null
+let _lastChatSignature = ''
+
+function withTimeout(promise, ms = 12000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => {
+      const error = new Error('Tiempo de espera agotado')
+      error.name = 'SocialTimeoutError'
+      reject(error)
+    }, ms))
+  ])
+}
+
+async function getSessionUser() {
+  const { data } = await supabase.auth.getSession()
+  return data?.session?.user || null
+}
 
 // ── Inicializar ───────────────────────────────────
 export function initAmigos() {
   injectButton()
   injectOverlay()
   setupListeners()
+  refreshFriendsPanel()
+  supabase.auth.onAuthStateChange((event, session) => refreshFriendsPanel(session?.user || null))
 }
 
 // ── Inyectar botón en #controls ───────────────────
@@ -82,6 +109,7 @@ function injectOverlay() {
 // ── Event listeners ───────────────────────────────
 function setupListeners() {
   document.getElementById('btn-amigos')?.addEventListener('click', openAmigos)
+  document.getElementById('friends-refresh')?.addEventListener('click', refreshFriendsPanel)
 
   document.addEventListener('click', e => {
     if (e.target?.id === 'amigos-close') closeAmigos()
@@ -114,11 +142,13 @@ function setupListeners() {
     document.getElementById('amigos-clear').hidden = true
     showInitial()
   })
+
+  document.addEventListener('click', handleFriendsPanelClick)
 }
 
 async function openAmigos() {
   // Obtener sesión actual al abrir (puede haber cambiado)
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getSessionUser()
   _currentUser = user
 
   document.getElementById('amigos-overlay')?.classList.add('visible')
@@ -130,6 +160,362 @@ function closeAmigos() {
 }
 
 // ── Búsqueda en Supabase ──────────────────────────
+export async function refreshFriendsPanel(userOverride) {
+  const body = document.getElementById('friends-panel-body')
+  if (!body) return
+
+  const user = userOverride !== undefined ? userOverride : await getSessionUser()
+  _currentUser = user
+
+  if (!user) {
+    body.innerHTML = '<div class="social-empty">Entra con Google para ver tus amigos.</div>'
+    _friends = []
+    closeChat()
+    return
+  }
+
+  body.innerHTML = '<div class="social-empty">Actualizando amigos...</div>'
+
+  try {
+    const [friends, pending] = await Promise.all([
+      loadAcceptedFriends(user.id),
+      loadPendingRequestsForPanel(user.id)
+    ])
+    _friends = friends
+
+    const pendingHtml = pending.length
+      ? `<section>
+          <div class="social-section-title">Solicitudes</div>
+          <div class="social-list">${pending.map(renderPendingRequest).join('')}</div>
+        </section>`
+      : ''
+
+    const friendsHtml = friends.length
+      ? `<section>
+          <div class="social-section-title">Mis amigos</div>
+          <div class="social-list">${friends.map(renderFriendPanelCard).join('')}</div>
+        </section>`
+      : '<div class="social-empty">Todavía no tienes amigos aceptados. Usa el buscador para encontrar coleccionistas.</div>'
+
+    body.innerHTML = pendingHtml + friendsHtml
+
+    if (_activeChatFriend && !friends.some(f => f.id === _activeChatFriend.id)) {
+      closeChat()
+    } else if (_activeChatFriend) {
+      markActiveFriend()
+    }
+  } catch (err) {
+    console.error('[amigos] refreshFriendsPanel:', err)
+    const msg = err?.name === 'SocialTimeoutError'
+      ? 'Supabase tardó demasiado cargando amigos. Intenta actualizar en unos segundos.'
+      : 'No se pudieron cargar tus amigos. Revisa permisos de friendships/profiles.'
+    body.innerHTML = `<div class="social-empty">${msg}</div>`
+  }
+}
+
+async function loadAcceptedFriends(userId) {
+  const { data, error } = await withTimeout(
+    supabase
+      .from('friendships')
+      .select('id, sender_id, receiver_id, status')
+      .eq('status', 'accepted')
+      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+  )
+
+  if (error) throw error
+
+  const rows = data || []
+  const friendIds = rows.map(f => f.sender_id === userId ? f.receiver_id : f.sender_id)
+  const profiles = await loadProfilesByIds(friendIds)
+
+  return rows
+    .map(f => {
+      const friendId = f.sender_id === userId ? f.receiver_id : f.sender_id
+      const profile = profiles[friendId]
+      return profile ? { friendshipId: f.id, ...profile } : null
+    })
+    .filter(Boolean)
+    .sort((a, b) => String(a.username).localeCompare(String(b.username)))
+}
+
+async function loadPendingRequestsForPanel(userId) {
+  const { data, error } = await withTimeout(
+    supabase
+      .from('friendships')
+      .select('id, sender_id, created_at')
+      .eq('receiver_id', userId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+  )
+
+  if (error) throw error
+
+  const rows = data || []
+  const profiles = await loadProfilesByIds(rows.map(f => f.sender_id))
+
+  return rows
+    .map(f => {
+      const profile = profiles[f.sender_id]
+      return profile ? { friendshipId: f.id, ...profile } : null
+    })
+    .filter(Boolean)
+}
+
+async function loadProfilesByIds(ids) {
+  const cleanIds = [...new Set((ids || []).filter(Boolean))]
+  if (cleanIds.length === 0) return {}
+
+  const { data, error } = await withTimeout(
+    supabase
+      .from('profiles')
+      .select('id, username, full_name, avatar_url, favorite_team')
+      .in('id', cleanIds)
+  )
+
+  if (error) throw error
+
+  const map = {}
+  ;(data || []).forEach(p => { map[p.id] = p })
+  return map
+}
+
+function renderFriendPanelCard(p) {
+  return `
+    <div class="social-card" data-friend-id="${escHtml(p.id)}">
+      ${renderSocialAvatar(p)}
+      <span class="social-card-copy">
+        <span class="social-name">${escHtml(p.full_name || p.username)}</span>
+        <span class="social-user">@${escHtml(p.username)}${p.favorite_team ? ' · ' + escHtml(p.favorite_team) : ''}</span>
+        <span class="social-card-actions">
+          <button class="social-mini-btn primary" data-chat-friend="${escHtml(p.id)}" type="button">Chat</button>
+          <a class="social-mini-link" href="/perfil/${encodeURIComponent(p.username)}">Perfil</a>
+        </span>
+      </span>
+    </div>`
+}
+
+function renderPendingRequest(p) {
+  return `
+    <div class="social-card" data-friendship-id="${escHtml(p.friendshipId)}">
+      ${renderSocialAvatar(p)}
+      <span class="social-card-copy">
+        <span class="social-name">${escHtml(p.full_name || p.username)}</span>
+        <span class="social-user">@${escHtml(p.username)} quiere ser tu amigo</span>
+        <span class="social-actions">
+          <button class="social-mini-btn primary" data-friend-action="accept" type="button">Aceptar</button>
+          <button class="social-mini-btn" data-friend-action="reject" type="button">Rechazar</button>
+        </span>
+      </span>
+    </div>`
+}
+
+function renderSocialAvatar(p) {
+  const initials = (p.full_name || p.username || 'FC')
+    .trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toUpperCase() || 'FC'
+
+  return p.avatar_url
+    ? `<span class="social-avatar"><img src="${escHtml(p.avatar_url)}" alt=""></span>`
+    : `<span class="social-avatar">${escHtml(initials)}</span>`
+}
+
+async function handleFriendsPanelClick(e) {
+  const chatBtn = e.target.closest('[data-chat-friend]')
+  if (chatBtn) {
+    const friend = _friends.find(f => f.id === chatBtn.dataset.chatFriend)
+    if (friend) openChat(friend)
+    return
+  }
+
+  const actionBtn = e.target.closest('[data-friend-action]')
+  if (!actionBtn) return
+
+  const card = actionBtn.closest('[data-friendship-id]')
+  const friendshipId = card?.dataset.friendshipId
+  if (!friendshipId) return
+
+  actionBtn.disabled = true
+  try {
+    if (actionBtn.dataset.friendAction === 'accept') {
+      await acceptFriendRequest(friendshipId)
+    } else {
+      await removeFriendship(friendshipId)
+    }
+    await refreshFriendsPanel()
+  } catch (err) {
+    console.error('[amigos] handleFriendsPanelClick:', err)
+    actionBtn.disabled = false
+  }
+}
+
+function openChat(friend) {
+  if (!_currentUser) return
+  _activeChatFriend = friend
+  _lastChatSignature = ''
+  markActiveFriend()
+  renderChatShell(friend)
+  loadChatMessages({ scroll: true })
+  clearInterval(_chatRefreshTimer)
+  _chatRefreshTimer = setInterval(() => loadChatMessages(), 5000)
+}
+
+function closeChat() {
+  clearInterval(_chatRefreshTimer)
+  _chatRefreshTimer = null
+  _activeChatFriend = null
+  _lastChatSignature = ''
+  const body = document.getElementById('chat-panel-body')
+  if (!body) return
+  body.innerHTML = `
+    <div class="chat-placeholder">
+      <div class="chat-placeholder-icon">💬</div>
+      <strong>Elige un amigo</strong>
+      <span>Selecciona Chat en tu lista de amigos para iniciar una conversación privada.</span>
+    </div>`
+  markActiveFriend()
+}
+
+function markActiveFriend() {
+  document.querySelectorAll('[data-friend-id]').forEach(card => {
+    card.classList.toggle('is-active', !!_activeChatFriend && card.dataset.friendId === _activeChatFriend.id)
+  })
+}
+
+function renderChatShell(friend) {
+  const body = document.getElementById('chat-panel-body')
+  if (!body) return
+
+  body.innerHTML = `
+    <div class="chat-thread">
+      <div class="chat-peer">
+        ${renderSocialAvatar(friend)}
+        <span class="chat-peer-copy">
+          <span class="chat-peer-name">${escHtml(friend.full_name || friend.username)}</span>
+          <span class="chat-peer-user">@${escHtml(friend.username)}</span>
+        </span>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="social-empty">Cargando mensajes...</div>
+      </div>
+      <form class="chat-form" id="chat-form">
+        <textarea class="chat-input" id="chat-input" maxlength="500" rows="1" placeholder="Escribe un mensaje..." aria-label="Mensaje para ${escHtml(friend.username)}"></textarea>
+        <button class="chat-send" type="submit" aria-label="Enviar mensaje">➤</button>
+      </form>
+      <div class="chat-note">Solo tú y este amigo pueden ver esta conversación.</div>
+    </div>`
+
+  document.getElementById('chat-form')?.addEventListener('submit', sendChatMessage)
+}
+
+async function loadChatMessages(opts = {}) {
+  if (!_currentUser || !_activeChatFriend) return
+  const box = document.getElementById('chat-messages')
+  if (!box) return
+
+  let result
+  try {
+    result = await withTimeout(
+      supabase
+        .from('friend_messages')
+        .select('id, sender_id, receiver_id, body, created_at')
+        .or(
+          `and(sender_id.eq.${_currentUser.id},receiver_id.eq.${_activeChatFriend.id}),` +
+          `and(sender_id.eq.${_activeChatFriend.id},receiver_id.eq.${_currentUser.id})`
+        )
+        .order('created_at', { ascending: false })
+        .limit(80)
+    )
+  } catch (err) {
+    console.error('[amigos] loadChatMessages timeout:', err)
+    box.innerHTML = '<div class="social-empty">Supabase tardó demasiado cargando este chat.</div>'
+    return
+  }
+
+  const { data, error } = result
+
+  if (error) {
+    console.error('[amigos] loadChatMessages:', error)
+    box.innerHTML = '<div class="social-empty">Para activar el chat, ejecuta primero el SQL de mensajes en Supabase.</div>'
+    return
+  }
+
+  const messages = (data || []).slice().reverse()
+  const signature = messages.map(m => m.id).join(',')
+  if (!opts.scroll && signature === _lastChatSignature) return
+  _lastChatSignature = signature
+
+  box.innerHTML = messages.length
+    ? messages.map(renderChatMessage).join('')
+    : '<div class="social-empty">Aún no hay mensajes. Manda el primero.</div>'
+
+  if (opts.scroll || isChatNearBottom(box)) {
+    box.scrollTop = box.scrollHeight
+  }
+}
+
+function renderChatMessage(msg) {
+  const mine = msg.sender_id === _currentUser?.id
+  return `
+    <div class="chat-msg${mine ? ' mine' : ''}">
+      <div class="chat-msg-body">${escHtml(msg.body)}</div>
+      <span class="chat-msg-time">${formatChatTime(msg.created_at)}</span>
+    </div>`
+}
+
+async function sendChatMessage(e) {
+  e.preventDefault()
+  if (!_currentUser || !_activeChatFriend) return
+
+  const input = document.getElementById('chat-input')
+  const button = e.currentTarget.querySelector('.chat-send')
+  const body = input?.value.trim()
+  if (!body) return
+
+  input.disabled = true
+  if (button) button.disabled = true
+
+  let result
+  try {
+    result = await withTimeout(
+      supabase
+        .from('friend_messages')
+        .insert({
+          sender_id: _currentUser.id,
+          receiver_id: _activeChatFriend.id,
+          body
+        })
+    )
+  } catch (err) {
+    console.error('[amigos] sendChatMessage timeout:', err)
+    input.disabled = false
+    if (button) button.disabled = false
+    return
+  }
+
+  const { error } = result
+
+  input.disabled = false
+  if (button) button.disabled = false
+
+  if (error) {
+    console.error('[amigos] sendChatMessage:', error)
+    return
+  }
+
+  input.value = ''
+  input.focus()
+  await loadChatMessages({ scroll: true })
+}
+
+function isChatNearBottom(el) {
+  return el.scrollHeight - el.scrollTop - el.clientHeight < 80
+}
+
+function formatChatTime(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
 async function doSearch(query) {
   try {
     const clean = query.toLowerCase().replace(/^@/, '')
@@ -232,6 +618,7 @@ async function handleCardClick(e) {
       addBtn.textContent = '✓ Enviado'
       addBtn.classList.remove('amigos-add-btn')
       addBtn.classList.add('amigos-sent-btn')
+      refreshFriendsPanel()
     } catch (err) {
       console.error('[amigos] sendFriendRequest:', err)
       addBtn.disabled = false

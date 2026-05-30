@@ -8,15 +8,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23f5c518'/%3E%3Cpath d='M32 10l7 14 15 2-11 11 3 16-14-8-14 8 3-16-11-11 15-2z' fill='%23080c18'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div id="bvw">
-  <video id="bg-video" autoplay muted loop playsinline
-    style="position:absolute;top:50%;left:50%;width:177.78vh;height:56.25vw;min-width:100vw;min-height:100vh;transform:translate(-50%,-50%);object-fit:cover;">
-    <source src="https://res.cloudinary.com/drchzbnpd/video/upload/es_OFICIAL__Nueva_Intro_para_la_Copa_del_Mundo_2026___HD_60fps_1080P_60FPS_eyp12s.mp4" type="video/mp4">
-  </video>
-</div>
  
 <!-- WELCOME SCREEN -->
 <!-- AUTH SCREEN -->
@@ -194,6 +189,21 @@
   </div>
 </div>
  
+<div class="album-shell">
+  <aside class="social-panel friends-panel" aria-label="Amigos">
+    <div class="social-panel-head">
+      <div>
+        <span class="social-kicker">Coleccionistas</span>
+        <h2>Amigos</h2>
+      </div>
+      <button class="social-icon-btn" id="friends-refresh" type="button" aria-label="Actualizar amigos">↻</button>
+    </div>
+    <div id="friends-panel-body" class="social-panel-body">
+      <div class="social-empty">Entra con Google para ver tus amigos.</div>
+    </div>
+  </aside>
+
+  <main class="album-main" aria-label="Álbum digital">
 <div id="stats-bar">
   <div class="stat-card" style="--accent:#f5c518"><span class="stat-value" id="s-total">0</span><span class="stat-label">Total Cromos</span></div>
   <div class="stat-card" style="--accent:#22c55e"><span class="stat-value" id="s-tengo">0</span><span class="stat-label">Tengo</span></div>
@@ -227,6 +237,25 @@
  
 <div id="group-tabs" role="tablist" aria-label="Filtrar por grupo"></div>
 <div id="groups-container"></div>
+  </main>
+
+  <aside class="social-panel chat-panel" aria-label="Chat">
+    <div class="social-panel-head">
+      <div>
+        <span class="social-kicker">Comunidad</span>
+        <h2>Chat</h2>
+      </div>
+      <span class="social-pill">1 a 1</span>
+    </div>
+    <div id="chat-panel-body" class="chat-panel-body">
+      <div class="chat-placeholder">
+      <div class="chat-placeholder-icon">💬</div>
+      <strong>Elige un amigo</strong>
+      <span>La zona ya está reservada para mensajes con amigos.</span>
+      </div>
+    </div>
+  </aside>
+</div>
  
 <!-- Country Overlay -->
 <div id="country-overlay" role="dialog" aria-modal="true" aria-label="Detalle de selección">
@@ -437,4 +466,3 @@
 <script type="module" src="predicciones.js"></script>
 </body>
 </html>
-
