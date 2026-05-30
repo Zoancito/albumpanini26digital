@@ -160,7 +160,7 @@ const albumData = {
   "🇧🇷 Brasil":["Brazil Logo","Alisson","Marquinhos","Éder Militão","Gabriel Magalhães","Casemiro","Bruno Guimarães","Vinícius Júnior","Rodrygo","Matheus Cunha","Raphinha","Estêvão"],
   "🇲🇦 Marruecos":["Morocco Logo","Yassine Bounou","Achraf Hakimi","Noussair Mazraoui","Nayef Aguerd","Romain Saïss","Sofyan Amrabat","Eliesse Ben Seghir","Bilal El Khannouss","Ismael Saibari","Youssef En-Nesyri","Brahim Díaz"],
   "🇭🇹 Haití":["Haiti Logo","Johny Placide","Carlens Arcus","Ricardo Adé","Duke Lacroix","Leverton Pierre","Danley Jean Jacques","Jean-Ricner Bellegarde","Josué Casimir","Ruben Providence","Duckens Nazon","Frantzdy Pierrot"],
-  "🏴ó §ó ¢ó ³ó £ó ´ó ¿ Escocia":["Scotland Logo","Angus Gunn","Aaron Hickey","Andrew Robertson","John Souttar","Grant Hanley","Scott McTominay","Lewis Ferguson","Ryan Christie","John McGinn","Ché Adams","Ben Gannon-Doak"],
+  "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia":["Scotland Logo","Angus Gunn","Aaron Hickey","Andrew Robertson","John Souttar","Grant Hanley","Scott McTominay","Lewis Ferguson","Ryan Christie","John McGinn","Ché Adams","Ben Gannon-Doak"],
   "🇺🇸 EE. UU.":["USA Logo","Matt Freese","Chris Richards","Tim Ream","Mark McKenzie","Tyler Adams","Weston McKennie","Timothy Weah","Malik Tillman","Christian Pulisic","Brenden Aaronson","Folarin Balogun"],
   "🇵🇾 Paraguay":["Paraguay Logo","Orlando Gill","Gustavo Gómez","Juan José Cáceres","Omar Alderete","Júnior Alonso","Diego Gómez","Andrés Cubas","Julio Enciso","Miguel Almirón","Ramón Sosa","Antonio Sanabria"],
   "🇦🇺 Australia":["Australia Logo","Mathew Ryan","Harry Souttar","Aziz Behich","Cameron Burgess","Lewis Miller","Jackson Irvine","Riley McGree","Aiden O'Neill","Connor Metcalfe","Kusini Yengi","Nestory Irankunda"],
@@ -193,7 +193,7 @@ const albumData = {
   "🇨🇩 República Democrática del Congo":["Congo DR Logo","Lionel Mpasi","Aaron Wan-Bissaka","Axel Tuanzebe","Arthur Masuaku","Chancel Mbemba","Ngal'ayel Mukau","Samuel Moutoussamy","Noah Sadiki","Théo Bongonda","Yoane Wissa","Cédric Bakambu"],
   "🇺🇿 Uzbekistán":["Uzbekistan Logo","Utkir Yusupov","Abdukodir Khusanov","Farrukh Sayfiev","Sherzod Nasrullaev","Husniddin Aliqulov","Rustam Ashurmatov","Khojiakbar Alijonov","Odiljon Hamrobekov","Otabek Shukurov","Eldor Shomurodov","Abbosbek Fayzullaev"],
   "🇨🇴 Colombia":["Colombia Logo","Camilo Vargas","Dávinson Sánchez","Yerry Mina","Daniel Muñoz","James Rodríguez","Jefferson Lerma","Richard Ríos","Juan Fernando Quintero","Luis Díaz","Jhon Arias","Luis Suárez"],
-  "🏴ó §ó ¢ó ¥ó ®ó §ó ¿ Inglaterra":["England Logo","Jordan Pickford","Reece James","John Stones","Jude Bellingham","Declan Rice","Jordan Henderson","Phil Foden","Harry Kane","Bukayo Saka","Cole Palmer","Marcus Rashford"],
+  "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra":["England Logo","Jordan Pickford","Reece James","John Stones","Jude Bellingham","Declan Rice","Jordan Henderson","Phil Foden","Harry Kane","Bukayo Saka","Cole Palmer","Marcus Rashford"],
   "🇭🇷 Croacia":["Croatia Logo","Dominik Livaković","Duje Ćaleta-Car","Joško Gvardiol","Josip Stanišić","Ivan Perišić","Luka Modrić","Mateo Kovačić","Lovro Majer","Mario Pašalić","Ante Budimir","Andrej Kramarić"],
   "🇬🇭 Ghana":["Ghana Logo","Lawrence Ati Zigi","Alidu Seidu","Alexander Djiku","Gideon Mensah","Caleb Yirenkyi","Thomas Partey","Abdul Issahaku Fatawu","Mohammed Kudus","Kamaldeen Sulemana","Jordan Ayew","Antoine Semenyo"],
   "🇵🇦 Panamá":["Panama Logo","Orlando Mosquera","Michael Amir Murillo","Andrés Andrade","Fidel Escobar","Aníbal Godoy","Cristian Martínez","Adalberto Carrasquilla","Édgar Bárcenas","José Fajardo","Ismael Díaz","José Luis Rodríguez"]
@@ -776,9 +776,13 @@ function renderGroups() {
           ? getStickerSubControlsHtml('INTRO', ii)
           : '';
 
-        li.innerHTML = `<span class="s-num">#${ii}</span><span class="s-name">${name}</span>
-          ${subBtnHtml}
-          <span class="s-badge">${st === 'tengo' ? 'TENGO' : st === 'falta' ? 'FALTA' : '—'}</span>`;
+        li.innerHTML = `
+          <div class="sticker-top">
+            <span class="s-dot-num"><span class="s-dot"></span>#${ii}</span>
+            <span class="s-badge">${st === 'tengo' ? 'TENGO' : st === 'falta' ? 'FALTA' : '—'}</span>
+          </div>
+          <span class="s-name">${name}</span>
+          ${subBtnHtml ? `<div class="sticker-sub-row">${subBtnHtml}</div>` : ''}`;
 
         li.addEventListener('click', (e) => {
           if (e.target.closest('.s-sub-btn')) return;
@@ -990,9 +994,13 @@ function renderStickerList(country, listEl, gColor) {
       ? getStickerSubControlsHtml(country, i)
       : '';
 
-    li.innerHTML = `<span class="s-num">#${i}</span><span class="s-name">${name}</span>
-      ${subBtnHtml}
-      <span class="s-badge">${st === 'tengo' ? 'TENGO' : st === 'falta' ? 'FALTA' : '—'}</span>`;
+        li.innerHTML = `
+          <div class="sticker-top">
+            <span class="s-dot-num"><span class="s-dot"></span>#${i}</span>
+            <span class="s-badge">${st === 'tengo' ? 'TENGO' : st === 'falta' ? 'FALTA' : '—'}</span>
+          </div>
+          <span class="s-name">${name}</span>
+          ${subBtnHtml ? `<div class="sticker-sub-row">${subBtnHtml}</div>` : ''}`;
 
     // Primary click → cycle main state
     li.addEventListener('click', (e) => {
