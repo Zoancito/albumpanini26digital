@@ -231,18 +231,23 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
 .sticker.sub-repetida{box-shadow:inset 3px 0 0 #f59e0b}
 .sticker.sub-reserva {box-shadow:inset 3px 0 0 #818cf8}
 .s-sub-btn{font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:8px;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;border:1px solid;transition:all .18s;user-select:none}
-.s-sub-btn.sub-none{background:transparent;color:var(--muted);border-color:var(--muted);opacity:.5}
+.s-sub-btn.sub-none{background:transparent;color:var(--muted);border-color:var(--muted);opacity:.55}
 .s-sub-btn.sub-none:hover{opacity:1;color:var(--dim);border-color:var(--dim)}
 .s-sub-btn.sub-repetida{background:#422006;color:#f59e0b;border-color:#92400e}
 .s-sub-btn.sub-reserva {background:#1e1b4b;color:#818cf8;border-color:#3730a3}
+.s-sub-btn.sub-repetida.sub-none,.s-sub-btn.sub-reserva.sub-none{background:transparent}
+.s-sub-btn.active{opacity:1;box-shadow:0 0 0 1px currentColor inset}
 /* pcard sub overlay */
 .pcard.sub-repetida::before,.pcard.sub-reserva::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0}
 .pcard.sub-repetida::before{background:#f59e0b}
 .pcard.sub-reserva::before{background:#818cf8}
+.pcard.sub-repetida.sub-reserva::before{background:linear-gradient(90deg,#f59e0b 0 50%,#818cf8 50% 100%)}
+.pcard-sub-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
 .pcard-sub{font-size:.6rem;font-weight:700;padding:2px 5px;border-radius:5px;margin-top:4px;display:inline-block;cursor:pointer;border:1px solid;letter-spacing:.04em}
 .pcard-sub.sub-repetida{background:#422006;color:#f59e0b;border-color:#92400e}
 .pcard-sub.sub-reserva {background:#1e1b4b;color:#818cf8;border-color:#3730a3}
-.pcard-sub.sub-none{background:rgba(255,255,255,.05);color:var(--muted);border-color:var(--muted)}
+.pcard-sub.sub-none{background:transparent;color:var(--muted);border-color:var(--muted);opacity:.55}
+.pcard-sub.active{opacity:1;box-shadow:0 0 0 1px currentColor inset}
 
 /* ── VOLUME CONTROL BAR ── */
 #vol-bar{max-width:900px;margin:-6px auto 12px;padding:0 16px;display:flex;align-items:center;gap:12px}

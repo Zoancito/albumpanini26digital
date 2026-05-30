@@ -1,4 +1,4 @@
-import {
+﻿import {
   checkAndHandleFirstLogin,
   updateHeaderProfile,
   openProfileViewModal,
@@ -152,7 +152,7 @@ const albumData = {
   "🇲🇽 México":["Mexico Logo","Luis Malagón","Johan Vásquez","César Montes","Jesús Gallardo","Israel Reyes","Edson Álvarez","Marcel Ruiz","Hirving Lozano","Raúl Jiménez","Alexis Vega","Roberto Alvarado"],
   "🇿🇦 Sudáfrica":["South Africa Logo","Ronwen Williams","Aubrey Modiba","Mbekezeli Mbokazi","Siyabonga Ngezana","Khuliso Mudau","Teboho Mokoena","Yaya Sithole","Bathusi Aubaas","Sipho Mbule","Lyle Foster","Oswin Appollis"],
   "🇰🇷 República de Corea":["Korea Republic Logo","Hyeonwoo Jo","Minjae Kim","Yumin Cho","Youngwoo Seol","Jaesung Lee","Inbeom Hwang","Kangin Lee","Jens Castrop","Heungmin Son","Heechan Hwang","Hyeongyu Oh"],
-  "🇨🇿 República Checa":["Czechia Logo","Matěj Kovář","Ladislav Krejčí","Vladimír Coufal","Jaroslav Zelený","Lukáš Provod","Lukáš Červ","Tomáš Souček","Pavel Šulc","Václav Černý","Adam Hložek","Patrik Schick"],
+  "🇨🇿 República Checa":["Czechia Logo","MatÄ›j KováÅ™","Ladislav Krejčí","Vladimír Coufal","Jaroslav Zelený","Lukáš Provod","Lukáš Červ","Tomáš Souček","Pavel Šulc","Václav Černý","Adam Hložek","Patrik Schick"],
   "🇨🇦 Canadá":["Canada Logo","Dayne St. Clair","Alphonso Davies","Richie Laryea","Derek Cornelius","Stephen Eustáquio","Ismaël Koné","Jacob Shaffelburg","Niko Sigur","Tajon Buchanan","Cyle Larin","Jonathan David"],
   "🇧🇦 Bosnia y Herzegovina":["Bosnia-Herzegovina Logo","Nikola Vasilj","Amar Dedić","Sead Kolašinac","Tarik Muharemović","Nikola Katić","Benjamin Tahirović","Ivan Šunjić","Ermedin Demirović","Esmir Bajraktarević","Edin Džeko","Amar Memić"],
   "🇶🇦 Catar":["Qatar Logo","Meshaal Barsham","Sultan Albrake","Boualem Khoukhi","Pedro Miguel","Mohammed Mannai","Karim Boudiaf","Assim Madibo","Edmílson Junior","Akram Hassan Afif","Ahmed Al-Ganehi","Almoez Ali"],
@@ -160,7 +160,7 @@ const albumData = {
   "🇧🇷 Brasil":["Brazil Logo","Alisson","Marquinhos","Éder Militão","Gabriel Magalhães","Casemiro","Bruno Guimarães","Vinícius Júnior","Rodrygo","Matheus Cunha","Raphinha","Estêvão"],
   "🇲🇦 Marruecos":["Morocco Logo","Yassine Bounou","Achraf Hakimi","Noussair Mazraoui","Nayef Aguerd","Romain Saïss","Sofyan Amrabat","Eliesse Ben Seghir","Bilal El Khannouss","Ismael Saibari","Youssef En-Nesyri","Brahim Díaz"],
   "🇭🇹 Haití":["Haiti Logo","Johny Placide","Carlens Arcus","Ricardo Adé","Duke Lacroix","Leverton Pierre","Danley Jean Jacques","Jean-Ricner Bellegarde","Josué Casimir","Ruben Providence","Duckens Nazon","Frantzdy Pierrot"],
-  "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia":["Scotland Logo","Angus Gunn","Aaron Hickey","Andrew Robertson","John Souttar","Grant Hanley","Scott McTominay","Lewis Ferguson","Ryan Christie","John McGinn","Ché Adams","Ben Gannon-Doak"],
+  "🏴ó §ó ¢ó ³ó £ó ´ó ¿ Escocia":["Scotland Logo","Angus Gunn","Aaron Hickey","Andrew Robertson","John Souttar","Grant Hanley","Scott McTominay","Lewis Ferguson","Ryan Christie","John McGinn","Ché Adams","Ben Gannon-Doak"],
   "🇺🇸 EE. UU.":["USA Logo","Matt Freese","Chris Richards","Tim Ream","Mark McKenzie","Tyler Adams","Weston McKennie","Timothy Weah","Malik Tillman","Christian Pulisic","Brenden Aaronson","Folarin Balogun"],
   "🇵🇾 Paraguay":["Paraguay Logo","Orlando Gill","Gustavo Gómez","Juan José Cáceres","Omar Alderete","Júnior Alonso","Diego Gómez","Andrés Cubas","Julio Enciso","Miguel Almirón","Ramón Sosa","Antonio Sanabria"],
   "🇦🇺 Australia":["Australia Logo","Mathew Ryan","Harry Souttar","Aziz Behich","Cameron Burgess","Lewis Miller","Jackson Irvine","Riley McGree","Aiden O'Neill","Connor Metcalfe","Kusini Yengi","Nestory Irankunda"],
@@ -193,7 +193,7 @@ const albumData = {
   "🇨🇩 República Democrática del Congo":["Congo DR Logo","Lionel Mpasi","Aaron Wan-Bissaka","Axel Tuanzebe","Arthur Masuaku","Chancel Mbemba","Ngal'ayel Mukau","Samuel Moutoussamy","Noah Sadiki","Théo Bongonda","Yoane Wissa","Cédric Bakambu"],
   "🇺🇿 Uzbekistán":["Uzbekistan Logo","Utkir Yusupov","Abdukodir Khusanov","Farrukh Sayfiev","Sherzod Nasrullaev","Husniddin Aliqulov","Rustam Ashurmatov","Khojiakbar Alijonov","Odiljon Hamrobekov","Otabek Shukurov","Eldor Shomurodov","Abbosbek Fayzullaev"],
   "🇨🇴 Colombia":["Colombia Logo","Camilo Vargas","Dávinson Sánchez","Yerry Mina","Daniel Muñoz","James Rodríguez","Jefferson Lerma","Richard Ríos","Juan Fernando Quintero","Luis Díaz","Jhon Arias","Luis Suárez"],
-  "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra":["England Logo","Jordan Pickford","Reece James","John Stones","Jude Bellingham","Declan Rice","Jordan Henderson","Phil Foden","Harry Kane","Bukayo Saka","Cole Palmer","Marcus Rashford"],
+  "🏴ó §ó ¢ó ¥ó ®ó §ó ¿ Inglaterra":["England Logo","Jordan Pickford","Reece James","John Stones","Jude Bellingham","Declan Rice","Jordan Henderson","Phil Foden","Harry Kane","Bukayo Saka","Cole Palmer","Marcus Rashford"],
   "🇭🇷 Croacia":["Croatia Logo","Dominik Livaković","Duje Ćaleta-Car","Joško Gvardiol","Josip Stanišić","Ivan Perišić","Luka Modrić","Mateo Kovačić","Lovro Majer","Mario Pašalić","Ante Budimir","Andrej Kramarić"],
   "🇬🇭 Ghana":["Ghana Logo","Lawrence Ati Zigi","Alidu Seidu","Alexander Djiku","Gideon Mensah","Caleb Yirenkyi","Thomas Partey","Abdul Issahaku Fatawu","Mohammed Kudus","Kamaldeen Sulemana","Jordan Ayew","Antoine Semenyo"],
   "🇵🇦 Panamá":["Panama Logo","Orlando Mosquera","Michael Amir Murillo","Andrés Andrade","Fidel Escobar","Aníbal Godoy","Cristian Martínez","Adalberto Carrasquilla","Édgar Bárcenas","José Fajardo","Ismael Díaz","José Luis Rodríguez"]
@@ -204,7 +204,7 @@ const albumData = {
 const GROUPS = {
   A:['🇲🇽 México','🇿🇦 Sudáfrica','🇰🇷 República de Corea','🇨🇿 República Checa'],
   B:['🇨🇦 Canadá','🇧🇦 Bosnia y Herzegovina','🇶🇦 Catar','🇨🇭 Suiza'],
-  C:['🇧🇷 Brasil','🇲🇦 Marruecos','🇭🇹 Haití','🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia'],
+  C:['🇧🇷 Brasil','🇲🇦 Marruecos','🇭🇹 Haití','🏴ó §ó ¢ó ³ó £ó ´ó ¿ Escocia'],
   D:['🇺🇸 EE. UU.','🇵🇾 Paraguay','🇦🇺 Australia','🇹🇷 Turquía'],
   E:['🇩🇪 Alemania','🇨🇼 Curaçao','🇨🇮 Costa de Marfil','🇪🇨 Ecuador'],
   F:['🇳🇱 Países Bajos','🇯🇵 Japón','🇸🇪 Suecia','🇹🇳 Túnez'],
@@ -213,7 +213,7 @@ const GROUPS = {
   I:['🇫🇷 Francia','🇸🇳 Senegal','🇮🇶 Irak','🇳🇴 Noruega'],
   J:['🇦🇷 Argentina','🇩🇿 Argelia','🇦🇹 Austria','🇯🇴 Jordania'],
   K:['🇵🇹 Portugal','🇨🇩 República Democrática del Congo','🇺🇿 Uzbekistán','🇨🇴 Colombia'],
-  L:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra','🇭🇷 Croacia','🇬🇭 Ghana','🇵🇦 Panamá']
+  L:['🏴ó §ó ¢ó ¥ó ®ó §ó ¿ Inglaterra','🇭🇷 Croacia','🇬🇭 Ghana','🇵🇦 Panamá']
 };
 
 
@@ -259,7 +259,7 @@ const COUNTRY_DATA = {
   "🇧🇷 Brasil":{flag:'br',wiki:'Brazil_national_football_team',nick:'A Canarinha',conf:'CONMEBOL',rank:5,bestWC:'Campeón (1958, 1962, 1970, 1994, 2002)',founded:1914,achiev:['5 Copas del Mundo (récord mundial)','Único en participar en todos los Mundiales','9 × Copa América'],history:'La <strong>"Canarinha"</strong> es la selección más exitosa del mundo con <strong>5 títulos mundiales</strong>. El único equipo presente en todos los Mundiales, inventó el "jogo bonito" con leyendas como Pelé, Ronaldo y Ronaldinho. <strong>Vinícius Júnior</strong>, candidato eterno al Balón de Oro, y el joven Estêvão representan la nueva generación dorada que busca la sexta estrella y exorcizar el fantasma del 7-1 de 2014.'},
   "🇲🇦 Marruecos":{flag:'ma',wiki:'Morocco_national_football_team',nick:'Los Leones del Atlas',conf:'CAF',rank:14,bestWC:'Semifinales Qatar 2022 (¡Primeros africanos!)',founded:1955,achiev:['Primeros africanos en llegar a Semifinales de un Mundial (2022)','Copa Africana de Naciones 1976','2 × Copa Árabe'],history:'Los <strong>"Leones del Atlas"</strong> escribieron el capítulo más emocionante del fútbol africano en Qatar 2022, siendo el <strong>primer equipo del continente en alcanzar las semifinales mundialistas</strong>. Con Achraf Hakimi (PSG), Sofyan Amrabat y una defensa heroica, demostraron que África puede competir con los mejores. En 2026 llegan como candidatos serios a ir aún más lejos.'},
   "🇭🇹 Haití":{flag:'ht',wiki:'Haiti_national_football_team',nick:'Los Grenadiers',conf:'CONCACAF',rank:102,bestWC:'Fase de Grupos (1974)',founded:1904,achiev:['Mundial 1974 en Alemania','Campeonato CONCACAF varias ediciones','Primer gol haitiano en un Mundial'],history:'Los <strong>"Grenadiers"</strong> tienen una historia emotiva en el fútbol mundial. Participaron en el <strong>Mundial 1974</strong> en Alemania, siendo uno de los equipos caribeños más destacados de esa época. A pesar de las enormes adversidades que enfrenta el país, el fútbol haitiano cuenta con una activa diáspora en Francia y América. <strong>Frantzdy Pierrot</strong> representa las esperanzas de una nación resiliente que nunca se rinde.'},
-  "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia":{flag:'gb-sct',wiki:'Scotland_national_football_team',nick:'Los Guerreros Azules',conf:'UEFA',rank:39,bestWC:'Primera ronda (múltiples participaciones)',founded:1873,achiev:['Primera selección internacional del mundo (1872)','Primer internacional: 0-0 vs Inglaterra','8 participaciones mundialistas'],history:'Escocia es una de las <strong>cuatro asociaciones fundadoras del fútbol moderno</strong>. En 1872 disputó el primer partido internacional de la historia ante Inglaterra. A pesar de su rica tradición, nunca ha superado la fase de grupos mundialista. <strong>Scott McTominay</strong> (Nápoles) y <strong>Andrew Robertson</strong> (Liverpool) lideran la generación actual que busca devolverle el orgullo a la nación del thistles.'},
+  "🏴ó §ó ¢ó ³ó £ó ´ó ¿ Escocia":{flag:'gb-sct',wiki:'Scotland_national_football_team',nick:'Los Guerreros Azules',conf:'UEFA',rank:39,bestWC:'Primera ronda (múltiples participaciones)',founded:1873,achiev:['Primera selección internacional del mundo (1872)','Primer internacional: 0-0 vs Inglaterra','8 participaciones mundialistas'],history:'Escocia es una de las <strong>cuatro asociaciones fundadoras del fútbol moderno</strong>. En 1872 disputó el primer partido internacional de la historia ante Inglaterra. A pesar de su rica tradición, nunca ha superado la fase de grupos mundialista. <strong>Scott McTominay</strong> (Nápoles) y <strong>Andrew Robertson</strong> (Liverpool) lideran la generación actual que busca devolverle el orgullo a la nación del thistles.'},
   "🇺🇸 EE. UU.":{flag:'us',wiki:"United_States_men's_national_soccer_team",nick:'Stars and Stripes',conf:'CONCACAF',rank:16,bestWC:'Semifinales (1930), Octavos (2022)',founded:1913,achiev:['Semifinalistas del primer Mundial 1930','3 × Copa Oro CONCACAF','Copa América 2024: Sede'],history:'Los <strong>"Stars and Stripes"</strong> llegaron a las semifinales del primer Mundial de 1930 en Uruguay. En Qatar 2022 alcanzaron octavos con <strong>Christian Pulisic</strong> como estandarte. Como co-anfitriones en 2026, con la Major League Soccer en pleno crecimiento y una nueva generación liderada por Pulisic y Gio Reyna, sueñan con hacer historia ante el mundo en su propio territorio.'},
   "🇵🇾 Paraguay":{flag:'py',wiki:'Paraguay_national_football_team',nick:'La Albirroja',conf:'CONMEBOL',rank:64,bestWC:'Cuartos de Final (2010)',founded:1906,achiev:['2 × Copa América (1953, 1979)','Cuartos de Final: Korea 2002 y Sudáfrica 2010','Campeones absolutos de la CONMEBOL sub-20 (2007)'],history:'La <strong>"Albirroja"</strong> es una potencia histórica del fútbol sudamericano con dos Copas América. Su mejor actuación mundialista fue llegar a cuartos de final en Sudáfrica 2010, donde dieron pelea a España. <strong>Miguel Almirón</strong> del Newcastle y el joven <strong>Julio Enciso</strong> del Brighton representan la nueva guardia de un país con enorme pasión futbolística.'},
   "🇦🇺 Australia":{flag:'au',wiki:'Australia_national_soccer_team',nick:'Socceroos',conf:'AFC',rank:25,bestWC:'Cuartos de Final (2006), Octavos (2022)',founded:1961,achiev:['Cuartos de Final Alemania 2006','Octavos Qatar 2022','Copa OFC (antes de migrar a AFC)'],history:'Los <strong>"Socceroos"</strong> alcanzaron cuartos en Alemania 2006 con la magia de Harry Kewell y Mark Viduka. En Qatar 2022 eliminaron a Dinamarca con un grupo renovado. Su fútbol híbrido combina intensidad física con la técnica de jugadores forjados en Europa. <strong>Harry Souttar</strong> y el experimentado <strong>Mathew Ryan</strong> lideran esta generación comprometida con llegar aún más lejos.'},
@@ -292,7 +292,7 @@ const COUNTRY_DATA = {
   "🇨🇩 República Democrática del Congo":{flag:'cd',wiki:'Democratic_Republic_of_the_Congo_national_football_team',nick:'Los Leopardos',conf:'CAF',rank:56,bestWC:'Fase de Grupos (1974, como Zaire)',founded:1919,achiev:['2 × Copa Africana de Naciones (1968, 1974)','Primer equipo africano en marcar en un Mundial (1974)','Aaron Wan-Bissaka: Premier League'],history:'Los <strong>"Leopardos"</strong>, antes conocidos como Zaire, ganaron la Copa Africana en 1968 y 1974 y participaron en el Mundial de ese año. <strong>Aaron Wan-Bissaka</strong> (West Ham), <strong>Yoane Wissa</strong> (Brentford) y <strong>Cédric Bakambu</strong> representan el inmenso talento congoleño. Con 100 millones de habitantes y millones de apasionados aficionados, DR Congo busca volver a la élite del fútbol mundial.'},
   "🇺🇿 Uzbekistán":{flag:'uz',wiki:'Uzbekistan_national_football_team',nick:'Los Lobos Blancos',conf:'AFC',rank:71,bestWC:'Primera clasificación (2026)',founded:1946,achiev:['Copa Asiática de Fútbol Sub-23 2018','Eldor Shomurodov: estrella de la Roma','Abbosbek Fayzullaev: talento emergente'],history:'Una nación en plena revolución futbolística. Uzbekistán nunca ha participado en un Mundial, y 2026 sería su <strong>debut histórico absoluto</strong>. <strong>Eldor Shomurodov</strong> del Roma y <strong>Abbosbek Fayzullaev</strong> son sus estrellas en el fútbol europeo. El país invierte fuerte en el desarrollo del fútbol con academias modernas, y el talento uzbeko en Europa y el Medio Oriente crece año tras año de forma impresionante.'},
   "🇨🇴 Colombia":{flag:'co',wiki:'Colombia_national_football_team',nick:'Los Cafeteros',conf:'CONMEBOL',rank:11,bestWC:'Cuartos de Final (2014)',founded:1924,achiev:['Copa América 2001','James Rodríguez: Balón de Oro Mundial 2014 (6 goles)','Luis Díaz: estrella del Liverpool'],history:'Los <strong>"Cafeteros"</strong> alcanzaron los cuartos de final en Brasil 2014 con un torneo memorable. <strong>James Rodríguez</strong> fue el Balón de Oro del torneo con 6 goles, imagen icónica del Mundial. <strong>Luis Díaz</strong> del Liverpool es la nueva generación: extremo explosivo, desequilibrante e imparable. Colombia tiene actualmente una de las mejores generaciones de su historia, disputando incluso la Copa América 2024 con enorme nivel.'},
-  "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra":{flag:'gb-eng',wiki:'England_national_football_team',nick:'Three Lions',conf:'UEFA',rank:4,bestWC:'Campeón (1966)',founded:1863,achiev:['Copa del Mundo 1966 en Wembley con Bobby Moore','Inventores del fútbol moderno (1863)','Jude Bellingham: El talento más valorado del mundo'],history:'La nación <strong>inventora del fútbol</strong> ganó su único título mundialista en 1966 en Wembley, con Bobby Moore levantando la Copa ante su público. El "¡El fútbol viene a casa!" es el anhelo de décadas. <strong>Harry Kane</strong> (Bayern Múnich), <strong>Jude Bellingham</strong> (Real Madrid) y <strong>Phil Foden</strong> (Manchester City) forman la trinidad dorada que lleva años siendo favorita y que puede escribir la historia que los ingleses llevan 60 años esperando.'},
+  "🏴ó §ó ¢ó ¥ó ®ó §ó ¿ Inglaterra":{flag:'gb-eng',wiki:'England_national_football_team',nick:'Three Lions',conf:'UEFA',rank:4,bestWC:'Campeón (1966)',founded:1863,achiev:['Copa del Mundo 1966 en Wembley con Bobby Moore','Inventores del fútbol moderno (1863)','Jude Bellingham: El talento más valorado del mundo'],history:'La nación <strong>inventora del fútbol</strong> ganó su único título mundialista en 1966 en Wembley, con Bobby Moore levantando la Copa ante su público. El "¡El fútbol viene a casa!" es el anhelo de décadas. <strong>Harry Kane</strong> (Bayern Múnich), <strong>Jude Bellingham</strong> (Real Madrid) y <strong>Phil Foden</strong> (Manchester City) forman la trinidad dorada que lleva años siendo favorita y que puede escribir la historia que los ingleses llevan 60 años esperando.'},
   "🇭🇷 Croacia":{flag:'hr',wiki:'Croatia_national_football_team',nick:'Vatreni (Los Ardientes)',conf:'UEFA',rank:10,bestWC:'Finalista (2018), 3er Lugar (2022)',founded:1912,achiev:['Final del Mundial 2018','3er Lugar del Mundial 2022','Luka Modrić: Balón de Oro 2018'],history:'Los <strong>"Vatreni"</strong> llegaron a la final del Mundial 2018 y al tercer lugar de 2022, un rendimiento extraordinario para una nación de 4 millones de habitantes. <strong>Luka Modrić</strong>, Balón de Oro 2018, es una de las leyendas vivas del fútbol mundial. La Croacia de Modrić y Kovačić ha demostrado que las naciones pequeñas también pueden llegar a lo más alto con inteligencia táctica y calidad técnica superior.'},
   "🇬🇭 Ghana":{flag:'gh',wiki:'Ghana_national_football_team',nick:'Estrellas Negras',conf:'CAF',rank:65,bestWC:'Cuartos de Final (2010)',founded:1957,achiev:['4 × Copa Africana de Naciones (1963, 1965, 1978, 1982)','Cuartos de Final Sudáfrica 2010','Thomas Partey: Arsenal y selección'],history:'Las <strong>"Estrellas Negras"</strong> llegaron a los cuartos de final en Sudáfrica 2010, donde eliminaron al equipo local en un emocionante partido. <strong>Thomas Partey</strong> del Arsenal y <strong>Mohammed Kudus</strong> del West Ham lideran la nueva generación que busca repetir ese histórico sueño mundialista en 2026.'},
   "🇵🇦 Panamá":{flag:'pa',wiki:'Panama_national_football_team',nick:'Los Canaleros',conf:'CONCACAF',rank:55,bestWC:'Fase de Grupos (Rusia 2018)',founded:1937,achiev:['Primera clasificación al Mundial en Rusia 2018','Campeones Liga de Naciones CONCACAF 2023','Rommel Fernández: leyenda histórica'],history:'Los <strong>"Canaleros"</strong> lograron su primer Mundial en Rusia 2018, un hito histórico para el fútbol panameño. Aunque cayeron en fase de grupos, el partido ante Inglaterra fue histórico con el primer gol mundialista de Panamá, celebrado como un título nacional. <strong>Aníbal Godoy</strong> y <strong>Adalberto Carrasquilla</strong> lideran una generación competitiva que busca en 2026 superar aquella primera actuación y demostrar que el fútbol centroamericano llegó para quedarse.'}
@@ -314,7 +314,7 @@ const ANTHEMS = {
   "🇧🇷 Brasil":           "https://upload.wikimedia.org/wikipedia/commons/transcoded/9/9b/Hino_Nacional_Brasileiro_instrumental.ogg/Hino_Nacional_Brasileiro_instrumental.ogg.mp3",
   "🇲🇦 Marruecos":        "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/3f/National_Anthem_of_Morocco.ogg/National_Anthem_of_Morocco.ogg.mp3",
   "🇭🇹 Haití":            "https://upload.wikimedia.org/wikipedia/commons/transcoded/4/4f/Haiti_National_Anthem.ogg/Haiti_National_Anthem.ogg.mp3",
-  "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia":        "https://files.catbox.moe/d09fhq.mp3",
+  "🏴ó §ó ¢ó ³ó £ó ´ó ¿ Escocia":        "https://files.catbox.moe/d09fhq.mp3",
   // Grupo D
   "🇺🇸 EE. UU.":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/6/65/Star_Spangled_Banner_instrumental.ogg/Star_Spangled_Banner_instrumental.ogg.mp3",
   "🇵🇾 Paraguay":         "https://upload.wikimedia.org/wikipedia/commons/transcoded/a/a6/Paraguayan_National_Anthem.oga/Paraguayan_National_Anthem.oga.mp3",
@@ -356,7 +356,7 @@ const ANTHEMS = {
   "🇺🇿 Uzbekistán":       "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/36/National_Anthem_of_Uzbekistan_%28Instrumental%29.ogg/National_Anthem_of_Uzbekistan_%28Instrumental%29.ogg.mp3",
   "🇨🇴 Colombia":         "https://upload.wikimedia.org/wikipedia/commons/transcoded/5/55/United_States_Navy_Band_-_%C2%A1Oh%2C_gloria_inmarcesible%21.ogg/United_States_Navy_Band_-_%C2%A1Oh%2C_gloria_inmarcesible%21.ogg.mp3",
   // Grupo L
-  "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra":    "https://upload.wikimedia.org/wikipedia/commons/transcoded/0/03/United_States_Navy_Band_-_God_Save_the_Queen.oga/United_States_Navy_Band_-_God_Save_the_Queen.oga.mp3",
+  "🏴ó §ó ¢ó ¥ó ®ó §ó ¿ Inglaterra":    "https://upload.wikimedia.org/wikipedia/commons/transcoded/0/03/United_States_Navy_Band_-_God_Save_the_Queen.oga/United_States_Navy_Band_-_God_Save_the_Queen.oga.mp3",
   "🇭🇷 Croacia":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/d/df/Lijepa_nasa_domovino_instrumental.ogg/Lijepa_nasa_domovino_instrumental.ogg.mp3",
   "🇬🇭 Ghana":            "https://upload.wikimedia.org/wikipedia/commons/transcoded/4/43/National_Anthem_of_Ghana.ogg/National_Anthem_of_Ghana.ogg.mp3",
   "🇵🇦 Panamá":           "https://upload.wikimedia.org/wikipedia/commons/transcoded/4/4a/Panama_National_Anthem.ogg/Panama_National_Anthem.ogg.mp3",
@@ -541,14 +541,61 @@ function cycleStickerState(country, idx) {
 
 // ── SUB-STATES ──
 function getSubKey(c, i) { return c + '::' + i + '::sub'; }
-function getStickerSubState(c, i) { return state[getSubKey(c, i)] || null; }
-function cycleStickerSubState(c, i) {
+function normalizeStickerSub(raw) {
+  if (!raw) return { repetida: 0, reserva: false };
+  if (raw === 'repetida') return { repetida: 1, reserva: false };
+  if (raw === 'reserva') return { repetida: 0, reserva: true };
+  if (typeof raw === 'object') {
+    return {
+      repetida: Math.max(0, Math.min(9, Number(raw.repetida || 0) || 0)),
+      reserva: Boolean(raw.reserva)
+    };
+  }
+  return { repetida: 0, reserva: false };
+}
+function getStickerSubData(c, i) { return normalizeStickerSub(state[getSubKey(c, i)]); }
+function getStickerSubState(c, i) {
+  const sub = getStickerSubData(c, i);
+  if (sub.repetida > 0) return 'repetida';
+  if (sub.reserva) return 'reserva';
+  return null;
+}
+function getRepetidaCount(c, i) { return getStickerSubData(c, i).repetida; }
+function hasRepetida(c, i) { return getRepetidaCount(c, i) > 0; }
+function hasReserva(c, i) { return getStickerSubData(c, i).reserva; }
+function saveStickerSubData(c, i, sub) {
   const k = getSubKey(c, i);
-  const cur = state[k] || null;
-  if (!cur) state[k] = 'repetida';
-  else if (cur === 'repetida') state[k] = 'reserva';
+  const clean = normalizeStickerSub(sub);
+  if (clean.repetida > 0 || clean.reserva) state[k] = clean;
   else delete state[k];
   saveState();
+}
+function incrementRepetida(c, i) {
+  const sub = getStickerSubData(c, i);
+  sub.repetida = sub.repetida >= 9 ? 0 : sub.repetida + 1;
+  saveStickerSubData(c, i, sub);
+}
+function toggleReserva(c, i) {
+  const sub = getStickerSubData(c, i);
+  sub.reserva = !sub.reserva;
+  saveStickerSubData(c, i, sub);
+}
+function cycleStickerSubState(c, i) { incrementRepetida(c, i); }
+function getStickerSubClasses(c, i) {
+  const sub = getStickerSubData(c, i);
+  return (sub.repetida > 0 ? ' sub-repetida' : '') + (sub.reserva ? ' sub-reserva' : '');
+}
+function getStickerSubControlsHtml(c, i) {
+  const sub = getStickerSubData(c, i);
+  const repLabel = sub.repetida > 0 ? `🔄 x${sub.repetida}` : '🔄 REP';
+  return `<span class="s-sub-btn sub-repetida${sub.repetida > 0 ? ' active' : ' sub-none'}" data-sub-action="rep">${repLabel}</span>
+    <span class="s-sub-btn sub-reserva${sub.reserva ? ' active' : ' sub-none'}" data-sub-action="res">📌 RES</span>`;
+}
+function getPcardSubControlsHtml(c, i) {
+  const sub = getStickerSubData(c, i);
+  const repLabel = sub.repetida > 0 ? `🔄 x${sub.repetida}` : '🔄 REP';
+  return `<span class="pcard-sub sub-repetida${sub.repetida > 0 ? ' active' : ' sub-none'}" data-action="rep">${repLabel}</span>
+    <span class="pcard-sub sub-reserva${sub.reserva ? ' active' : ' sub-none'}" data-action="res">📌 RES</span>`;
 }
 function clearStickerSubState(c, i) { delete state[getSubKey(c, i)]; saveState(); }
 
@@ -584,11 +631,10 @@ function getCountryStats(country) {
   let owned=0,missing=0,repetida=0,reserva=0;
   stickers.forEach((_, i) => {
     const s = getStickerState(country, i);
-    const sub = getStickerSubState(country, i);
     if (s === 'tengo') owned++;
     else if (s === 'falta') missing++;
-    if (sub === 'repetida') repetida++;
-    else if (sub === 'reserva') reserva++;
+    repetida += getRepetidaCount(country, i);
+    if (hasReserva(country, i)) reserva++;
   });
   const total = stickers.length;
   return {owned, missing, total, pct: total ? Math.round(owned/total*100) : 0, repetida, reserva};
@@ -607,11 +653,10 @@ function getGlobalStats() {
 
   INTRO_DATA.forEach((_, i) => {
     const s = getStickerState('INTRO', i);
-    const sub = getStickerSubState('INTRO', i);
     if (s === 'tengo') owned++;
     else if (s === 'falta') missing++;
-    if (sub === 'repetida') repetida++;
-    else if (sub === 'reserva') reserva++;
+    repetida += getRepetidaCount('INTRO', i);
+    if (hasReserva('INTRO', i)) reserva++;
     total++;
   });
 
@@ -714,24 +759,21 @@ function renderGroups() {
       introList.innerHTML = '';
       INTRO_DATA.forEach((name, ii) => {
         const st  = getStickerState('INTRO', ii);
-        const sub = getStickerSubState('INTRO', ii);
-
         if (activeStatus === 'tengo'    && st  !== 'tengo')    return;
         if (activeStatus === 'falta'    && st  !== 'falta')    return;
-        if (activeStatus === 'repetida' && sub !== 'repetida') return;
-        if (activeStatus === 'reserva'  && sub !== 'reserva')  return;
+        if (activeStatus === 'repetida' && !hasRepetida('INTRO', ii)) return;
+        if (activeStatus === 'reserva'  && !hasReserva('INTRO', ii))  return;
         if (searchQuery && !name.toLowerCase().includes(searchQuery)) return;
 
         const stClass  = st  === 'tengo' ? ' state-tengo' : st  === 'falta' ? ' state-falta' : '';
-        const subClass = sub ? ' sub-' + sub : '';
+        const subClass = getStickerSubClasses('INTRO', ii);
         const li = document.createElement('li');
         li.className = 'sticker' + stClass + subClass;
         li.dataset.country = 'INTRO';
         li.dataset.idx = ii;
 
-        const subLabel   = sub === 'repetida' ? '🔄 REP' : sub === 'reserva' ? '📌 RES' : '+';
         const subBtnHtml = st !== 'none'
-          ? `<span class="s-sub-btn sub-${sub||'none'}">${subLabel}</span>`
+          ? getStickerSubControlsHtml('INTRO', ii)
           : '';
 
         li.innerHTML = `<span class="s-num">#${ii}</span><span class="s-name">${name}</span>
@@ -753,14 +795,15 @@ function renderGroups() {
         });
 
         const subBtn = li.querySelector('.s-sub-btn');
-        if (subBtn) {
+        li.querySelectorAll('.s-sub-btn').forEach(subBtn => {
           subBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            cycleStickerSubState('INTRO', ii);
+            if (subBtn.dataset.subAction === 'rep') incrementRepetida('INTRO', ii);
+            if (subBtn.dataset.subAction === 'res') toggleReserva('INTRO', ii);
             updateAll();
             renderIntroList();
           });
-        }
+        });
 
         introList.appendChild(li);
       });
@@ -928,25 +971,23 @@ function renderStickerList(country, listEl, gColor) {
   const stickers = albumData[country] || [];
   stickers.forEach((name, i) => {
     const st  = getStickerState(country, i);
-    const sub = getStickerSubState(country, i);
 
     // Status filter
     if (activeStatus === 'tengo'    && st !== 'tengo') return;
     if (activeStatus === 'falta'    && st !== 'falta') return;
-    if (activeStatus === 'repetida' && sub !== 'repetida') return;
-    if (activeStatus === 'reserva'  && sub !== 'reserva')  return;
+    if (activeStatus === 'repetida' && !hasRepetida(country, i)) return;
+    if (activeStatus === 'reserva'  && !hasReserva(country, i))  return;
     if (searchQuery && !name.toLowerCase().includes(searchQuery) && !country.toLowerCase().includes(searchQuery)) return;
 
     const li = document.createElement('li');
     const stClass = st === 'tengo' ? ' state-tengo' : st === 'falta' ? ' state-falta' : '';
-    const subClass = sub ? ' sub-' + sub : '';
+    const subClass = getStickerSubClasses(country, i);
     li.className = 'sticker' + stClass + subClass;
     li.dataset.country = country;
     li.dataset.idx = i;
 
-    const subLabel = sub === 'repetida' ? '🔄 REP' : sub === 'reserva' ? '📌 RES' : '+';
     const subBtnHtml = st !== 'none'
-      ? `<span class="s-sub-btn sub-${sub||'none'}">${subLabel}</span>`
+      ? getStickerSubControlsHtml(country, i)
       : '';
 
     li.innerHTML = `<span class="s-num">#${i}</span><span class="s-name">${name}</span>
@@ -966,18 +1007,18 @@ function renderStickerList(country, listEl, gColor) {
     });
 
     // Sub-state click
-    const subBtn = li.querySelector('.s-sub-btn');
-    if (subBtn) {
+    li.querySelectorAll('.s-sub-btn').forEach(subBtn => {
       subBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        cycleStickerSubState(country, i);
+        if (subBtn.dataset.subAction === 'rep') incrementRepetida(country, i);
+        if (subBtn.dataset.subAction === 'res') toggleReserva(country, i);
         updateAll();
         const pl = li.closest('.sticker-list');
         const pg = li.closest('.group-accordion');
         const gc = pg ? pg.querySelector('.group-header').dataset.grp : null;
         renderStickerList(country, pl, gc ? GROUP_COLORS[gc] : gColor);
       });
-    }
+    });
 
     listEl.appendChild(li);
   });
@@ -1055,39 +1096,36 @@ function openOverlay(country) {
   const grid = playersSection.querySelector('#ov-player-grid');
   stickers.forEach((name, i) => {
     const st  = getStickerState(country, i);
-    const sub = getStickerSubState(country, i);
     const card = document.createElement('div');
     const stClass = st==='tengo' ? ' owned' : st==='falta' ? ' missing' : '';
-    const subClass = sub ? ' sub-' + sub : '';
+    const subClass = getStickerSubClasses(country, i);
     card.className = 'pcard' + stClass + subClass;
 
-    const subLabel = sub === 'repetida' ? '🔄 REP' : sub === 'reserva' ? '📌 RES' : '+ sub';
     const subHtml  = st !== 'none'
-      ? `<span class="pcard-sub sub-${sub||'none'}" data-action="sub">${subLabel}</span>`
+      ? `<div class="pcard-sub-row">${getPcardSubControlsHtml(country, i)}</div>`
       : '';
 
     card.innerHTML = `<div class="pcard-num">#${i}</div><div class="pcard-name">${name}</div>${subHtml}`;
 
-    // Main click → cycle primary
+    // Main click -> cycle primary
     card.addEventListener('click', (e) => {
-      if (e.target.dataset.action === 'sub') return;
+      if (e.target.closest('.pcard-sub')) return;
       cycleStickerState(country, i);
-      const ns   = getStickerState(country, i);
-      const nsub = getStickerSubState(country, i);
-      const stC  = ns==='tengo' ? ' owned' : ns==='falta' ? ' missing' : '';
-      const subC = nsub ? ' sub-'+nsub : '';
-      card.className = 'pcard' + stC + subC;
-      const sl2 = nsub==='repetida'?'🔄 REP':nsub==='reserva'?'📌 RES':'+ sub';
-      const sbtn = card.querySelector('.pcard-sub');
-      if (ns !== 'none' && !sbtn) {
-        const ns2 = document.createElement('span');
-        ns2.className = `pcard-sub sub-${nsub||'none'}`;
-        ns2.dataset.action = 'sub';
-        ns2.textContent = sl2;
-        card.appendChild(ns2);
-        ns2.addEventListener('click', subClickHandler);
-      } else if (ns === 'none' && sbtn) sbtn.remove();
-      else if (sbtn) { sbtn.className = `pcard-sub sub-${nsub||'none'}`; sbtn.textContent = sl2; }
+      const ns = getStickerState(country, i);
+      const stC = ns==='tengo' ? ' owned' : ns==='falta' ? ' missing' : '';
+      card.className = 'pcard' + stC + getStickerSubClasses(country, i);
+      const row = card.querySelector('.pcard-sub-row');
+      if (ns !== 'none' && !row) {
+        const newRow = document.createElement('div');
+        newRow.className = 'pcard-sub-row';
+        newRow.innerHTML = getPcardSubControlsHtml(country, i);
+        card.appendChild(newRow);
+        bindPcardSubButtons(newRow);
+      } else if (ns === 'none' && row) row.remove();
+      else if (row) {
+        row.innerHTML = getPcardSubControlsHtml(country, i);
+        bindPcardSubButtons(row);
+      }
       const cs2 = getCountryStats(country);
       document.getElementById('ov-pbar').style.width = cs2.pct + '%';
       document.getElementById('ov-ptext').textContent = `${cs2.owned} / ${cs2.total} cromos (${cs2.pct}%)`;
@@ -1097,21 +1135,23 @@ function openOverlay(country) {
 
     function subClickHandler(e) {
       e.stopPropagation();
-      cycleStickerSubState(country, i);
-      const nsub = getStickerSubState(country, i);
-      const sbtn = card.querySelector('.pcard-sub');
-      if (sbtn) {
-        sbtn.className = `pcard-sub sub-${nsub||'none'}`;
-        sbtn.textContent = nsub==='repetida'?'🔄 REP':nsub==='reserva'?'📌 RES':'+ sub';
+      const action = e.currentTarget.dataset.action;
+      if (action === 'rep') incrementRepetida(country, i);
+      if (action === 'res') toggleReserva(country, i);
+      const row = card.querySelector('.pcard-sub-row');
+      if (row) {
+        row.innerHTML = getPcardSubControlsHtml(country, i);
+        bindPcardSubButtons(row);
       }
       const stC = getStickerState(country,i);
-      card.className = 'pcard' + (stC==='tengo'?' owned':stC==='falta'?' missing':'') + (nsub?' sub-'+nsub:'');
+      card.className = 'pcard' + (stC==='tengo'?' owned':stC==='falta'?' missing':'') + getStickerSubClasses(country, i);
       updateAll();
     }
 
-    const sb = card.querySelector('.pcard-sub');
-    if (sb) sb.addEventListener('click', subClickHandler);
-
+    function bindPcardSubButtons(scope = card) {
+      scope.querySelectorAll('.pcard-sub').forEach(btn => btn.addEventListener('click', subClickHandler));
+    }
+    bindPcardSubButtons();
     grid.appendChild(card);
   });
 
@@ -1156,9 +1196,9 @@ function pdfSafeText(str=''){
   return String(str)
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[“”]/g, '"')
+    .replace(/[â€œâ€]/g, '"')
     .replace(/[‘’]/g, "'")
-    .replace(/[‐‑–—]/g, '-')
+    .replace(/[â€‑–—]/g, '-')
     .replace(/[•·]/g, '-')
     .replace(/[\u{1F1E6}-\u{1F1FF}]/gu, '')
     .replace(/[\p{Extended_Pictographic}]/gu, '')
@@ -1212,12 +1252,11 @@ function generatePDF(mode) {
   const introItems = [];
   INTRO_DATA.forEach((name, i) => {
     const st  = getStickerState('INTRO', i);
-    const sub = getStickerSubState('INTRO', i);
     if (mode === 'owned'    && st  !== 'tengo')    return;
     if (mode === 'missing'  && st  !== 'falta')    return;
-    if (mode === 'repetida' && sub !== 'repetida') return;
-    if (mode === 'reserva'  && sub !== 'reserva')  return;
-    introItems.push({name, st, i});
+    if (mode === 'repetida' && !hasRepetida('INTRO', i)) return;
+    if (mode === 'reserva'  && !hasReserva('INTRO', i))  return;
+    introItems.push({name, st, i, rep: getRepetidaCount('INTRO', i), res: hasReserva('INTRO', i)});
   });
 
   if (introItems.length > 0) {
@@ -1272,6 +1311,12 @@ function generatePDF(mode) {
         const badge = item.st === 'tengo' ? 'TENGO' : item.st === 'falta' ? 'FALTA' : '—';
         doc.text(badge, x + colW - 2, yy + 3.5, {align:'right'});
       }
+      if (item.rep > 0 || item.res) {
+        doc.setFontSize(5.5);
+        doc.setTextColor(90,95,120);
+        const subBadge = [item.rep > 0 ? `REP x${item.rep}` : '', item.res ? 'RES' : ''].filter(Boolean).join(' / ');
+        doc.text(subBadge, x + colW - 2, yy + 6.2, {align:'right'});
+      }
     });
 
     const introRows = Math.ceil(introItems.length / 3);
@@ -1289,12 +1334,11 @@ function generatePDF(mode) {
       const stickers = albumData[c] || [];
       stickers.forEach((name, i) => {
         const st  = getStickerState(c, i);
-        const sub = getStickerSubState(c, i);
         if (mode==='owned'    && st==='tengo')      groupHasItems=true;
         if (mode==='missing'  && st==='falta')      groupHasItems=true;
         if (mode==='all')                           groupHasItems=true;
-        if (mode==='repetida' && sub==='repetida')  groupHasItems=true;
-        if (mode==='reserva'  && sub==='reserva')   groupHasItems=true;
+        if (mode==='repetida' && hasRepetida(c, i)) groupHasItems=true;
+        if (mode==='reserva'  && hasReserva(c, i))  groupHasItems=true;
       });
     });
     if (!groupHasItems) return;
@@ -1319,12 +1363,11 @@ function generatePDF(mode) {
       const items = [];
       stickers.forEach((name, i) => {
         const st  = getStickerState(c, i);
-        const sub = getStickerSubState(c, i);
         if (mode==='owned'    && st  !== 'tengo')     return;
         if (mode==='missing'  && st  !== 'falta')     return;
-        if (mode==='repetida' && sub !== 'repetida')  return;
-        if (mode==='reserva'  && sub !== 'reserva')   return;
-        items.push({name, st, sub, i});
+        if (mode==='repetida' && !hasRepetida(c, i))  return;
+        if (mode==='reserva'  && !hasReserva(c, i))   return;
+        items.push({name, st, rep: getRepetidaCount(c, i), res: hasReserva(c, i), i});
       });
       if (items.length===0) return;
 
@@ -1380,6 +1423,12 @@ function generatePDF(mode) {
           doc.setTextColor(item.st==='tengo'?[34,197,94]:item.st==='falta'?[229,57,53]:[150,150,150]);
           const badge = item.st==='tengo'?'TENGO':item.st==='falta'?'FALTA':'—';
           doc.text(badge, x+colW-2, finalY+3.5, {align:'right'});
+        }
+        if (item.rep > 0 || item.res) {
+          doc.setFontSize(5.5);
+          doc.setTextColor(90,95,120);
+          const subBadge = [item.rep > 0 ? `REP x${item.rep}` : '', item.res ? 'RES' : ''].filter(Boolean).join(' / ');
+          doc.text(subBadge, x+colW-2, finalY+6.2, {align:'right'});
         }
       });
 
@@ -2041,7 +2090,7 @@ applyA11yPrefs();
         <button class="codes-mclose" id="codes-close" aria-label="Cerrar">✕</button>
       </div>
       <div class="codes-warn">
-        <span class="codes-warn-icon">⚠️</span>
+        <span class="codes-warn-icon">⚠ï¸</span>
         <span><strong>Un solo uso por cuenta.</strong> Una vez canjeado, el código queda desactivado para esa cuenta. Úsalos en la app oficial de Panini o FIFA.</span>
       </div>
       <div class="codes-scroll">
