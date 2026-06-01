@@ -204,7 +204,7 @@ const albumData = {
 const GROUPS = {
   A:['🇲🇽 México','🇿🇦 Sudáfrica','🇰🇷 República de Corea','🇨🇿 República Checa'],
   B:['🇨🇦 Canadá','🇧🇦 Bosnia y Herzegovina','🇶🇦 Catar','🇨🇭 Suiza'],
-  C:['🇧🇷 Brasil','🇲🇦 Marruecos','🇭🇹 Haití','🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia'],
+  C:['🇧🇷 Brasil','🇲🇦 Marruecos','🇭🇹 Haití','🏴ó §ó ¢ó ³ó £ó ´ó ¿ Escocia'],
   D:['🇺🇸 EE. UU.','🇵🇾 Paraguay','🇦🇺 Australia','🇹🇷 Turquía'],
   E:['🇩🇪 Alemania','🇨🇼 Curaçao','🇨🇮 Costa de Marfil','🇪🇨 Ecuador'],
   F:['🇳🇱 Países Bajos','🇯🇵 Japón','🇸🇪 Suecia','🇹🇳 Túnez'],
@@ -213,7 +213,7 @@ const GROUPS = {
   I:['🇫🇷 Francia','🇸🇳 Senegal','🇮🇶 Irak','🇳🇴 Noruega'],
   J:['🇦🇷 Argentina','🇩🇿 Argelia','🇦🇹 Austria','🇯🇴 Jordania'],
   K:['🇵🇹 Portugal','🇨🇩 República Democrática del Congo','🇺🇿 Uzbekistán','🇨🇴 Colombia'],
-  L:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra','🇭🇷 Croacia','🇬🇭 Ghana','🇵🇦 Panamá']
+  L:['🏴ó §ó ¢ó ¥ó ®ó §ó ¿ Inglaterra','🇭🇷 Croacia','🇬🇭 Ghana','🇵🇦 Panamá']
 };
 
 
@@ -259,7 +259,7 @@ const COUNTRY_DATA = {
   "🇧🇷 Brasil":{flag:'br',wiki:'Brazil_national_football_team',nick:'A Canarinha',conf:'CONMEBOL',rank:5,bestWC:'Campeón (1958, 1962, 1970, 1994, 2002)',founded:1914,achiev:['5 Copas del Mundo (récord mundial)','Único en participar en todos los Mundiales','9 × Copa América'],history:'La <strong>"Canarinha"</strong> es la selección más exitosa del mundo con <strong>5 títulos mundiales</strong>. El único equipo presente en todos los Mundiales, inventó el "jogo bonito" con leyendas como Pelé, Ronaldo y Ronaldinho. <strong>Vinícius Júnior</strong>, candidato eterno al Balón de Oro, y el joven Estêvão representan la nueva generación dorada que busca la sexta estrella y exorcizar el fantasma del 7-1 de 2014.'},
   "🇲🇦 Marruecos":{flag:'ma',wiki:'Morocco_national_football_team',nick:'Los Leones del Atlas',conf:'CAF',rank:14,bestWC:'Semifinales Qatar 2022 (¡Primeros africanos!)',founded:1955,achiev:['Primeros africanos en llegar a Semifinales de un Mundial (2022)','Copa Africana de Naciones 1976','2 × Copa Árabe'],history:'Los <strong>"Leones del Atlas"</strong> escribieron el capítulo más emocionante del fútbol africano en Qatar 2022, siendo el <strong>primer equipo del continente en alcanzar las semifinales mundialistas</strong>. Con Achraf Hakimi (PSG), Sofyan Amrabat y una defensa heroica, demostraron que África puede competir con los mejores. En 2026 llegan como candidatos serios a ir aún más lejos.'},
   "🇭🇹 Haití":{flag:'ht',wiki:'Haiti_national_football_team',nick:'Los Grenadiers',conf:'CONCACAF',rank:102,bestWC:'Fase de Grupos (1974)',founded:1904,achiev:['Mundial 1974 en Alemania','Campeonato CONCACAF varias ediciones','Primer gol haitiano en un Mundial'],history:'Los <strong>"Grenadiers"</strong> tienen una historia emotiva en el fútbol mundial. Participaron en el <strong>Mundial 1974</strong> en Alemania, siendo uno de los equipos caribeños más destacados de esa época. A pesar de las enormes adversidades que enfrenta el país, el fútbol haitiano cuenta con una activa diáspora en Francia y América. <strong>Frantzdy Pierrot</strong> representa las esperanzas de una nación resiliente que nunca se rinde.'},
-  "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia":{flag:'gb-sct',wiki:'Scotland_national_football_team',nick:'Los Guerreros Azules',conf:'UEFA',rank:39,bestWC:'Primera ronda (múltiples participaciones)',founded:1873,achiev:['Primera selección internacional del mundo (1872)','Primer internacional: 0-0 vs Inglaterra','8 participaciones mundialistas'],history:'Escocia es una de las <strong>cuatro asociaciones fundadoras del fútbol moderno</strong>. En 1872 disputó el primer partido internacional de la historia ante Inglaterra. A pesar de su rica tradición, nunca ha superado la fase de grupos mundialista. <strong>Scott McTominay</strong> (Nápoles) y <strong>Andrew Robertson</strong> (Liverpool) lideran la generación actual que busca devolverle el orgullo a la nación del thistles.'},
+  "🏴ó §ó ¢ó ³ó £ó ´ó ¿ Escocia":{flag:'gb-sct',wiki:'Scotland_national_football_team',nick:'Los Guerreros Azules',conf:'UEFA',rank:39,bestWC:'Primera ronda (múltiples participaciones)',founded:1873,achiev:['Primera selección internacional del mundo (1872)','Primer internacional: 0-0 vs Inglaterra','8 participaciones mundialistas'],history:'Escocia es una de las <strong>cuatro asociaciones fundadoras del fútbol moderno</strong>. En 1872 disputó el primer partido internacional de la historia ante Inglaterra. A pesar de su rica tradición, nunca ha superado la fase de grupos mundialista. <strong>Scott McTominay</strong> (Nápoles) y <strong>Andrew Robertson</strong> (Liverpool) lideran la generación actual que busca devolverle el orgullo a la nación del thistles.'},
   "🇺🇸 EE. UU.":{flag:'us',wiki:"United_States_men's_national_soccer_team",nick:'Stars and Stripes',conf:'CONCACAF',rank:16,bestWC:'Semifinales (1930), Octavos (2022)',founded:1913,achiev:['Semifinalistas del primer Mundial 1930','3 × Copa Oro CONCACAF','Copa América 2024: Sede'],history:'Los <strong>"Stars and Stripes"</strong> llegaron a las semifinales del primer Mundial de 1930 en Uruguay. En Qatar 2022 alcanzaron octavos con <strong>Christian Pulisic</strong> como estandarte. Como co-anfitriones en 2026, con la Major League Soccer en pleno crecimiento y una nueva generación liderada por Pulisic y Gio Reyna, sueñan con hacer historia ante el mundo en su propio territorio.'},
   "🇵🇾 Paraguay":{flag:'py',wiki:'Paraguay_national_football_team',nick:'La Albirroja',conf:'CONMEBOL',rank:64,bestWC:'Cuartos de Final (2010)',founded:1906,achiev:['2 × Copa América (1953, 1979)','Cuartos de Final: Korea 2002 y Sudáfrica 2010','Campeones absolutos de la CONMEBOL sub-20 (2007)'],history:'La <strong>"Albirroja"</strong> es una potencia histórica del fútbol sudamericano con dos Copas América. Su mejor actuación mundialista fue llegar a cuartos de final en Sudáfrica 2010, donde dieron pelea a España. <strong>Miguel Almirón</strong> del Newcastle y el joven <strong>Julio Enciso</strong> del Brighton representan la nueva guardia de un país con enorme pasión futbolística.'},
   "🇦🇺 Australia":{flag:'au',wiki:'Australia_national_soccer_team',nick:'Socceroos',conf:'AFC',rank:25,bestWC:'Cuartos de Final (2006), Octavos (2022)',founded:1961,achiev:['Cuartos de Final Alemania 2006','Octavos Qatar 2022','Copa OFC (antes de migrar a AFC)'],history:'Los <strong>"Socceroos"</strong> alcanzaron cuartos en Alemania 2006 con la magia de Harry Kewell y Mark Viduka. En Qatar 2022 eliminaron a Dinamarca con un grupo renovado. Su fútbol híbrido combina intensidad física con la técnica de jugadores forjados en Europa. <strong>Harry Souttar</strong> y el experimentado <strong>Mathew Ryan</strong> lideran esta generación comprometida con llegar aún más lejos.'},
@@ -292,7 +292,7 @@ const COUNTRY_DATA = {
   "🇨🇩 República Democrática del Congo":{flag:'cd',wiki:'Democratic_Republic_of_the_Congo_national_football_team',nick:'Los Leopardos',conf:'CAF',rank:56,bestWC:'Fase de Grupos (1974, como Zaire)',founded:1919,achiev:['2 × Copa Africana de Naciones (1968, 1974)','Primer equipo africano en marcar en un Mundial (1974)','Aaron Wan-Bissaka: Premier League'],history:'Los <strong>"Leopardos"</strong>, antes conocidos como Zaire, ganaron la Copa Africana en 1968 y 1974 y participaron en el Mundial de ese año. <strong>Aaron Wan-Bissaka</strong> (West Ham), <strong>Yoane Wissa</strong> (Brentford) y <strong>Cédric Bakambu</strong> representan el inmenso talento congoleño. Con 100 millones de habitantes y millones de apasionados aficionados, DR Congo busca volver a la élite del fútbol mundial.'},
   "🇺🇿 Uzbekistán":{flag:'uz',wiki:'Uzbekistan_national_football_team',nick:'Los Lobos Blancos',conf:'AFC',rank:71,bestWC:'Primera clasificación (2026)',founded:1946,achiev:['Copa Asiática de Fútbol Sub-23 2018','Eldor Shomurodov: estrella de la Roma','Abbosbek Fayzullaev: talento emergente'],history:'Una nación en plena revolución futbolística. Uzbekistán nunca ha participado en un Mundial, y 2026 sería su <strong>debut histórico absoluto</strong>. <strong>Eldor Shomurodov</strong> del Roma y <strong>Abbosbek Fayzullaev</strong> son sus estrellas en el fútbol europeo. El país invierte fuerte en el desarrollo del fútbol con academias modernas, y el talento uzbeko en Europa y el Medio Oriente crece año tras año de forma impresionante.'},
   "🇨🇴 Colombia":{flag:'co',wiki:'Colombia_national_football_team',nick:'Los Cafeteros',conf:'CONMEBOL',rank:11,bestWC:'Cuartos de Final (2014)',founded:1924,achiev:['Copa América 2001','James Rodríguez: Balón de Oro Mundial 2014 (6 goles)','Luis Díaz: estrella del Liverpool'],history:'Los <strong>"Cafeteros"</strong> alcanzaron los cuartos de final en Brasil 2014 con un torneo memorable. <strong>James Rodríguez</strong> fue el Balón de Oro del torneo con 6 goles, imagen icónica del Mundial. <strong>Luis Díaz</strong> del Liverpool es la nueva generación: extremo explosivo, desequilibrante e imparable. Colombia tiene actualmente una de las mejores generaciones de su historia, disputando incluso la Copa América 2024 con enorme nivel.'},
-  "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra":{flag:'gb-eng',wiki:'England_national_football_team',nick:'Three Lions',conf:'UEFA',rank:4,bestWC:'Campeón (1966)',founded:1863,achiev:['Copa del Mundo 1966 en Wembley con Bobby Moore','Inventores del fútbol moderno (1863)','Jude Bellingham: El talento más valorado del mundo'],history:'La nación <strong>inventora del fútbol</strong> ganó su único título mundialista en 1966 en Wembley, con Bobby Moore levantando la Copa ante su público. El "¡El fútbol viene a casa!" es el anhelo de décadas. <strong>Harry Kane</strong> (Bayern Múnich), <strong>Jude Bellingham</strong> (Real Madrid) y <strong>Phil Foden</strong> (Manchester City) forman la trinidad dorada que lleva años siendo favorita y que puede escribir la historia que los ingleses llevan 60 años esperando.'},
+  "🏴ó §ó ¢ó ¥ó ®ó §ó ¿ Inglaterra":{flag:'gb-eng',wiki:'England_national_football_team',nick:'Three Lions',conf:'UEFA',rank:4,bestWC:'Campeón (1966)',founded:1863,achiev:['Copa del Mundo 1966 en Wembley con Bobby Moore','Inventores del fútbol moderno (1863)','Jude Bellingham: El talento más valorado del mundo'],history:'La nación <strong>inventora del fútbol</strong> ganó su único título mundialista en 1966 en Wembley, con Bobby Moore levantando la Copa ante su público. El "¡El fútbol viene a casa!" es el anhelo de décadas. <strong>Harry Kane</strong> (Bayern Múnich), <strong>Jude Bellingham</strong> (Real Madrid) y <strong>Phil Foden</strong> (Manchester City) forman la trinidad dorada que lleva años siendo favorita y que puede escribir la historia que los ingleses llevan 60 años esperando.'},
   "🇭🇷 Croacia":{flag:'hr',wiki:'Croatia_national_football_team',nick:'Vatreni (Los Ardientes)',conf:'UEFA',rank:10,bestWC:'Finalista (2018), 3er Lugar (2022)',founded:1912,achiev:['Final del Mundial 2018','3er Lugar del Mundial 2022','Luka Modrić: Balón de Oro 2018'],history:'Los <strong>"Vatreni"</strong> llegaron a la final del Mundial 2018 y al tercer lugar de 2022, un rendimiento extraordinario para una nación de 4 millones de habitantes. <strong>Luka Modrić</strong>, Balón de Oro 2018, es una de las leyendas vivas del fútbol mundial. La Croacia de Modrić y Kovačić ha demostrado que las naciones pequeñas también pueden llegar a lo más alto con inteligencia táctica y calidad técnica superior.'},
   "🇬🇭 Ghana":{flag:'gh',wiki:'Ghana_national_football_team',nick:'Estrellas Negras',conf:'CAF',rank:65,bestWC:'Cuartos de Final (2010)',founded:1957,achiev:['4 × Copa Africana de Naciones (1963, 1965, 1978, 1982)','Cuartos de Final Sudáfrica 2010','Thomas Partey: Arsenal y selección'],history:'Las <strong>"Estrellas Negras"</strong> llegaron a los cuartos de final en Sudáfrica 2010, donde eliminaron al equipo local en un emocionante partido. <strong>Thomas Partey</strong> del Arsenal y <strong>Mohammed Kudus</strong> del West Ham lideran la nueva generación que busca repetir ese histórico sueño mundialista en 2026.'},
   "🇵🇦 Panamá":{flag:'pa',wiki:'Panama_national_football_team',nick:'Los Canaleros',conf:'CONCACAF',rank:55,bestWC:'Fase de Grupos (Rusia 2018)',founded:1937,achiev:['Primera clasificación al Mundial en Rusia 2018','Campeones Liga de Naciones CONCACAF 2023','Rommel Fernández: leyenda histórica'],history:'Los <strong>"Canaleros"</strong> lograron su primer Mundial en Rusia 2018, un hito histórico para el fútbol panameño. Aunque cayeron en fase de grupos, el partido ante Inglaterra fue histórico con el primer gol mundialista de Panamá, celebrado como un título nacional. <strong>Aníbal Godoy</strong> y <strong>Adalberto Carrasquilla</strong> lideran una generación competitiva que busca en 2026 superar aquella primera actuación y demostrar que el fútbol centroamericano llegó para quedarse.'}
@@ -314,7 +314,7 @@ const ANTHEMS = {
   "🇧🇷 Brasil":           "https://upload.wikimedia.org/wikipedia/commons/transcoded/9/9b/Hino_Nacional_Brasileiro_instrumental.ogg/Hino_Nacional_Brasileiro_instrumental.ogg.mp3",
   "🇲🇦 Marruecos":        "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/3f/National_Anthem_of_Morocco.ogg/National_Anthem_of_Morocco.ogg.mp3",
   "🇭🇹 Haití":            "https://upload.wikimedia.org/wikipedia/commons/transcoded/4/4f/Haiti_National_Anthem.ogg/Haiti_National_Anthem.ogg.mp3",
-  "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia":        "https://files.catbox.moe/d09fhq.mp3",
+  "🏴ó §ó ¢ó ³ó £ó ´ó ¿ Escocia":        "https://files.catbox.moe/d09fhq.mp3",
   // Grupo D
   "🇺🇸 EE. UU.":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/6/65/Star_Spangled_Banner_instrumental.ogg/Star_Spangled_Banner_instrumental.ogg.mp3",
   "🇵🇾 Paraguay":         "https://upload.wikimedia.org/wikipedia/commons/transcoded/a/a6/Paraguayan_National_Anthem.oga/Paraguayan_National_Anthem.oga.mp3",
@@ -356,7 +356,7 @@ const ANTHEMS = {
   "🇺🇿 Uzbekistán":       "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/36/National_Anthem_of_Uzbekistan_%28Instrumental%29.ogg/National_Anthem_of_Uzbekistan_%28Instrumental%29.ogg.mp3",
   "🇨🇴 Colombia":         "https://upload.wikimedia.org/wikipedia/commons/transcoded/5/55/United_States_Navy_Band_-_%C2%A1Oh%2C_gloria_inmarcesible%21.ogg/United_States_Navy_Band_-_%C2%A1Oh%2C_gloria_inmarcesible%21.ogg.mp3",
   // Grupo L
-  "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra":    "https://upload.wikimedia.org/wikipedia/commons/transcoded/0/03/United_States_Navy_Band_-_God_Save_the_Queen.oga/United_States_Navy_Band_-_God_Save_the_Queen.oga.mp3",
+  "🏴ó §ó ¢ó ¥ó ®ó §ó ¿ Inglaterra":    "https://upload.wikimedia.org/wikipedia/commons/transcoded/0/03/United_States_Navy_Band_-_God_Save_the_Queen.oga/United_States_Navy_Band_-_God_Save_the_Queen.oga.mp3",
   "🇭🇷 Croacia":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/d/df/Lijepa_nasa_domovino_instrumental.ogg/Lijepa_nasa_domovino_instrumental.ogg.mp3",
   "🇬🇭 Ghana":            "https://upload.wikimedia.org/wikipedia/commons/transcoded/4/43/National_Anthem_of_Ghana.ogg/National_Anthem_of_Ghana.ogg.mp3",
   "🇵🇦 Panamá":           "https://upload.wikimedia.org/wikipedia/commons/transcoded/4/4a/Panama_National_Anthem.ogg/Panama_National_Anthem.ogg.mp3",
@@ -575,6 +575,11 @@ function incrementRepetida(c, i) {
   sub.repetida = sub.repetida >= 9 ? 0 : sub.repetida + 1;
   saveStickerSubData(c, i, sub);
 }
+function decrementRepetida(c, i) {
+  const sub = getStickerSubData(c, i);
+  sub.repetida = sub.repetida > 1 ? sub.repetida - 1 : 0;
+  saveStickerSubData(c, i, sub);
+}
 function toggleReserva(c, i) {
   const sub = getStickerSubData(c, i);
   sub.reserva = !sub.reserva;
@@ -587,14 +592,20 @@ function getStickerSubClasses(c, i) {
 }
 function getStickerSubControlsHtml(c, i) {
   const sub = getStickerSubData(c, i);
-  const repLabel = sub.repetida > 0 ? `🔄 x${sub.repetida}` : '🔄 REP';
-  return `<span class="s-sub-btn sub-repetida${sub.repetida > 0 ? ' active' : ' sub-none'}" data-sub-action="rep">${repLabel}</span>
+  if (sub.repetida > 0) {
+    return `<span class="s-sub-btn sub-repetida active sub-dec" data-sub-action="rep-dec" title="Dar una">−</span><span class="s-sub-btn sub-repetida active" data-sub-action="rep" title="Tengo ${sub.repetida} repetida(s)">🔄 x${sub.repetida}</span><span class="s-sub-btn sub-repetida active sub-inc" data-sub-action="rep" title="Añadir repetida">+</span>
+    <span class="s-sub-btn sub-reserva${sub.reserva ? ' active' : ' sub-none'}" data-sub-action="res">📌 RES</span>`;
+  }
+  return `<span class="s-sub-btn sub-repetida sub-none" data-sub-action="rep">🔄 REP</span>
     <span class="s-sub-btn sub-reserva${sub.reserva ? ' active' : ' sub-none'}" data-sub-action="res">📌 RES</span>`;
 }
 function getPcardSubControlsHtml(c, i) {
   const sub = getStickerSubData(c, i);
-  const repLabel = sub.repetida > 0 ? `🔄 x${sub.repetida}` : '🔄 REP';
-  return `<span class="pcard-sub sub-repetida${sub.repetida > 0 ? ' active' : ' sub-none'}" data-action="rep">${repLabel}</span>
+  if (sub.repetida > 0) {
+    return `<span class="pcard-sub sub-repetida active sub-dec" data-action="rep-dec" title="Dar una">−</span><span class="pcard-sub sub-repetida active" data-action="rep" title="Tengo ${sub.repetida} repetida(s)">🔄 x${sub.repetida}</span><span class="pcard-sub sub-repetida active sub-inc" data-action="rep" title="Añadir repetida">+</span>
+    <span class="pcard-sub sub-reserva${sub.reserva ? ' active' : ' sub-none'}" data-action="res">📌 RES</span>`;
+  }
+  return `<span class="pcard-sub sub-repetida sub-none" data-action="rep">🔄 REP</span>
     <span class="pcard-sub sub-reserva${sub.reserva ? ' active' : ' sub-none'}" data-action="res">📌 RES</span>`;
 }
 function clearStickerSubState(c, i) { delete state[getSubKey(c, i)]; saveState(); }
@@ -803,6 +814,7 @@ function renderGroups() {
           subBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (subBtn.dataset.subAction === 'rep') incrementRepetida('INTRO', ii);
+            if (subBtn.dataset.subAction === 'rep-dec') decrementRepetida('INTRO', ii);
             if (subBtn.dataset.subAction === 'res') toggleReserva('INTRO', ii);
             updateAll();
             renderIntroList();
@@ -1019,6 +1031,7 @@ function renderStickerList(country, listEl, gColor) {
       subBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         if (subBtn.dataset.subAction === 'rep') incrementRepetida(country, i);
+        if (subBtn.dataset.subAction === 'rep-dec') decrementRepetida(country, i);
         if (subBtn.dataset.subAction === 'res') toggleReserva(country, i);
         updateAll();
         const pl = li.closest('.sticker-list');
@@ -1145,6 +1158,7 @@ function openOverlay(country) {
       e.stopPropagation();
       const action = e.currentTarget.dataset.action;
       if (action === 'rep') incrementRepetida(country, i);
+      if (action === 'rep-dec') decrementRepetida(country, i);
       if (action === 'res') toggleReserva(country, i);
       const row = card.querySelector('.pcard-sub-row');
       if (row) {
@@ -1995,6 +2009,7 @@ function _injectInAppBtns(){
 loadA11yPrefs();
 setupA11yUI();
 applyA11yPrefs();
+saveA11yPrefs(); // garantiza que localStorage tenga el tema aunque nunca se haya abierto el panel
 
 // ════════════ COUNTDOWN INAUGURAL ════════════
 (function initCountdown() {
