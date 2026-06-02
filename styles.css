@@ -1807,3 +1807,61 @@ html[data-theme="contrast"] .amigos-card-arrow{color:#ff0}
   .amigos-card{padding:12px}
   .amigos-card-avatar{width:44px;height:44px}
 }
+
+/* ══════════════════════════════════════════════
+   FASE 2 — Perfil mejorado
+   ══════════════════════════════════════════════ */
+
+/* ── Avatar upload en setup modal ── */
+.psetup-avatar-row{display:flex;align-items:center;gap:16px;padding:10px 0}
+.psetup-avatar-actions{display:flex;flex-direction:column;gap:6px}
+.psetup-avatar-label{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.05em;cursor:pointer;transition:all .2s}
+.psetup-avatar-label:hover{background:var(--bg3);border-color:#3a5280}
+
+/* ── Player chips (setup form) ── */
+.player-chips-row{display:flex;flex-wrap:wrap;gap:6px;min-height:32px;padding:4px 0}
+.player-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.3);color:var(--text);font-size:.82rem;font-family:'Barlow Condensed',sans-serif;font-weight:600}
+.player-chip-remove{background:none;border:none;cursor:pointer;color:var(--dim);font-size:1rem;line-height:1;padding:0 2px;transition:color .15s}
+.player-chip-remove:hover{color:var(--red)}
+.psetup-player-search-wrap{position:relative;margin-top:6px}
+.player-options-list{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:200;display:flex;flex-wrap:wrap;gap:5px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);max-height:200px;overflow-y:auto}
+.player-option{padding:5px 10px;border-radius:20px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:.8rem;cursor:pointer;transition:all .15s;white-space:nowrap}
+.player-option:hover{background:rgba(245,197,24,.15);border-color:rgba(245,197,24,.4);color:var(--gold)}
+html[data-theme="light"] .player-options-list{box-shadow:0 8px 24px rgba(0,0,0,.12)}
+
+/* ── Player chips (vista pública) ── */
+.player-chips-row-view{display:flex;flex-wrap:wrap;gap:6px;padding:8px 0}
+.player-chip-view{display:inline-flex;align-items:center;padding:5px 12px;border-radius:20px;background:rgba(245,197,24,.1);border:1px solid rgba(245,197,24,.25);color:var(--text);font-size:.82rem;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:.02em}
+.pview-empty{color:var(--dim);font-size:.85rem;font-style:italic}
+
+/* ── Sección jugadores en tarjeta pública ── */
+.card-players-section{padding:12px 20px;border-top:1px solid var(--border)}
+.card-section-label{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+
+/* ── Frase futbolera en tarjeta pública ── */
+.card-frase-wrap{display:flex;align-items:flex-start;gap:8px;padding:12px 20px 6px;border-top:1px solid var(--border);margin-top:2px}
+.card-frase-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.card-frase{font-size:.88rem;color:var(--dim);line-height:1.45;font-style:italic}
+html[data-theme="light"] .card-frase{color:var(--muted)}
+
+/* ── Frase en modal de vista ── */
+.pview-frase-box{display:flex;align-items:flex-start;gap:8px;padding:12px 0;border-top:1px solid var(--border)}
+.pview-frase-icon{font-size:1.1rem;flex-shrink:0}
+.pview-frase{font-size:.88rem;color:var(--dim);line-height:1.45}
+.pview-section-label{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;padding-top:12px;border-top:1px solid var(--border)}
+.pview-players-section{padding:4px 0}
+
+/* ── Botón Apoyar ── */
+.apoyo-zone{display:flex;align-items:center;gap:12px;padding:14px 20px;border-top:1px solid var(--border)}
+.apoyo-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;border:1px solid rgba(245,197,24,.35);background:rgba(245,197,24,.08);color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:.06em;cursor:pointer;transition:all .25s}
+.apoyo-btn:hover:not(:disabled){background:rgba(245,197,24,.18);border-color:var(--gold);transform:scale(1.03);box-shadow:0 4px 16px rgba(245,197,24,.2)}
+.apoyo-btn:disabled{cursor:default;opacity:.75}
+.apoyo-btn.apoyo-done{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.4);color:var(--green)}
+.apoyo-btn.apoyo-own{background:transparent;border-color:var(--border);color:var(--dim)}
+.apoyo-icon{font-size:1.1rem}
+.apoyo-count{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:22px;border-radius:999px;background:rgba(245,197,24,.15);padding:0 6px;font-size:.82rem;font-weight:900;color:var(--gold)}
+.apoyo-hint{font-size:.8rem;color:var(--dim)}
+@keyframes apoyoBurst{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
+.apoyo-burst{animation:apoyoBurst .5s ease}
+html[data-theme="light"] .apoyo-btn{background:rgba(212,164,0,.08);border-color:rgba(212,164,0,.3)}
+html[data-theme="light"] .apoyo-btn:hover:not(:disabled){background:rgba(212,164,0,.18);border-color:var(--gold)}
