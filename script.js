@@ -213,7 +213,7 @@ const GROUPS = {
   I:['🇫🇷 Francia','🇸🇳 Senegal','🇮🇶 Irak','🇳🇴 Noruega'],
   J:['🇦🇷 Argentina','🇩🇿 Argelia','🇦🇹 Austria','🇯🇴 Jordania'],
   K:['🇵🇹 Portugal','🇨🇩 República Democrática del Congo','🇺🇿 Uzbekistán','🇨🇴 Colombia'],
-  L:[🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra','🇭🇷 Croacia','🇬🇭 Ghana','🇵🇦 Panamá']
+  L:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra','🇭🇷 Croacia','🇬🇭 Ghana','🇵🇦 Panamá']
 };
 
 
