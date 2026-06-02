@@ -268,16 +268,42 @@ html[data-theme="contrast"] #a11y-panel{background:#000;border-left:2px solid #f
               <div class="card-bio" id="pc-bio" style="display:none"></div>
             </div>
           </div>
+          <!-- Frase futbolera -->
+          <div class="card-frase-wrap" id="pc-frase-wrap" style="display:none">
+            <span class="card-frase-icon">💬</span>
+            <em class="card-frase" id="pc-frase"></em>
+          </div>
         </div>
+
         <div class="card-stats">
           <div class="card-stat">
-            <span class="card-stat-label">⚽ Equipo favorito</span>
+            <span class="card-stat-label">🌍 Selección favorita</span>
             <span class="card-stat-val" id="pc-team">—</span>
           </div>
           <div class="card-stat">
             <span class="card-stat-label">🧤 Posición</span>
             <span class="card-stat-val" id="pc-position">—</span>
           </div>
+          <div class="card-stat" id="pc-estadio-wrap" style="display:none">
+            <span class="card-stat-label">🏟️ Estadio / País fav.</span>
+            <span class="card-stat-val" id="pc-estadio">—</span>
+          </div>
+        </div>
+
+        <!-- Jugadores favoritos -->
+        <div class="card-players-section" id="pc-players-section" style="display:none">
+          <div class="card-section-label">⭐ Jugadores favoritos del Mundial</div>
+          <div id="pc-jugadores" class="player-chips-row-view"></div>
+        </div>
+
+        <!-- Botón Apoyar -->
+        <div class="apoyo-zone" id="apoyo-zone">
+          <button class="apoyo-btn" id="apoyo-btn" title="Apoyar este perfil">
+            <span class="apoyo-icon">🏆</span>
+            <span class="apoyo-label">Apoyar</span>
+            <span class="apoyo-count" id="apoyo-count">0</span>
+          </button>
+          <span class="apoyo-hint" id="apoyo-hint"></span>
         </div>
 
         <!-- Zona de amistad: se rellena dinámicamente -->
@@ -387,6 +413,7 @@ const GROUP_COLORS = {
 let _currentUser   = null   // usuario logueado (o null)
 let _profileData   = null   // perfil público que se muestra
 let _friendship    = null   // relación actual con ese perfil
+let _isOwnProfile  = false  // true si el perfil es del usuario logueado
 let _progress      = {}
 let _filter        = 'all'
 
@@ -422,6 +449,7 @@ async function loadPage(uname) {
 
     // 3. Determinar nivel de acceso
     const level = await determineLevel(user, profile)
+    _isOwnProfile = (level === 'own')
 
     // 4. Renderizar perfil y zona de amistad
     renderProfile(profile)
@@ -509,8 +537,92 @@ function renderProfile(p) {
   document.getElementById('pc-username').textContent = '@' + p.username
   document.getElementById('pc-team').textContent     = p.favorite_team || '—'
   document.getElementById('pc-position').textContent = p.favorite_position || '—'
+
+  // Bio
   const bioEl = document.getElementById('pc-bio')
   if (p.bio) { bioEl.textContent = p.bio; bioEl.style.display = '' }
+
+  // Estadio / país
+  const estadioEl   = document.getElementById('pc-estadio')
+  const estadioWrap = document.getElementById('pc-estadio-wrap')
+  if (estadioEl && p.estadio_favorito) {
+    estadioEl.textContent = p.estadio_favorito
+    if (estadioWrap) estadioWrap.style.display = ''
+  }
+
+  // Frase futbolera
+  const fraseEl   = document.getElementById('pc-frase')
+  const fraseWrap = document.getElementById('pc-frase-wrap')
+  if (fraseEl && p.frase_futbolera) {
+    fraseEl.textContent = p.frase_futbolera
+    if (fraseWrap) fraseWrap.style.display = ''
+  }
+
+  // Jugadores favoritos
+  const jugsSection = document.getElementById('pc-players-section')
+  const jugsEl      = document.getElementById('pc-jugadores')
+  const jugs = Array.isArray(p.jugadores_favoritos) ? p.jugadores_favoritos : []
+  if (jugsEl && jugs.length) {
+    jugsEl.innerHTML = jugs.map(j => `<span class="player-chip-view">${j}</span>`).join('')
+    if (jugsSection) jugsSection.style.display = ''
+  }
+
+  // Apoyar
+  renderApoyoBtn(p)
+}
+
+// ── Render: botón Apoyar ──────────────────────────
+const APOYO_KEY = 'apoyo_dado_'
+function renderApoyoBtn(p) {
+  const zone     = document.getElementById('apoyo-zone')
+  const btn      = document.getElementById('apoyo-btn')
+  const countEl  = document.getElementById('apoyo-count')
+  const hintEl   = document.getElementById('apoyo-hint')
+  if (!zone || !btn) return
+
+  const total = p.apoyo_count || 0
+  if (countEl) countEl.textContent = total
+
+  // Si es mi propio perfil, solo mostrar contador
+  if (_isOwnProfile) {
+    btn.disabled = true
+    btn.classList.add('apoyo-own')
+    if (hintEl) hintEl.textContent = `${total} apoyo${total !== 1 ? 's' : ''} recibido${total !== 1 ? 's' : ''}`
+    return
+  }
+
+  // Verificar si ya apoyé (guardado en localStorage)
+  const yaDi = localStorage.getItem(APOYO_KEY + p.id) === 'true'
+  if (yaDi) {
+    btn.disabled = true
+    btn.classList.add('apoyo-done')
+    const label = btn.querySelector('.apoyo-label')
+    if (label) label.textContent = '¡Apoyado!'
+    if (hintEl) hintEl.textContent = 'Ya apoyaste este perfil 🏆'
+    return
+  }
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true
+    const label = btn.querySelector('.apoyo-label')
+    if (label) label.textContent = 'Apoyando...'
+    try {
+      const { error } = await supabase.rpc('increment_apoyo', { profile_id: p.id })
+      if (error) throw error
+      const newTotal = total + 1
+      if (countEl) countEl.textContent = newTotal
+      localStorage.setItem(APOYO_KEY + p.id, 'true')
+      btn.classList.add('apoyo-done')
+      if (label) label.textContent = '¡Apoyado!'
+      if (hintEl) hintEl.textContent = 'Ya apoyaste este perfil 🏆'
+      btn.classList.add('apoyo-burst')
+      setTimeout(() => btn.classList.remove('apoyo-burst'), 600)
+    } catch (err) {
+      console.error('apoyo error:', err)
+      btn.disabled = false
+      if (label) label.textContent = 'Apoyar'
+    }
+  }, { once: true })
 }
 
 // ── Render: zona de amistad ───────────────────────
