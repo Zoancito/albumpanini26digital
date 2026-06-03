@@ -1127,6 +1127,20 @@ export async function unlockMusicMedal() {
   }
 }
 
+ // MARK ALL STICKERS OF A COUNTRY AS 'TENGO' (for medal unlocking)
+function markAllStickersAsTengo(country) {
+  // Guard: ensure country exists in albumData
+  const stickers = albumData[country];
+  if (!stickers) return;
+  // Set every sticker key to 'tengo'
+  stickers.forEach((_, idx) => {
+    state[getStickerKey(country, idx)] = 'tengo';
+  });
+  saveState();          // persist the change
+  updateAll();          // triggers medal checking & UI refresh
+}
+
+// MARK ALL STICKERS OF A COUNTRY AS 'TENGO' (for medal unlocking)
 function updateAll() {
   updateStatsBar();
   buildGroupTabs();
