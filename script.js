@@ -1074,37 +1074,37 @@ function updateCountryBar(country, gColor) {
 
 // ════════════ MEDALLERO ════════════
 
-let _localMedals = new Set()  // medallas ya guardadas (evita duplicados)
-
 async function checkAndUnlockMedals() {
   const profile = getCurrentProfile()
   if (!profile) return
 
-  const stored = Array.isArray(profile.medallas) ? profile.medallas : []
-  _localMedals = new Set(stored)
+  const stored     = Array.isArray(profile.medallas) ? profile.medallas : []
+  const storedSet  = new Set(stored)
 
-  // Verificar medallas de país
+  // Recalcular el set COMPLETO según estado actual del álbum
   const countryEarned = checkCountryMedals(getCountryStats, albumData)
+  const gs            = getGlobalStats()
+  const albumEarned   = checkAlbumComplete(gs.owned, gs.total) ? ['album_complete'] : []
 
-  // Verificar álbum completo  (getGlobalStats es la función real en script.js)
-  const gs = getGlobalStats()
-  const albumEarned = checkAlbumComplete(gs.owned, gs.total) ? ['album_complete'] : []
+  // La medalla musical NO se revoca (no depende del álbum)
+  const musicMedal = stored.includes('music_note') ? ['music_note'] : []
 
-  const allEarned = [...countryEarned, ...albumEarned]
-  const newOnes   = allEarned.filter(id => !_localMedals.has(id))
+  const currentMedals = [...new Set([...countryEarned, ...albumEarned, ...musicMedal])]
+  const currentSet    = new Set(currentMedals)
 
-  console.log('[medals] earned:', allEarned, '| new:', newOnes)  // debug — quitar en producción
+  // Detectar cambios en cualquier dirección (ganadas O perdidas)
+  const hasChanges = currentMedals.some(id => !storedSet.has(id)) ||
+                     stored.some(id => !currentSet.has(id))
 
-  if (newOnes.length === 0) return
+  if (!hasChanges) return
 
-  const merged = [...stored, ...newOnes]
+  // Medallas recién ganadas (para mostrar toast)
+  const newOnes = currentMedals.filter(id => !storedSet.has(id))
+
   try {
-    await supabase.from('profiles').update({ medallas: merged }).eq('id', profile.id)
-    profile.medallas = merged
-    newOnes.forEach(id => {
-      _localMedals.add(id)
-      showMedalUnlockToast(id)
-    })
+    await supabase.from('profiles').update({ medallas: currentMedals }).eq('id', profile.id)
+    profile.medallas = currentMedals
+    newOnes.forEach(id => showMedalUnlockToast(id))
   } catch (e) {
     console.error('[medals] save error:', e)
   }

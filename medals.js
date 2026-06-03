@@ -4,6 +4,8 @@
 // ═══════════════════════════════════════════════════
 
 // ── Definición de medallas por selección ──────────
+// NOTA: Inglaterra (🏴󠁧󠁢󠁥󠁮󠁧󠁿) y Escocia (🏴󠁧󠁢󠁳󠁣󠁴󠁿) usan flags de subdivisión GB.
+// Si editas este archivo, copia esas banderas desde aquí, no las regeneres.
 export const COUNTRY_MEDALS = [
   { id:'country_mx', type:'country', name:'México',              flag:'🇲🇽', countryKey:'🇲🇽 México',                    desc:'Completaste todos los cromos de México' },
   { id:'country_za', type:'country', name:'Sudáfrica',           flag:'🇿🇦', countryKey:'🇿🇦 Sudáfrica',                 desc:'Completaste todos los cromos de Sudáfrica' },
@@ -51,8 +53,8 @@ export const COUNTRY_MEDALS = [
   { id:'country_hr', type:'country', name:'Croacia',             flag:'🇭🇷', countryKey:'🇭🇷 Croacia',                  desc:'Completaste todos los cromos de Croacia' },
   { id:'country_gh', type:'country', name:'Ghana',               flag:'🇬🇭', countryKey:'🇬🇭 Ghana',                    desc:'Completaste todos los cromos de Ghana' },
   { id:'country_pa', type:'country', name:'Panamá',              flag:'🇵🇦', countryKey:'🇵🇦 Panamá',                   desc:'Completaste todos los cromos de Panamá' },
-      { id:'country_gbeng', type:'country', name:'Inglaterra',   flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', countryKey:'🏴ó §ó ¢ó ¥ó ®ó §ó ¿ Inglaterra', desc:'Completaste todos los cromos de Inglaterra' },
-  { id:'country_gbsct', type:'country', name:'Escocia',       flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', countryKey:'🏴ó §ó ¢ó ³ó £ó ´ó ¿ Escocia', desc:'Completaste todos los cromos de Escocia' },
+      { id:'country_gbeng', type:'country', name:'Inglaterra',   flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', countryKey:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra', desc:'Completaste todos los cromos de Inglaterra' },
+  { id:'country_gbsct', type:'country', name:'Escocia',      flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', countryKey:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia', desc:'Completaste todos los cromos de Escocia' },
 ]
 
 // ── Medallas especiales ───────────────────────────
@@ -224,4 +226,53 @@ export function showMedalUnlockToast(medalId) {
     toast.classList.remove('medal-toast-in')
     setTimeout(() => toast.remove(), 400)
   }, 3500)
+}
+
+// ── Calcular medallas desde un objeto progress ────
+/**
+ * Calcula medallas ganadas a partir de un progress raw
+ * (el mismo formato que se guarda en album_progress.progress).
+ * Clave de estado: `${country}::${i}` → 'tengo'|'falta'|'none'
+ * 
+ * @param {Object} progress  - { "🇲🇦 Marruecos::0": "tengo", ... }
+ * @param {Object} albumData - { "🇲🇦 Marruecos": [{...}, ...], ... }
+ * @param {Array}  introData - array de stickers INTRO
+ * @returns {string[]} array de medal IDs ganados
+ */
+export function computeMedalsFromProgress(progress, albumData, introData) {
+  if (!progress || !albumData) return []
+  const earned = []
+
+  // Medallas de país
+  for (const m of COUNTRY_MEDALS) {
+    const stickers = albumData[m.countryKey]
+    if (!stickers || stickers.length === 0) continue
+    const total = stickers.length
+    let owned = 0
+    for (let i = 0; i < total; i++) {
+      if (progress[`${m.countryKey}::${i}`] === 'tengo') owned++
+    }
+    if (owned >= total) earned.push(m.id)
+  }
+
+  // Medalla álbum completo
+  let totalOwned = 0, totalAll = 0
+  // INTRO
+  if (introData) {
+    for (let i = 0; i < introData.length; i++) {
+      totalAll++
+      if (progress[`INTRO::${i}`] === 'tengo') totalOwned++
+    }
+  }
+  // Países
+  for (const key of Object.keys(albumData)) {
+    const arr = albumData[key]
+    totalAll += arr.length
+    for (let i = 0; i < arr.length; i++) {
+      if (progress[`${key}::${i}`] === 'tengo') totalOwned++
+    }
+  }
+  if (totalAll > 0 && totalOwned >= totalAll) earned.push('album_complete')
+
+  return earned
 }
