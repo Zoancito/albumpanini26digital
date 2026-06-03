@@ -311,7 +311,24 @@ html[data-theme="contrast"] #a11y-panel{background:#000;border-left:2px solid #f
       </div>
     </div>
 
-    <!-- Album section: se rellena dinámicamente según nivel -->
+    <!-- Medallero -->
+    <div class="medallero-card" id="medallero-section">
+      <div class="medallero-header">
+        <div class="medallero-header-left">
+          <span class="medallero-title-icon">🏅</span>
+          <div>
+            <div class="medallero-title">MEDALLERO</div>
+            <div class="medallero-subtitle" id="medallero-subtitle">Cargando...</div>
+          </div>
+        </div>
+        <button class="medallero-toggle-main" id="medallero-toggle" aria-expanded="true">▲</button>
+      </div>
+      <div id="medallero-body">
+        <div id="medallero-container"></div>
+      </div>
+    </div>
+
+    <!-- Album section -->
     <div id="album-section"></div>
 
     <!-- CTA -->
@@ -327,6 +344,7 @@ html[data-theme="contrast"] #a11y-panel{background:#000;border-left:2px solid #f
 
 <script type="module">
 import { supabase } from '../supabase.js'
+import { renderMedallero } from '../medals.js'
 import {
   getFriendshipStatus,
   sendFriendRequest,
@@ -454,6 +472,9 @@ async function loadPage(uname) {
     // 4. Renderizar perfil y zona de amistad
     renderProfile(profile)
     renderFriendZone(level)
+
+    // 4b. Renderizar medallero
+    await renderMedalleroSection(profile, level)
 
     // 5. Renderizar sección de álbum según nivel
     if (level === 'own' || level === 2) {
@@ -623,6 +644,43 @@ function renderApoyoBtn(p) {
       if (label) label.textContent = 'Apoyar'
     }
   }, { once: true })
+}
+
+// ── Render: medallero ─────────────────────────────
+async function renderMedalleroSection(profile, level) {
+  const section   = document.getElementById('medallero-section')
+  const container = document.getElementById('medallero-container')
+  const subtitle  = document.getElementById('medallero-subtitle')
+  const toggle    = document.getElementById('medallero-toggle')
+  const body      = document.getElementById('medallero-body')
+  if (!section || !container) return
+
+  // Mostrar medallas bloqueadas solo en perfil propio
+  const showLocked = (level === 'own')
+
+  // Cargar medallas del perfil
+  const medals = Array.isArray(profile.medallas) ? profile.medallas : []
+
+  if (subtitle) {
+    subtitle.textContent = medals.length > 0
+      ? `${medals.length} medalla${medals.length !== 1 ? 's' : ''} obtenida${medals.length !== 1 ? 's' : ''}`
+      : (showLocked ? 'Completa selecciones para ganar medallas' : 'Sin medallas aún')
+  }
+
+  // Render
+  renderMedallero(container, medals, showLocked)
+
+  // Toggle colapsar/expandir
+  if (toggle && body) {
+    toggle.addEventListener('click', () => {
+      const open = body.style.display !== 'none'
+      body.style.display = open ? 'none' : ''
+      toggle.textContent = open ? '▼' : '▲'
+      toggle.setAttribute('aria-expanded', !open)
+    })
+  }
+
+  section.style.display = ''
 }
 
 // ── Render: zona de amistad ───────────────────────
