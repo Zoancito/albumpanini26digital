@@ -344,7 +344,7 @@ html[data-theme="contrast"] #a11y-panel{background:#000;border-left:2px solid #f
 
 <script type="module">
 import { supabase } from '../supabase.js'
-import { renderMedallero } from '../medals.js'
+import { renderMedallero, computeMedalsFromProgress } from '../medals.js'
 import {
   getFriendshipStatus,
   sendFriendRequest,
@@ -473,9 +473,6 @@ async function loadPage(uname) {
     renderProfile(profile)
     renderFriendZone(level)
 
-    // 4b. Renderizar medallero
-    await renderMedalleroSection(profile, level)
-
     // 5. Renderizar sección de álbum según nivel
     if (level === 'own' || level === 2) {
       // Intentar cargar progreso (RLS lo permite solo si son amigos o es el dueño)
@@ -486,11 +483,17 @@ async function loadPage(uname) {
         .eq('album_id', 'wc2026')
         .maybeSingle()
 
-      renderFullAlbumSection(profile, albumRow?.progress || {})
+      const progress = albumRow?.progress || {}
+      renderFullAlbumSection(profile, progress)
+
+      // Calcular medallas desde el progress real y sincronizar
+      await syncMedalsFromProgress(profile, progress)
     } else {
       // Calcular % sin necesitar el progreso detallado (stats públicos)
       const pct = await getPublicPct(profile.id)
       renderLockedAlbumSection(level, pct)
+      // Mostrar medallero con lo guardado en Supabase (sin recalcular)
+      await renderMedalleroSection(profile, level)
     }
 
     // 6. Mostrar página
@@ -644,6 +647,46 @@ function renderApoyoBtn(p) {
       if (label) label.textContent = 'Apoyar'
     }
   }, { once: true })
+}
+
+// ── Sincronizar medallas desde progress real ──────
+/**
+ * Calcula las medallas que corresponden según el progress actual
+ * y actualiza Supabase si difieren de lo guardado.
+ * Preserva la medalla musical (no depende del álbum).
+ */
+async function syncMedalsFromProgress(profile, progress) {
+  try {
+    const storedMedals  = Array.isArray(profile.medallas) ? profile.medallas : []
+    const musicMedal    = storedMedals.includes('music_note') ? ['music_note'] : []
+
+    // Calcular medallas desde el progress real
+    const computed = computeMedalsFromProgress(progress, albumData, INTRO_DATA)
+    const newSet   = [...new Set([...computed, ...musicMedal])]
+
+    // Comparar con las guardadas
+    const storedSet  = new Set(storedMedals)
+    const newSetSet  = new Set(newSet)
+    const changed    = newSet.some(id => !storedSet.has(id)) ||
+                       storedMedals.some(id => id !== 'music_note' && !newSetSet.has(id))
+
+    if (!changed) {
+      // Sin cambios: re-render con las ya guardadas
+      await renderMedalleroSection(profile, _isOwnProfile ? 'own' : 2)
+      return
+    }
+
+    // Guardar set corregido en Supabase
+    await supabase.from('profiles').update({ medallas: newSet }).eq('id', profile.id)
+    profile.medallas = newSet
+
+    // Re-render el medallero con los datos actualizados
+    await renderMedalleroSection(profile, _isOwnProfile ? 'own' : 2)
+  } catch (e) {
+    console.error('[medals] syncMedalsFromProgress error:', e)
+    // Fallback: render con lo que hay
+    await renderMedalleroSection(profile, _isOwnProfile ? 'own' : 2)
+  }
 }
 
 // ── Render: medallero ─────────────────────────────
