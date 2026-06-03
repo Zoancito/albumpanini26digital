@@ -51,6 +51,8 @@ export const COUNTRY_MEDALS = [
   { id:'country_hr', type:'country', name:'Croacia',             flag:'🇭🇷', countryKey:'🇭🇷 Croacia',                  desc:'Completaste todos los cromos de Croacia' },
   { id:'country_gh', type:'country', name:'Ghana',               flag:'🇬🇭', countryKey:'🇬🇭 Ghana',                    desc:'Completaste todos los cromos de Ghana' },
   { id:'country_pa', type:'country', name:'Panamá',              flag:'🇵🇦', countryKey:'🇵🇦 Panamá',                   desc:'Completaste todos los cromos de Panamá' },
+      { id:'country_gbeng', type:'country', name:'Inglaterra',   flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', countryKey:'🏴ó §ó ¢ó ¥ó ®ó §ó ¿ Inglaterra', desc:'Completaste todos los cromos de Inglaterra' },
+  { id:'country_gbsct', type:'country', name:'Escocia',       flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', countryKey:'🏴ó §ó ¢ó ³ó £ó ´ó ¿ Escocia', desc:'Completaste todos los cromos de Escocia' },
 ]
 
 // ── Medallas especiales ───────────────────────────
