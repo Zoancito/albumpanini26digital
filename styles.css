@@ -1865,3 +1865,76 @@ html[data-theme="light"] .card-frase{color:var(--muted)}
 .apoyo-burst{animation:apoyoBurst .5s ease}
 html[data-theme="light"] .apoyo-btn{background:rgba(212,164,0,.08);border-color:rgba(212,164,0,.3)}
 html[data-theme="light"] .apoyo-btn:hover:not(:disabled){background:rgba(212,164,0,.18);border-color:var(--gold)}
+
+/* ══════════════════════════════════════════════
+   FASE 3 — Medallero
+   ══════════════════════════════════════════════ */
+
+/* ── Tarjeta del medallero ── */
+.medallero-card{margin-top:20px;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.medallero-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#0d1830,#111e38)}
+html[data-theme="light"] .medallero-header{background:linear-gradient(135deg,#dde8f7,#cfdcf0)}
+.medallero-header-left{display:flex;align-items:center;gap:12px}
+.medallero-title-icon{font-size:1.6rem;line-height:1}
+.medallero-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.06em;color:var(--gold);line-height:1}
+.medallero-subtitle{font-size:.78rem;color:var(--dim);margin-top:2px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em}
+.medallero-toggle-main{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--dim);cursor:pointer;font-size:.8rem;transition:all .2s;flex-shrink:0}
+.medallero-toggle-main:hover{background:var(--bg3);color:var(--text)}
+#medallero-body{padding:16px 20px 20px}
+
+/* ── Grupos de medallas ── */
+.medallero-group{margin-bottom:16px}
+.medallero-group:last-child{margin-bottom:0}
+.medallero-group-label{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.medallero-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:18px;padding:0 5px;border-radius:999px;background:rgba(245,197,24,.15);color:var(--gold);font-size:.7rem;font-weight:900}
+.medallero-toggle{width:100%;display:flex;align-items:center;gap:8px;padding:8px 0;background:none;border:none;cursor:pointer;color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;text-align:left}
+.medallero-toggle:hover{color:var(--text)}
+.medallero-toggle-arrow{margin-left:auto;transition:transform .2s}
+.medallero-empty{color:var(--dim);font-size:.88rem;font-style:italic;text-align:center;padding:16px 0}
+
+/* ── Grid de medallas ── */
+.medallero-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:12px}
+
+/* ── Medalla individual ── */
+.medal{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:transform .2s}
+.medal:hover{transform:translateY(-3px)}
+.medal-circle{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;border:2px solid var(--border);background:var(--card2)}
+.medal-flag{font-size:1.7rem;line-height:1;position:relative;z-index:1}
+.medal-name{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.04em;text-align:center;color:var(--dim);line-height:1.2;max-width:72px;word-break:break-word}
+
+/* ── Medalla desbloqueada ── */
+.medal-unlocked .medal-circle{
+  border-color:var(--medal-color, var(--gold));
+  background:radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--medal-color,var(--gold)) 20%, var(--card2)), var(--card2));
+  box-shadow:0 0 14px var(--medal-glow, rgba(245,197,24,.25));
+}
+.medal-unlocked .medal-name{color:var(--text)}
+
+/* ── Medalla especial ── */
+.medal-special .medal-circle{
+  border-color:var(--medal-color);
+  background:radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--medal-color) 35%, var(--card)), var(--card2));
+  box-shadow:0 0 20px var(--medal-glow),0 0 40px var(--medal-glow);
+}
+.medal-shine{position:absolute;inset:0;border-radius:50%;background:conic-gradient(transparent 0deg, rgba(255,255,255,.15) 60deg, transparent 120deg);animation:medalSpin 3s linear infinite;pointer-events:none}
+@keyframes medalSpin{to{transform:rotate(360deg)}}
+
+/* ── Medalla bloqueada ── */
+.medal-locked{opacity:.45}
+.medal-locked .medal-circle{filter:grayscale(1)}
+.medal-lock{position:absolute;bottom:-2px;right:-2px;font-size:.75rem;background:var(--card);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
+
+/* ── Tooltip ── */
+.medal-tooltip{position:absolute;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 12px;pointer-events:none;min-width:160px;max-width:220px;display:flex;flex-direction:column;gap:3px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.medal-tooltip strong{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:.04em;color:var(--text)}
+.medal-tooltip span{font-size:.78rem;color:var(--dim);line-height:1.35}
+.medal-tooltip em{font-size:.72rem;color:var(--gold);font-style:normal}
+
+/* ── Toast de nueva medalla ── */
+.medal-toast{position:fixed;bottom:90px;right:20px;z-index:10000;display:flex;align-items:center;gap:12px;padding:12px 18px;background:var(--card);border:1px solid var(--gold);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.3);transform:translateX(120%);transition:transform .4s cubic-bezier(.16,1,.3,1);max-width:280px}
+.medal-toast.medal-toast-in{transform:translateX(0)}
+.medal-toast-icon{font-size:2rem;line-height:1;flex-shrink:0}
+.medal-toast-title{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-family:'Barlow Condensed',sans-serif}
+.medal-toast-name{font-size:.95rem;font-weight:700;color:var(--text);font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em}
+html[data-theme="light"] .medal-tooltip{box-shadow:0 8px 24px rgba(0,0,0,.12)}
+html[data-theme="light"] .medal-toast{box-shadow:0 8px 24px rgba(0,0,0,.12)}

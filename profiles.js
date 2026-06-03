@@ -16,6 +16,16 @@ let _selectedPlayers = []   // jugadores favoritos del mundial (3-5)
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024   // 2 MB
 const ALLOWED_MIME     = ['image/jpeg','image/png','image/webp','image/gif']
 
+// ── Cargar medallas de un perfil público ──────────
+export async function loadMedals(userId) {
+  const { data } = await supabase
+    .from('profiles')
+    .select('medallas')
+    .eq('id', userId)
+    .single()
+  return Array.isArray(data?.medallas) ? data.medallas : []
+}
+
 // ── Helpers de BD ────────────────────────────────
 
 export async function getProfile(userId) {
