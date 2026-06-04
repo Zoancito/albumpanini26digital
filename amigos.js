@@ -16,6 +16,38 @@ let _friends = []
 let _activeChatFriend = null
 let _chatRefreshTimer = null
 let _lastChatSignature = ''
+let _unreadCounts = {}   // { [friendId]: number }
+
+// ── Unread message tracking via localStorage ──────
+function getChatLastSeen(friendId) {
+  try { return parseInt(localStorage.getItem(`chat_seen_${friendId}`) || '0') } catch { return 0 }
+}
+function setChatLastSeen(friendId) {
+  try { localStorage.setItem(`chat_seen_${friendId}`, Date.now().toString()) } catch {}
+}
+async function fetchUnreadCounts(userId, friendIds) {
+  if (!friendIds.length) return {}
+  try {
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString() // últimos 30 días
+    const { data } = await withTimeout(
+      supabase
+        .from('friend_messages')
+        .select('sender_id, created_at')
+        .eq('receiver_id', userId)
+        .in('sender_id', friendIds)
+        .gte('created_at', since)
+    )
+    const counts = {}
+    ;(data || []).forEach(msg => {
+      const lastSeen = getChatLastSeen(msg.sender_id)
+      const msgTime  = new Date(msg.created_at).getTime()
+      if (msgTime > lastSeen) {
+        counts[msg.sender_id] = (counts[msg.sender_id] || 0) + 1
+      }
+    })
+    return counts
+  } catch { return {} }
+}
 
 // ── FIX: debounce + guard para evitar refreshes superpuestos ─────
 let _friendsRefreshing = false
@@ -233,6 +265,9 @@ export async function refreshFriendsPanel(userOverride) {
     ])
     _friends = friends
 
+    // Obtener mensajes no leídos de cada amigo
+    _unreadCounts = await fetchUnreadCounts(user.id, friends.map(f => f.id))
+
     const pendingHtml = pending.length
       ? `<section>
           <div class="social-section-title">Solicitudes</div>
@@ -324,6 +359,10 @@ async function loadProfilesByIds(ids) {
 }
 
 function renderFriendPanelCard(p) {
+  const unread = _unreadCounts[p.id] || 0
+  const badge  = unread > 0
+    ? `<span class="chat-unread-badge" aria-label="${unread} mensajes nuevos">${unread > 9 ? '9+' : unread}</span>`
+    : ''
   return `
     <div class="social-card" data-friend-id="${escHtml(p.id)}">
       ${renderSocialAvatar(p)}
@@ -331,7 +370,9 @@ function renderFriendPanelCard(p) {
         <span class="social-name">${escHtml(p.full_name || p.username)}</span>
         <span class="social-user">@${escHtml(p.username)}${p.favorite_team ? ' · ' + escHtml(p.favorite_team) : ''}</span>
         <span class="social-card-actions">
-          <button class="social-mini-btn primary" data-chat-friend="${escHtml(p.id)}" type="button">Chat</button>
+          <button class="social-mini-btn primary chat-btn-with-badge" data-chat-friend="${escHtml(p.id)}" type="button">
+            Chat${badge}
+          </button>
           <a class="social-mini-link" href="/perfil/?u=${encodeURIComponent(p.username)}">Perfil</a>
         </span>
       </span>
@@ -388,6 +429,11 @@ async function handleFriendsPanelClick(e) {
 }
 
 function openChat(friend) {
+  setChatLastSeen(friend.id)
+  _unreadCounts[friend.id] = 0
+  // Actualizar badge en la tarjeta sin re-render completo
+  const card = document.querySelector(`.social-card[data-friend-id="${friend.id}"]`)
+  card?.querySelector('.chat-unread-badge')?.remove()
   if (!_currentUser) return
   _activeChatFriend = friend
   _lastChatSignature = ''

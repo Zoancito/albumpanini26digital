@@ -221,6 +221,45 @@ export function openTriviaModal(grp, gColor, userId = null) {
   modal.setAttribute('role', 'dialog')
   modal.setAttribute('aria-modal', 'true')
 
+  function closeModal() {
+    modal.classList.add('trivia-hiding')
+    setTimeout(() => modal.remove(), 350)
+  }
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal() })
+  document.addEventListener('keydown', function esc(e) {
+    if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', esc) }
+  })
+
+  // ── BLOQUEO DIARIO ──────────────────────────────
+  if (hasAttemptedToday(grp)) {
+    // Calcular tiempo hasta medianoche
+    const now    = new Date()
+    const mañana = new Date(now)
+    mañana.setDate(mañana.getDate() + 1)
+    mañana.setHours(0, 0, 0, 0)
+    const diffMs  = mañana - now
+    const horas   = Math.floor(diffMs / 3600000)
+    const minutos = Math.floor((diffMs % 3600000) / 60000)
+
+    modal.innerHTML = `
+      <div class="trivia-box trivia-blocked-box" style="--trivia-color:${gColor}">
+        <div class="trivia-header">
+          <div class="trivia-eyebrow">🧠 TRIVIA · GRUPO ${grp}</div>
+          <button class="trivia-close" id="trivia-close" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="trivia-blocked-icon">⏳</div>
+        <div class="trivia-blocked-title">¡Ya jugaste hoy!</div>
+        <div class="trivia-blocked-msg">Vuelve mañana para un nuevo intento.</div>
+        <div class="trivia-blocked-time">Siguiente intento en <strong>${horas}h ${minutos}m</strong></div>
+        <button class="trivia-close-btn" id="trivia-close-btn">Entendido</button>
+      </div>`
+    document.body.appendChild(modal)
+    requestAnimationFrame(() => modal.classList.add('trivia-visible'))
+    modal.querySelector('#trivia-close')?.addEventListener('click', closeModal)
+    modal.querySelector('#trivia-close-btn')?.addEventListener('click', closeModal)
+    return
+  }
+
   let current = 0
   let score = 0
   let answered = false
@@ -318,16 +357,6 @@ export function openTriviaModal(grp, gColor, userId = null) {
     document.getElementById('trivia-close')?.addEventListener('click', closeModal)
     document.getElementById('trivia-close-btn')?.addEventListener('click', closeModal)
   }
-
-  function closeModal() {
-    modal.classList.add('trivia-hiding')
-    setTimeout(() => modal.remove(), 350)
-  }
-
-  modal.addEventListener('click', e => { if (e.target === modal) closeModal() })
-  document.addEventListener('keydown', function esc(e) {
-    if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', esc) }
-  })
 
   document.body.appendChild(modal)
   requestAnimationFrame(() => modal.classList.add('trivia-visible'))

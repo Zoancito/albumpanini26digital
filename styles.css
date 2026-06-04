@@ -1893,7 +1893,9 @@ html[data-theme="light"] .medallero-header{background:linear-gradient(135deg,#dd
 .medallero-empty{color:var(--dim);font-size:.88rem;font-style:italic;text-align:center;padding:16px 0}
 
 /* ── Grid de medallas ── */
-.medallero-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:12px}
+.medallero-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;width:100%}
+@media(max-width:480px){.medallero-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:340px){.medallero-grid{grid-template-columns:repeat(3,1fr)}}
 
 /* ── Medalla individual ── */
 .medal{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:transform .2s}
@@ -2119,3 +2121,19 @@ html[data-theme="light"] .trivia-box{box-shadow:0 12px 40px rgba(0,0,0,.12)}
   .once-pitch{grid-template-columns:repeat(3,1fr)}
   .once-box{padding:16px 12px 14px}
 }
+
+/* ── Badge mensajes no leídos ── */
+.chat-btn-with-badge{position:relative}
+.chat-unread-badge{position:absolute;top:-6px;right:-8px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:var(--red);color:#fff;font-size:.68rem;font-weight:900;display:inline-flex;align-items:center;justify-content:center;line-height:1;pointer-events:none;font-family:'Barlow Condensed',sans-serif;letter-spacing:0;border:2px solid var(--card)}
+
+/* ── Trivia bloqueada ── */
+.trivia-blocked-box{text-align:center}
+.trivia-blocked-icon{font-size:2.8rem;margin:8px 0}
+.trivia-blocked-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.04em;color:var(--text);margin-bottom:6px}
+.trivia-blocked-msg{font-size:.92rem;color:var(--dim);margin-bottom:8px}
+.trivia-blocked-time{font-size:.88rem;color:var(--text);padding:10px 16px;background:var(--bg3);border-radius:10px;margin-bottom:16px;display:inline-block}
+
+/* ── Predicciones: equipo en otro rol ── */
+.pkr-team.in-other-role{opacity:.5;cursor:not-allowed;position:relative}
+.pkr-team.in-other-role .pkr-name{text-decoration:line-through}
+.pkr-other-role{position:absolute;top:-4px;right:-4px;font-size:.75rem;background:var(--card);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}

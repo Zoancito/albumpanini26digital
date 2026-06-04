@@ -209,58 +209,6 @@ function resetSetupForm() {
 
 // ── Jugadores favoritos ───────────────────────────
 
-// Lista curada de jugadores destacados del Mundial 2026
-export const MUNDIAL_PLAYERS = [
-  // Argentina
-  'Lionel Messi 🇦🇷','Julián Álvarez 🇦🇷','Rodrigo De Paul 🇦🇷','Enzo Fernández 🇦🇷','Emiliano Martínez 🇦🇷',
-  // Brasil
-  'Vinicius Jr. 🇧🇷','Rodrygo 🇧🇷','Raphinha 🇧🇷','Endrick 🇧🇷','Alisson 🇧🇷',
-  // Francia
-  'Kylian Mbappé 🇫🇷','Antoine Griezmann 🇫🇷','Aurélien Tchouaméni 🇫🇷','Marcus Thuram 🇫🇷',
-  // Inglaterra
-  'Jude Bellingham 🏴󠁧󠁢󠁥󠁮󠁧󠁿','Harry Kane 🏴󠁧󠁢󠁥󠁮󠁧󠁿','Phil Foden 🏴󠁧󠁢󠁥󠁮󠁧󠁿','Bukayo Saka 🏴󠁧󠁢󠁥󠁮󠁧󠁿',
-  // España
-  'Pedri 🇪🇸','Lamine Yamal 🇪🇸','Ferran Torres 🇪🇸','Dani Olmo 🇪🇸','Alejandro Grimaldo 🇪🇸',
-  // Alemania
-  'Florian Wirtz 🇩🇪','Jamal Musiala 🇩🇪','Kai Havertz 🇩🇪','Manuel Neuer 🇩🇪',
-  // Portugal
-  'Cristiano Ronaldo 🇵🇹','Bruno Fernandes 🇵🇹','Rafael Leão 🇵🇹','Bernardo Silva 🇵🇹',
-  // Países Bajos
-  'Virgil van Dijk 🇳🇱','Xavi Simons 🇳🇱','Cody Gakpo 🇳🇱',
-  // Bélgica
-  'Kevin De Bruyne 🇧🇪','Romelu Lukaku 🇧🇪','Lois Openda 🇧🇪',
-  // Colombia
-  'James Rodríguez 🇨🇴','Luis Díaz 🇨🇴','Rafael Santos Borré 🇨🇴',
-  // Uruguay
-  'Federico Valverde 🇺🇾','Darwin Núñez 🇺🇾','Ronald Araújo 🇺🇾',
-  // México
-  'Hirving Lozano 🇲🇽','Edson Álvarez 🇲🇽','Raúl Jiménez 🇲🇽',
-  // Canadá
-  'Alphonso Davies 🇨🇦','Jonathan David 🇨🇦',
-  // Estados Unidos
-  'Christian Pulisic 🇺🇸','Folarin Balogun 🇺🇸','Gio Reyna 🇺🇸',
-  // Marruecos
-  'Hakim Ziyech 🇲🇦','Achraf Hakimi 🇲🇦','Youssef En-Nesyri 🇲🇦',
-  // Senegal
-  'Sadio Mané 🇸🇳','Idrissa Gueye 🇸🇳',
-  // Japón
-  'Takefusa Kubo 🇯🇵','Kaoru Mitoma 🇯🇵','Daichi Kamada 🇯🇵',
-  // Corea del Sur
-  'Heung-min Son 🇰🇷','Min-jae Kim 🇰🇷',
-  // Australia
-  'Mathew Ryan 🇦🇺','Awer Mabil 🇦🇺',
-  // Turquía
-  'Arda Güler 🇹🇷','Hakan Çalhanoğlu 🇹🇷',
-  // Croacia
-  'Luka Modrić 🇭🇷','Ivan Perišić 🇭🇷',
-  // Serbia
-  'Dušan Vlahović 🇷🇸','Aleksandar Mitrović 🇷🇸',
-  // Chile
-  'Alexis Sánchez 🇨🇱',
-  // Ecuador
-  'Moisés Caicedo 🇪🇨','Enner Valencia 🇪🇨',
-]
-
 function renderSelectedPlayers() {
   const container = document.getElementById('psetup-players-selected')
   if (!container) return
@@ -284,11 +232,44 @@ function _updatePlayerSearch() {
   if (input) _filterPlayers(input.value)
 }
 
+// ── Lista de jugadores del mundial ────────────────
+// Usa los jugadores reales del álbum si están disponibles (cargados por script.js)
+// Si no, lista de respaldo con los más conocidos
+function getAllMundialPlayers() {
+  if (window._albumPlayers && Object.keys(window._albumPlayers).length > 0) {
+    // Extraer todos los jugadores de todas las selecciones con el formato "Nombre (Selección)"
+    const players = []
+    Object.entries(window._albumPlayers).forEach(([country, names]) => {
+      const countryShort = country.split(' ').slice(1).join(' ')  // quitar emoji
+      names.forEach(name => players.push(`${name} (${countryShort})`))
+    })
+    return players
+  }
+  // Fallback: lista curada
+  return [
+    'Lionel Messi (Argentina)','Julián Álvarez (Argentina)','Emiliano Martínez (Argentina)',
+    'Vinicius Jr. (Brasil)','Rodrygo (Brasil)','Endrick (Brasil)','Alisson (Brasil)',
+    'Kylian Mbappé (Francia)','Antoine Griezmann (Francia)','Mike Maignan (Francia)',
+    'Jude Bellingham (Inglaterra)','Harry Kane (Inglaterra)','Phil Foden (Inglaterra)',
+    'Lamine Yamal (España)','Pedri (España)','Álvaro Morata (España)',
+    'Florian Wirtz (Alemania)','Jamal Musiala (Alemania)','Manuel Neuer (Alemania)',
+    'Cristiano Ronaldo (Portugal)','Bruno Fernandes (Portugal)','Rúben Dias (Portugal)',
+    'Kevin De Bruyne (Bélgica)','Romelu Lukaku (Bélgica)','Lois Openda (Bélgica)',
+    'Erling Haaland (Noruega)','Martin Ødegaard (Noruega)',
+    'Heung-min Son (Corea del Sur)','Min-jae Kim (Corea del Sur)',
+    'Achraf Hakimi (Marruecos)','Hakim Ziyech (Marruecos)','Youssef En-Nesyri (Marruecos)',
+    'Mohamed Salah (Egipto)','Sadio Mané (Senegal)','Alphonso Davies (Canadá)',
+    'Jonathan David (Canadá)','Christian Pulisic (EE. UU.)','Hirving Lozano (México)',
+    'James Rodríguez (Colombia)','Luis Díaz (Colombia)','Federico Valverde (Uruguay)',
+    'Darwin Núñez (Uruguay)','Takefusa Kubo (Japón)','Arda Güler (Turquía)',
+  ]
+}
+
 function _filterPlayers(query) {
   const list = document.getElementById('psetup-players-list')
   if (!list) return
   const q = query.toLowerCase()
-  const filtered = MUNDIAL_PLAYERS.filter(p =>
+  const filtered = getAllMundialPlayers().filter(p =>
     p.toLowerCase().includes(q) && !_selectedPlayers.includes(p)
   ).slice(0, 12)
   list.innerHTML = filtered.map(p =>

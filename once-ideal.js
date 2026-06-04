@@ -3,7 +3,20 @@
 //  Armador del 11 ideal por grupo
 // ═══════════════════════════════════════════════════
 import { supabase } from './supabase.js'
-import { GROUP_PLAYERS } from './trivia.js'
+
+// ── Obtener jugadores del grupo desde albumData ───
+function getGroupPlayersData(grp, countries) {
+  const result = {}
+  if (window._albumPlayers && Object.keys(window._albumPlayers).length > 0) {
+    countries.forEach(country => {
+      result[country] = (window._albumPlayers[country] || [])
+    })
+  } else {
+    // Fallback vacío — no debería ocurrir si script.js cargó antes
+    countries.forEach(country => { result[country] = [] })
+  }
+  return result
+}
 
 // Posiciones y slots por formación
 const FORMATIONS = {
@@ -63,11 +76,10 @@ async function loadCommunityOnce(grp) {
 export async function openOnceIdealModal(grp, gColor, countries, userId = null) {
   document.getElementById('once-modal')?.remove()
 
-  const allPlayers = Object.values(GROUP_PLAYERS[grp] || {}).flat()
-  const countryMap = {}
-  Object.entries(GROUP_PLAYERS[grp] || {}).forEach(([country, players]) => {
-    players.forEach(p => { countryMap[p] = country })
-  })
+  const groupPlayers = getGroupPlayersData(grp, countries)
+  const allPlayers   = countries.flatMap(c => (groupPlayers[c] || []).map(name => ({ name, country: c })))
+  const countryMap   = {}
+  allPlayers.forEach(({ name, country }) => { countryMap[name] = country })
 
   let formation  = '4-3-3'
   let selected   = []   // array de player strings en slots
@@ -118,7 +130,7 @@ export async function openOnceIdealModal(grp, gColor, countries, userId = null) 
               <div class="once-slot${player?' filled':''}" data-slot="${i}" data-pos="${pos}">
                 <div class="once-slot-pos" style="background:${gColor}">${pos}</div>
                 ${player
-                  ? `<div class="once-slot-player">${player.split('(')[0].trim()}</div>
+                  ? `<div class="once-slot-player">${player}</div>
                      <div class="once-slot-country">${country?.split(' ').slice(1).join(' ')||''}</div>
                      <button class="once-slot-remove" data-slot="${i}" aria-label="Quitar">×</button>`
                   : `<div class="once-slot-empty">+ ${SLOT_LABELS[pos]||pos}</div>`
@@ -131,13 +143,14 @@ export async function openOnceIdealModal(grp, gColor, countries, userId = null) 
           <div class="once-panel-label">Jugadores disponibles <span class="once-selected-count">${selected.filter(Boolean).length}/11</span></div>
           <div class="once-players-list">
             ${allPlayers.map(p => {
-              const used = usedSet.has(p)
-              const votes = communityVotes[p] || 0
+              const used = usedSet.has(p.name)
+              const votes = communityVotes[p.name] || 0
               const votePct = Math.round((votes/totalVotes)*100)
+              const countrShort = p.country.split(' ').slice(1).join(' ')
               return `
-                <button class="once-player-btn${used?' used':''}" data-player="${p}" ${used?'disabled':''}>
-                  <span class="once-player-name">${p.split('(')[0].trim()}</span>
-                  <span class="once-player-pos">${p.match(/\(([^)]+)\)/)?.[1]||''}</span>
+                <button class="once-player-btn${used?' used':''}" data-player="${p.name}" ${used?'disabled':''}>
+                  <span class="once-player-name">${p.name}</span>
+                  <span class="once-player-pos">${countrShort}</span>
                   ${votes>0?`<span class="once-player-votes" title="${votes} votos comunitarios">${votePct}%</span>`:''}
                 </button>`
             }).join('')}
@@ -207,20 +220,19 @@ export async function openOnceIdealModal(grp, gColor, countries, userId = null) 
 
   function openPlayerPicker(slotIdx, pos) {
     const usedSet = new Set(selected.filter(Boolean))
-    const available = allPlayers.filter(p => !usedSet.has(p))
-    // Ordenar: mismo pos primero
-    const sorted = [...available.filter(p => p.includes(`(${pos})`)),
-                    ...available.filter(p => !p.includes(`(${pos})`))]
+    const available = allPlayers.filter(p => !usedSet.has(p.name))
+    // Ordenar: primero los de la misma country (aproximado por pos)
+    const sorted = available
 
     const picker = document.createElement('div')
     picker.className = 'once-picker'
     picker.innerHTML = `
       <div class="once-picker-title">Seleccionar ${SLOT_LABELS[pos]||pos}</div>
       ${sorted.map(p => `
-        <button class="once-pick-btn" data-player="${p}">
-          ${p.split('(')[0].trim()}
-          <span class="once-pick-pos">${p.match(/\(([^)]+)\)/)?.[1]||''}</span>
-          <span class="once-pick-country">${countryMap[p]?.split(' ').slice(1).join(' ')||''}</span>
+        <button class="once-pick-btn" data-player="${p.name}">
+          ${p.name}
+          <span class="once-pick-pos"></span>
+          <span class="once-pick-country">${p.country.split(' ').slice(1).join(' ')}</span>
         </button>`).join('')}
       <button class="once-picker-cancel">Cancelar</button>`
 

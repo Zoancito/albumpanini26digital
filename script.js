@@ -13,8 +13,6 @@ import {
   showMedalUnlockToast,
   getMedalDef,
 } from './medals.js'
-import { openTriviaModal, hasAttemptedToday } from './trivia.js'
-import { openOnceIdealModal } from './once-ideal.js'
 console.log('Supabase conectado:', supabase)
 
 const authScreen = document.getElementById('auth-screen');
@@ -44,7 +42,6 @@ function showAuthScreen() {
 function enterAlbumShell(mode, user = null) {
   accessMode = mode;
   currentUser = mode === 'google' ? user : null;
-  window._currentUserId = currentUser?.id || null;  // expuesto para trivia y once-ideal
   authScreen?.classList.add('off');
   renderUserProfile(user);
   if (currentUser) {
@@ -162,7 +159,7 @@ const albumData = {
   "🇲🇽 México":["Mexico Logo","Luis Malagón","Johan Vásquez","César Montes","Jesús Gallardo","Israel Reyes","Edson Álvarez","Marcel Ruiz","Hirving Lozano","Raúl Jiménez","Alexis Vega","Roberto Alvarado"],
   "🇿🇦 Sudáfrica":["South Africa Logo","Ronwen Williams","Aubrey Modiba","Mbekezeli Mbokazi","Siyabonga Ngezana","Khuliso Mudau","Teboho Mokoena","Yaya Sithole","Bathusi Aubaas","Sipho Mbule","Lyle Foster","Oswin Appollis"],
   "🇰🇷 República de Corea":["Korea Republic Logo","Hyeonwoo Jo","Minjae Kim","Yumin Cho","Youngwoo Seol","Jaesung Lee","Inbeom Hwang","Kangin Lee","Jens Castrop","Heungmin Son","Heechan Hwang","Hyeongyu Oh"],
-  "🇨🇿 República Checa":["Czechia Logo","Matěj Kovář","Ladislav Krejčí","Vladimír Coufal","Jaroslav Zelený","Lukáš Provod","Lukáš Červ","Tomáš Souček","Pavel Šulc","Václav Černý","Adam Hložek","Patrik Schick"],
+  "🇨🇿 República Checa":["Czechia Logo","MatÄ›j KováÅ™","Ladislav Krejčí","Vladimír Coufal","Jaroslav Zelený","Lukáš Provod","Lukáš Červ","Tomáš Souček","Pavel Šulc","Václav Černý","Adam Hložek","Patrik Schick"],
   "🇨🇦 Canadá":["Canada Logo","Dayne St. Clair","Alphonso Davies","Richie Laryea","Derek Cornelius","Stephen Eustáquio","Ismaël Koné","Jacob Shaffelburg","Niko Sigur","Tajon Buchanan","Cyle Larin","Jonathan David"],
   "🇧🇦 Bosnia y Herzegovina":["Bosnia-Herzegovina Logo","Nikola Vasilj","Amar Dedić","Sead Kolašinac","Tarik Muharemović","Nikola Katić","Benjamin Tahirović","Ivan Šunjić","Ermedin Demirović","Esmir Bajraktarević","Edin Džeko","Amar Memić"],
   "🇶🇦 Catar":["Qatar Logo","Meshaal Barsham","Sultan Albrake","Boualem Khoukhi","Pedro Miguel","Mohammed Mannai","Karim Boudiaf","Assim Madibo","Edmílson Junior","Akram Hassan Afif","Ahmed Al-Ganehi","Almoez Ali"],
@@ -405,6 +402,20 @@ let activeStatus = 'all';
 let searchQuery = '';
 let currentOverlayCountry = null;
 let pdfMode = 'owned';
+
+// Exponer todos los jugadores del álbum para profiles.js y once-ideal.js
+// Formato: { "🇲🇽 México": ["Luis Malagón","Johan Vásquez",...], ... }
+window._albumPlayers = {};
+Object.entries(albumData).forEach(([country, names]) => {
+  // Filtrar entradas que NO son jugadores (logos, escudos, etc.)
+  window._albumPlayers[country] = names.filter(n =>
+    n && !n.toLowerCase().includes('logo') &&
+    !n.toLowerCase().includes('escudo') &&
+    !n.toLowerCase().includes('estadio') &&
+    !n.toLowerCase().includes('stadium') &&
+    n.trim().length > 1
+  );
+});
 
 function loadState() {
   try {
@@ -889,14 +900,6 @@ function renderGroups() {
           <p>${gInfo.analysis}</p>
           <div class="group-info-tags">${gInfo.tags.map(t=>`<span class="g-tag">${t}</span>`).join('')}</div>
         </div>` : ''}
-        <div class="group-minigames" id="minigames-${grp}">
-          <button class="minigame-btn trivia-btn" data-grp="${grp}" style="--mg-color:${gColor}">
-            🧠 Trivia del Grupo
-          </button>
-          <button class="minigame-btn once-btn" data-grp="${grp}" style="--mg-color:${gColor}">
-            👕 11 Ideal
-          </button>
-        </div>
       </div>`;
 
     container.appendChild(acc);
@@ -916,24 +919,6 @@ function renderGroups() {
 
     // Header click → expand
     acc.querySelector('.group-header').addEventListener('click', () => toggleGroup(grp, acc));
-
-    // Trivia button
-    acc.querySelector(`.trivia-btn[data-grp="${grp}"]`)?.addEventListener('click', e => {
-      e.stopPropagation();
-      const userId = window._currentUserId || null;
-      if (hasAttemptedToday(grp) && !userId) {
-        // Sin sesión: avisa pero permite re-intentar (no hay restricción real sin BD)
-      }
-      openTriviaModal(grp, gColor, userId);
-    });
-
-    // 11 Ideal button
-    acc.querySelector(`.once-btn[data-grp="${grp}"]`)?.addEventListener('click', e => {
-      e.stopPropagation();
-      const userId = window._currentUserId || null;
-      openOnceIdealModal(grp, gColor, countries, userId);
-    });
-
 
     // If only one group shown, auto-open
     if (activeGroup !== 'all') {

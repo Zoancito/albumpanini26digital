@@ -365,6 +365,16 @@
     <form id="psetup-form" novalidate>
       <div class="psetup-fields">
 
+        <!-- Avatar -->
+        <div class="psetup-field psetup-avatar-row">
+          <div id="psetup-avatar-preview"></div>
+          <div class="psetup-avatar-actions">
+            <label class="psetup-avatar-label" for="psetup-avatar-file">📷 Cambiar foto</label>
+            <input type="file" id="psetup-avatar-file" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none">
+            <small class="psetup-hint">JPG, PNG o WebP · máx. 2 MB</small>
+          </div>
+        </div>
+
         <div class="psetup-field">
           <label class="psetup-label" for="psetup-fullname">Nombre</label>
           <input type="text" id="psetup-fullname" maxlength="60" placeholder="Tu nombre completo" autocomplete="name">
@@ -375,8 +385,7 @@
           <div class="psetup-input-wrap">
             <span class="psetup-at">@</span>
             <input type="text" id="psetup-username" maxlength="30"
-              placeholder="martinfutbol" autocomplete="off" spellcheck="false"
-              inputmode="url">
+              placeholder="martinfutbol" autocomplete="off" spellcheck="false" inputmode="url">
             <span class="psetup-check" id="psetup-user-check"></span>
           </div>
           <small class="psetup-hint" id="psetup-user-hint">Solo letras, números y _ · 3–30 caracteres</small>
@@ -384,8 +393,8 @@
 
         <div class="psetup-row">
           <div class="psetup-field">
-            <label class="psetup-label" for="psetup-team">Equipo favorito</label>
-            <input type="text" id="psetup-team" maxlength="50" placeholder="Ej: River Plate...">
+            <label class="psetup-label" for="psetup-team">Selección favorita</label>
+            <input type="text" id="psetup-team" maxlength="50" placeholder="Ej: Argentina, Brasil...">
           </div>
           <div class="psetup-field">
             <label class="psetup-label" for="psetup-position">Posición favorita</label>
@@ -406,12 +415,38 @@
         </div>
 
         <div class="psetup-field">
+          <label class="psetup-label" for="psetup-estadio">Estadio / País favorito</label>
+          <input type="text" id="psetup-estadio" maxlength="60" placeholder="Ej: Azteca, Maracaná, Estados Unidos...">
+        </div>
+
+        <div class="psetup-field">
           <label class="psetup-label" for="psetup-bio">Bio corta</label>
           <textarea id="psetup-bio" maxlength="120" rows="2"
             placeholder="Coleccionista apasionado del fútbol..."></textarea>
           <small class="psetup-hint" style="text-align:right">
             <span id="psetup-bio-count">0</span>/120
           </small>
+        </div>
+
+        <div class="psetup-field">
+          <label class="psetup-label" for="psetup-frase">Frase futbolera</label>
+          <textarea id="psetup-frase" maxlength="100" rows="2"
+            placeholder="Ej: El fútbol es lo más importante de las cosas sin importancia..."></textarea>
+          <small class="psetup-hint" style="text-align:right">
+            <span id="psetup-frase-count">0</span>/100
+          </small>
+        </div>
+
+        <!-- Jugadores favoritos del Mundial -->
+        <div class="psetup-field">
+          <label class="psetup-label">⭐ Jugadores favoritos del Mundial <small style="font-weight:400;color:var(--dim)">(elige 3 a 5)</small></label>
+          <div id="psetup-players-selected" class="player-chips-row"></div>
+          <div class="psetup-player-search-wrap">
+            <input type="text" id="psetup-player-search" placeholder="Buscar jugador..." autocomplete="off"
+              style="width:100%;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:.9rem">
+            <div id="psetup-players-list" class="player-options-list" style="display:none"></div>
+          </div>
+          <small class="psetup-hint">Seleccionados: <span id="psetup-players-count">0/5</span></small>
         </div>
 
       </div><!-- /psetup-fields -->
@@ -443,15 +478,29 @@
 
     <div class="pview-bio" id="pview-bio">—</div>
 
+    <div class="pview-frase-box" id="pview-frase-wrap" style="display:none">
+      <span class="pview-frase-icon">💬</span>
+      <em class="pview-frase" id="pview-frase">—</em>
+    </div>
+
     <div class="pview-stats">
       <div class="pview-stat">
-        <span class="pview-stat-label">⚽ EQUIPO FAVORITO</span>
+        <span class="pview-stat-label">🌍 SELECCIÓN FAVORITA</span>
         <span class="pview-stat-val" id="pview-team">—</span>
       </div>
       <div class="pview-stat">
         <span class="pview-stat-label">🧤 POSICIÓN</span>
         <span class="pview-stat-val" id="pview-position">—</span>
       </div>
+      <div class="pview-stat">
+        <span class="pview-stat-label">🏟️ ESTADIO / PAÍS FAV.</span>
+        <span class="pview-stat-val" id="pview-estadio">—</span>
+      </div>
+    </div>
+
+    <div class="pview-players-section" id="pview-players-section">
+      <div class="pview-section-label">⭐ Jugadores favoritos del Mundial</div>
+      <div id="pview-jugadores" class="player-chips-row-view"></div>
     </div>
 
     <div class="pview-link-box">

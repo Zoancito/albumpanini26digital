@@ -271,6 +271,13 @@ function openPicker(roleId) {
     byGrp[t.grp].push(t);
   });
 
+  // Mapa: equipo → rol donde ya está asignado (excluyendo el rol actual)
+  const teamRoleMap = {};
+  PRED_ROLES.forEach(r => {
+    if (r.id === roleId) return;
+    getArr(rl, r.id).forEach(name => { teamRoleMap[name] = r; });
+  });
+
   let inner = `
     <div class="pkr-header">
       <button class="pkr-close" id="pkr-close" aria-label="Cerrar selector">✕</button>
@@ -285,14 +292,20 @@ function openPicker(roleId) {
     if (!teams) return;
     inner += `<div class="pkr-grp"><div class="pkr-grp-lbl">Grupo ${grp}</div><div class="pkr-grp-teams">`;
     teams.forEach(t => {
-      const sel = cur.includes(t.n);
-      const dis = !sel && cur.length >= role.max;
-      inner += `<button class="pkr-team${sel?' sel':''}${dis?' dis':''}"
+      const sel       = cur.includes(t.n);
+      const otherRole = teamRoleMap[t.n];
+      const maxed     = !sel && cur.length >= role.max;
+      // Deshabilitar si: ya está en otro rol OR el rol actual está lleno
+      const dis = !!otherRole || maxed;
+      const tooltip = otherRole ? `Ya en: ${otherRole.icon} ${otherRole.label}` : '';
+      inner += `<button class="pkr-team${sel?' sel':''}${dis?' dis':''}${otherRole?' in-other-role':''}"
         data-team="${t.n}" data-role="${roleId}"
-        aria-label="${t.n}" aria-pressed="${sel}" ${dis?'disabled':''}>
+        aria-label="${t.n}" aria-pressed="${sel}"
+        title="${tooltip}" ${dis?'disabled':''}>
         <span class="pkr-flag">${t.e}</span>
         <span class="pkr-name">${t.n}</span>
         ${sel?'<span class="pkr-check" aria-hidden="true">✓</span>':''}
+        ${otherRole?`<span class="pkr-other-role" aria-hidden="true">${otherRole.icon}</span>`:''}
       </button>`;
     });
     inner += `</div></div>`;
