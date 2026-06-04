@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/perfil/:username",
-      "destination": "/perfil/?u=:username"
+      "destination": "/perfil/index.html?u=:username"
     }
   ]
 }
