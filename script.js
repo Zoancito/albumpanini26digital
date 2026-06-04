@@ -13,6 +13,8 @@ import {
   showMedalUnlockToast,
   getMedalDef,
 } from './medals.js'
+import { openTriviaModal, hasAttemptedToday } from './trivia.js'
+import { openOnceIdealModal } from './once-ideal.js'
 console.log('Supabase conectado:', supabase)
 
 const authScreen = document.getElementById('auth-screen');
@@ -42,6 +44,7 @@ function showAuthScreen() {
 function enterAlbumShell(mode, user = null) {
   accessMode = mode;
   currentUser = mode === 'google' ? user : null;
+  window._currentUserId = currentUser?.id || null;  // expuesto para trivia y once-ideal
   authScreen?.classList.add('off');
   renderUserProfile(user);
   if (currentUser) {
@@ -886,6 +889,14 @@ function renderGroups() {
           <p>${gInfo.analysis}</p>
           <div class="group-info-tags">${gInfo.tags.map(t=>`<span class="g-tag">${t}</span>`).join('')}</div>
         </div>` : ''}
+        <div class="group-minigames" id="minigames-${grp}">
+          <button class="minigame-btn trivia-btn" data-grp="${grp}" style="--mg-color:${gColor}">
+            🧠 Trivia del Grupo
+          </button>
+          <button class="minigame-btn once-btn" data-grp="${grp}" style="--mg-color:${gColor}">
+            👕 11 Ideal
+          </button>
+        </div>
       </div>`;
 
     container.appendChild(acc);
@@ -905,6 +916,24 @@ function renderGroups() {
 
     // Header click → expand
     acc.querySelector('.group-header').addEventListener('click', () => toggleGroup(grp, acc));
+
+    // Trivia button
+    acc.querySelector(`.trivia-btn[data-grp="${grp}"]`)?.addEventListener('click', e => {
+      e.stopPropagation();
+      const userId = window._currentUserId || null;
+      if (hasAttemptedToday(grp) && !userId) {
+        // Sin sesión: avisa pero permite re-intentar (no hay restricción real sin BD)
+      }
+      openTriviaModal(grp, gColor, userId);
+    });
+
+    // 11 Ideal button
+    acc.querySelector(`.once-btn[data-grp="${grp}"]`)?.addEventListener('click', e => {
+      e.stopPropagation();
+      const userId = window._currentUserId || null;
+      openOnceIdealModal(grp, gColor, countries, userId);
+    });
+
 
     // If only one group shown, auto-open
     if (activeGroup !== 'all') {

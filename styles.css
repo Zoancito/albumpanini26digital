@@ -2008,3 +2008,114 @@ html[data-theme="light"] .album-complete-box{
   .album-complete-title{font-size:2.4rem}
   .album-complete-video{max-height:220px}
 }
+
+/* ══════════════════════════════════════════════
+   FASE 5 — Trivia + 11 Ideal por grupo
+   ══════════════════════════════════════════════ */
+
+/* ── Botones de minijuego en el grupo ── */
+.group-minigames{display:flex;gap:10px;padding:14px 16px 8px;flex-wrap:wrap}
+.minigame-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:999px;border:1px solid var(--mg-color,var(--border));background:color-mix(in srgb,var(--mg-color,var(--gold)) 10%,var(--card2));color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:.05em;cursor:pointer;transition:all .2s}
+.minigame-btn:hover{background:color-mix(in srgb,var(--mg-color,var(--gold)) 22%,var(--card2));transform:scale(1.03);box-shadow:0 4px 14px color-mix(in srgb,var(--mg-color,var(--gold)) 30%,transparent)}
+
+/* ══ TRIVIA ══ */
+.trivia-modal-backdrop{position:fixed;inset:0;z-index:15000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .3s}
+.trivia-modal-backdrop.trivia-visible{opacity:1;pointer-events:all}
+.trivia-modal-backdrop.trivia-hiding{opacity:0;pointer-events:none}
+
+.trivia-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px 22px 20px;max-width:500px;width:92%;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:triviaIn .35s cubic-bezier(.16,1,.3,1) both}
+@keyframes triviaIn{from{transform:scale(.92) translateY(20px);opacity:0}to{transform:none;opacity:1}}
+html[data-theme="light"] .trivia-box{box-shadow:0 12px 40px rgba(0,0,0,.12)}
+
+.trivia-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.trivia-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--trivia-color,var(--gold))}
+.trivia-close{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--dim);cursor:pointer;font-size:.9rem}
+
+.trivia-progress{height:4px;background:var(--bg3);border-radius:4px;margin-bottom:8px;overflow:hidden}
+.trivia-progress-fill{height:100%;border-radius:4px;transition:width .4s ease}
+.trivia-q-count{font-size:.78rem;color:var(--dim);margin-bottom:10px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em}
+
+.trivia-question{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:700;line-height:1.35;color:var(--text);margin-bottom:16px;letter-spacing:.02em}
+
+.trivia-opts{display:flex;flex-direction:column;gap:8px}
+.trivia-opt{padding:11px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.95rem;text-align:left;cursor:pointer;transition:all .2s}
+.trivia-opt:hover:not(:disabled){background:var(--bg3);border-color:var(--trivia-color,var(--gold))}
+.trivia-opt.correct{background:rgba(34,197,94,.15);border-color:#22c55e;color:#22c55e}
+.trivia-opt.wrong{background:rgba(239,68,68,.13);border-color:#ef4444;color:#ef4444}
+.trivia-opt:disabled{cursor:default}
+
+.trivia-feedback{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;min-height:22px;margin-top:10px;letter-spacing:.04em}
+.trivia-feedback.ok{color:#22c55e}
+.trivia-feedback.bad{color:#ef4444}
+
+.trivia-actions{margin-top:14px;display:flex;justify-content:flex-end}
+.trivia-next-btn{padding:10px 24px;border-radius:999px;border:none;background:var(--trivia-color,var(--gold));color:#111;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.06em;cursor:pointer;transition:all .2s}
+.trivia-next-btn:hover{transform:scale(1.04)}
+
+/* Resultado trivia */
+.trivia-result-box{text-align:center}
+.trivia-result-icon{font-size:3rem;margin-bottom:8px}
+.trivia-result-score{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;letter-spacing:.04em;line-height:1;color:var(--text)}
+.trivia-result-pct{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:700;margin:4px 0 10px}
+.trivia-result-msg{font-size:.95rem;color:var(--dim);margin-bottom:14px}
+.trivia-result-bar-wrap{height:8px;background:var(--bg3);border-radius:8px;overflow:hidden;margin-bottom:10px}
+.trivia-result-bar{height:100%;border-radius:8px;transition:width .8s ease}
+.trivia-result-note{font-size:.8rem;color:var(--muted);margin-bottom:16px;font-style:italic}
+.trivia-close-btn{padding:10px 28px;border-radius:999px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;cursor:pointer;font-size:.9rem}
+
+/* ══ 11 IDEAL ══ */
+.once-modal-backdrop{position:fixed;inset:0;z-index:15000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .3s;padding:16px}
+.once-modal-backdrop.once-visible{opacity:1;pointer-events:all}
+.once-modal-backdrop.once-hiding{opacity:0;pointer-events:none}
+
+.once-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px 18px 18px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:triviaIn .35s cubic-bezier(.16,1,.3,1) both;position:relative}
+.once-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.once-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--once-color,var(--gold))}
+.once-close{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--dim);cursor:pointer;font-size:.9rem}
+
+.once-formation-wrap{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.once-label{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;flex-shrink:0}
+.once-formation-btns{display:flex;gap:6px;flex-wrap:wrap}
+.once-f-btn{padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .18s}
+.once-f-btn.active{background:var(--once-color,var(--gold));color:#111;border-color:var(--once-color,var(--gold))}
+
+.once-pitch{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.once-slot{border:1px dashed var(--border);border-radius:12px;padding:8px 6px;text-align:center;cursor:pointer;transition:all .2s;min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative;background:var(--card2)}
+.once-slot:hover:not(.filled){border-color:var(--once-color,var(--gold));background:color-mix(in srgb,var(--once-color,var(--gold)) 8%,var(--card2))}
+.once-slot.filled{border-style:solid;border-color:var(--once-color,var(--gold));background:color-mix(in srgb,var(--once-color,var(--gold)) 10%,var(--card))}
+.once-slot-pos{font-size:.55rem;font-weight:900;letter-spacing:.1em;padding:2px 5px;border-radius:4px;color:#111;font-family:'Barlow Condensed',sans-serif;margin-bottom:2px}
+.once-slot-player{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;color:var(--text);line-height:1.2;text-align:center}
+.once-slot-country{font-size:.6rem;color:var(--dim);line-height:1}
+.once-slot-empty{font-size:.68rem;color:var(--muted);font-style:italic}
+.once-slot-remove{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:var(--red);color:#fff;border:none;cursor:pointer;font-size:.65rem;display:flex;align-items:center;justify-content:center;line-height:1}
+
+.once-panel-label{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.once-selected-count{font-size:.75rem;color:var(--once-color,var(--gold));font-weight:900}
+.once-players-list{display:flex;flex-direction:column;gap:5px;max-height:180px;overflow-y:auto;padding-right:4px}
+.once-player-btn{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;text-align:left;transition:all .18s}
+.once-player-btn:hover:not(:disabled){background:var(--bg3);border-color:var(--once-color,var(--gold))}
+.once-player-btn.used{opacity:.4;cursor:not-allowed}
+.once-player-btn:disabled{cursor:not-allowed}
+.once-player-name{flex:1}
+.once-player-pos{font-size:.7rem;color:var(--dim);flex-shrink:0}
+.once-player-votes{font-size:.7rem;color:var(--once-color,var(--gold));font-weight:900;margin-left:auto;flex-shrink:0}
+
+.once-actions{margin-top:14px;text-align:center}
+.once-save-btn{padding:11px 32px;border-radius:999px;border:none;background:var(--once-color,var(--gold));color:#111;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.06em;cursor:pointer;transition:all .2s}
+.once-save-btn:hover:not(:disabled){transform:scale(1.04)}
+.once-save-btn:disabled{opacity:.6;cursor:not-allowed}
+.once-login-hint{font-size:.85rem;color:var(--dim);font-style:italic}
+
+/* Picker de jugador */
+.once-picker{position:absolute;inset:0;background:var(--card);border-radius:20px;padding:16px;overflow-y:auto;z-index:10;display:flex;flex-direction:column;gap:6px}
+.once-picker-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.06em;font-size:.9rem;color:var(--dim);text-transform:uppercase;margin-bottom:4px}
+.once-pick-btn{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;text-align:left;transition:all .18s}
+.once-pick-btn:hover{background:var(--bg3);border-color:var(--once-color,var(--gold))}
+.once-pick-pos{font-size:.72rem;color:var(--dim);flex-shrink:0}
+.once-pick-country{font-size:.72rem;color:var(--dim);margin-left:auto;flex-shrink:0}
+.once-picker-cancel{margin-top:4px;padding:8px 20px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-size:.85rem;cursor:pointer}
+
+@media(max-width:500px){
+  .once-pitch{grid-template-columns:repeat(3,1fr)}
+  .once-box{padding:16px 12px 14px}
+}
