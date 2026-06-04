@@ -1938,3 +1938,73 @@ html[data-theme="light"] .medallero-header{background:linear-gradient(135deg,#dd
 .medal-toast-name{font-size:.95rem;font-weight:700;color:var(--text);font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em}
 html[data-theme="light"] .medal-tooltip{box-shadow:0 8px 24px rgba(0,0,0,.12)}
 html[data-theme="light"] .medal-toast{box-shadow:0 8px 24px rgba(0,0,0,.12)}
+
+/* ══════════════════════════════════════════════
+   FASE 4 — Celebración álbum completo
+   ══════════════════════════════════════════════ */
+
+#album-complete-overlay{
+  position:fixed;inset:0;z-index:20000;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.85);backdrop-filter:blur(8px);
+  opacity:0;pointer-events:none;transition:opacity .4s ease;
+}
+#album-complete-overlay.visible{opacity:1;pointer-events:all}
+#album-complete-overlay.hiding{opacity:0;pointer-events:none}
+
+.album-complete-box{
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+  background:linear-gradient(160deg,#0a1428,#0f1e3a,#0a1428);
+  border:2px solid var(--gold);border-radius:24px;
+  padding:32px 28px 28px;max-width:480px;width:90%;
+  box-shadow:0 0 60px rgba(245,197,24,.25),0 24px 80px rgba(0,0,0,.6);
+  animation:celebBoxIn .5s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes celebBoxIn{
+  from{transform:scale(.85) translateY(30px);opacity:0}
+  to{transform:scale(1) translateY(0);opacity:1}
+}
+html[data-theme="light"] .album-complete-box{
+  background:linear-gradient(160deg,#dde8f7,#e8f0fb,#dde8f7);
+  box-shadow:0 0 40px rgba(212,164,0,.2),0 16px 40px rgba(0,0,0,.12);
+}
+
+.album-complete-top{text-align:center}
+.album-complete-stars{font-size:1.6rem;letter-spacing:.3em;display:block;margin-bottom:8px;animation:starsPulse 1.5s ease-in-out infinite}
+@keyframes starsPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.08)}}
+
+.album-complete-title{
+  font-family:'Bebas Neue',sans-serif;font-size:3rem;line-height:.95;
+  letter-spacing:.06em;color:var(--text);margin:0;
+}
+.album-complete-title span{color:var(--gold)}
+.album-complete-sub{
+  font-family:'Barlow Condensed',sans-serif;font-size:1rem;
+  color:var(--dim);margin:8px 0 0;letter-spacing:.04em;
+}
+
+.album-complete-video-wrap{
+  width:100%;border-radius:16px;overflow:hidden;
+  border:1px solid rgba(245,197,24,.25);
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+  line-height:0;
+}
+.album-complete-video{
+  width:100%;height:auto;display:block;max-height:280px;object-fit:cover;
+}
+
+.album-complete-close{
+  padding:14px 36px;border-radius:999px;border:none;cursor:pointer;
+  background:var(--gold);color:#111;
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.08em;
+  transition:transform .2s,box-shadow .2s;
+  box-shadow:0 4px 20px rgba(245,197,24,.35);
+}
+.album-complete-close:hover{transform:scale(1.05);box-shadow:0 6px 28px rgba(245,197,24,.5)}
+.album-complete-close:active{transform:scale(.97)}
+
+@media(max-width:500px){
+  .album-complete-box{padding:24px 16px 20px}
+  .album-complete-title{font-size:2.4rem}
+  .album-complete-video{max-height:220px}
+}

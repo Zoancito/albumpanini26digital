@@ -1129,7 +1129,68 @@ export async function unlockMusicMedal() {
 function updateAll() {
   updateStatsBar();
   buildGroupTabs();
-  checkAndUnlockMedals();   // 🏅 verificar medallas tras cada cambio
+  checkAndUnlockMedals();
+
+  // 🎉 Fase 4 — celebración álbum completo
+  const gs = getGlobalStats();
+  if (gs.owned > 0 && gs.owned === gs.total) {
+    triggerAlbumCompleteCelebration();
+  } else {
+    resetCelebrationIfNeeded();
+  }
+}
+
+
+// ════════════ CELEBRACIÓN ÁLBUM COMPLETO ════════════
+
+let _celebrationShown = false;
+
+function triggerAlbumCompleteCelebration() {
+  // Solo mostrar una vez por sesión
+  if (_celebrationShown) return;
+  // Verificar que no se mostró ya en sesiones previas
+  if (localStorage.getItem('album_complete_celebrated') === 'true') return;
+  _celebrationShown = true;
+
+  const overlay = document.getElementById('album-complete-overlay');
+  if (!overlay) return;
+
+  overlay.classList.add('visible');
+
+  // Guardar para no volver a mostrar
+  try { localStorage.setItem('album_complete_celebrated', 'true'); } catch(e) {}
+
+  // Cerrar al hacer clic fuera del video o en el botón
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay || e.target.id === 'album-complete-close') {
+      closeAlbumCompleteCelebration();
+    }
+  });
+
+  document.addEventListener('keydown', function escHandler(e) {
+    if (e.key === 'Escape') {
+      closeAlbumCompleteCelebration();
+      document.removeEventListener('keydown', escHandler);
+    }
+  });
+}
+
+function closeAlbumCompleteCelebration() {
+  const overlay = document.getElementById('album-complete-overlay');
+  if (!overlay) return;
+  overlay.classList.add('hiding');
+  setTimeout(() => {
+    overlay.classList.remove('visible', 'hiding');
+  }, 500);
+}
+
+// Resetear celebración si el álbum ya no está completo
+function resetCelebrationIfNeeded() {
+  const gs = getGlobalStats();
+  if (gs.owned < gs.total) {
+    _celebrationShown = false;
+    try { localStorage.removeItem('album_complete_celebrated'); } catch(e) {}
+  }
 }
 
 // ════════════ OVERLAY ════════════
