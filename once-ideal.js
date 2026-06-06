@@ -3,16 +3,17 @@
 //  Armador del 11 ideal por grupo
 // ═══════════════════════════════════════════════════
 import { supabase } from './supabase.js'
-
-// ── Obtener jugadores del grupo desde albumData ───
+import { getPlayerPosition } from './player-positions.js'
 function getGroupPlayersData(grp, countries) {
   const result = {}
   if (window._albumPlayers && Object.keys(window._albumPlayers).length > 0) {
     countries.forEach(country => {
-      result[country] = (window._albumPlayers[country] || [])
+      result[country] = (window._albumPlayers[country] || []).map(name => ({
+        name,
+        pos: getPlayerPosition(name) || '?',
+      }))
     })
   } else {
-    // Fallback vacío — no debería ocurrir si script.js cargó antes
     countries.forEach(country => { result[country] = [] })
   }
   return result
@@ -131,7 +132,10 @@ export async function openOnceIdealModal(grp, gColor, countries, userId = null) 
                 <div class="once-slot-pos" style="background:${gColor}">${pos}</div>
                 ${player
                   ? `<div class="once-slot-player">${player}</div>
-                     <div class="once-slot-country">${country?.split(' ').slice(1).join(' ')||''}</div>
+                     <div class="once-slot-country">
+                       <span class="once-pos-badge${getPlayerPosition(player)==='?'||!getPlayerPosition(player)?' pos-unknown':''}">${getPlayerPosition(player)||'?'}</span>
+                       ${country?.split(' ').slice(1).join(' ')||''}
+                     </div>
                      <button class="once-slot-remove" data-slot="${i}" aria-label="Quitar">×</button>`
                   : `<div class="once-slot-empty">+ ${SLOT_LABELS[pos]||pos}</div>`
                 }
@@ -150,7 +154,10 @@ export async function openOnceIdealModal(grp, gColor, countries, userId = null) 
               return `
                 <button class="once-player-btn${used?' used':''}" data-player="${p.name}" ${used?'disabled':''}>
                   <span class="once-player-name">${p.name}</span>
-                  <span class="once-player-pos">${countrShort}</span>
+                  <span class="once-player-pos">
+                    <span class="once-pos-badge${p.pos==='?'?' pos-unknown':''}">${p.pos}</span>
+                    ${countrShort}
+                  </span>
                   ${votes>0?`<span class="once-player-votes" title="${votes} votos comunitarios">${votePct}%</span>`:''}
                 </button>`
             }).join('')}
@@ -222,7 +229,12 @@ export async function openOnceIdealModal(grp, gColor, countries, userId = null) 
     const usedSet = new Set(selected.filter(Boolean))
     const available = allPlayers.filter(p => !usedSet.has(p.name))
     // Ordenar: primero los de la misma country (aproximado por pos)
-    const sorted = available
+    const POS_ORDER = ['POR','DEF','LAT','MED','EXT','DEL','?']
+    const sorted = [...available].sort((a,b) => {
+      const ai = POS_ORDER.indexOf(a.pos), bi = POS_ORDER.indexOf(b.pos)
+      if (ai !== bi) return ai - bi
+      return a.name.localeCompare(b.name)
+    })
 
     const picker = document.createElement('div')
     picker.className = 'once-picker'
@@ -231,7 +243,7 @@ export async function openOnceIdealModal(grp, gColor, countries, userId = null) 
       ${sorted.map(p => `
         <button class="once-pick-btn" data-player="${p.name}">
           ${p.name}
-          <span class="once-pick-pos"></span>
+          <span class="once-pick-pos"><span class="once-pos-badge${p.pos==='?'?' pos-unknown':''}">${p.pos}</span></span>
           <span class="once-pick-country">${p.country.split(' ').slice(1).join(' ')}</span>
         </button>`).join('')}
       <button class="once-picker-cancel">Cancelar</button>`

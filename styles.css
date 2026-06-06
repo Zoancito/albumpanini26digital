@@ -2137,3 +2137,8 @@ html[data-theme="light"] .trivia-box{box-shadow:0 12px 40px rgba(0,0,0,.12)}
 .pkr-team.in-other-role{opacity:.5;cursor:not-allowed;position:relative}
 .pkr-team.in-other-role .pkr-name{text-decoration:line-through}
 .pkr-other-role{position:absolute;top:-4px;right:-4px;font-size:.75rem;background:var(--card);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
+
+/* ── Position badges en 11 ideal ── */
+.once-pos-badge{display:inline-flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:.6rem;font-weight:900;letter-spacing:.06em;padding:1px 4px;border-radius:4px;background:var(--once-color,var(--gold));color:#111;flex-shrink:0}
+.once-pos-badge.pos-unknown{background:var(--bg4);color:var(--dim)}
+.once-slot-country{display:flex;align-items:center;gap:3px;flex-wrap:wrap;justify-content:center;font-size:.58rem}
