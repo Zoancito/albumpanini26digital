@@ -2233,3 +2233,36 @@ html[data-theme="light"] .trivia-box{box-shadow:0 12px 40px rgba(0,0,0,.12)}
 .int-btn-reject{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid #ef4444}
 .int-btn-accept:hover:not(:disabled){background:rgba(34,197,94,.25)}
 .int-btn-reject:hover:not(:disabled){background:rgba(239,68,68,.2)}
+
+/* ══════════════════════════════════════════════
+   FASE 8 — Mundiales enriquecidos
+   ══════════════════════════════════════════════ */
+
+/* ── Podio ── */
+.mun-podio{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+.mun-podio-item{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center}
+.mun-podio-item.gold{border-color:rgba(245,197,24,.4);background:rgba(245,197,24,.06)}
+.mun-podio-item.silver{border-color:rgba(192,192,192,.35);background:rgba(192,192,192,.05)}
+.mun-podio-item.bronze{border-color:rgba(205,127,50,.35);background:rgba(205,127,50,.05)}
+.mun-podio-medal{font-size:1.5rem;display:block;margin-bottom:4px}
+.mun-podio-label{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
+.mun-podio-val{font-family:'Barlow Condensed',sans-serif;font-size:.92rem;font-weight:700;color:var(--text);line-height:1.2}
+
+/* ── Premios individuales ── */
+.mun-awards-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.mun-award{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.mun-award-icon{font-size:1.2rem}
+.mun-award-label{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.mun-award-val{font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:700;color:var(--text);line-height:1.2}
+
+/* ── Semifinales ── */
+.mun-semis{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.mun-semis-label{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.mun-semi-row{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;color:var(--text);padding:5px 0;border-bottom:1px solid var(--border);line-height:1.3}
+.mun-semi-row:last-child{border-bottom:none;padding-bottom:0}
+
+/* ── ¿Sabías que? ── */
+.mun-curiosidad{background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(167,139,250,.04));border:1px solid rgba(167,139,250,.25);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.mun-curiosidad-label{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:6px}
+.mun-curiosidad-text{font-size:.9rem;color:var(--text);line-height:1.55}
+html[data-theme="light"] .mun-curiosidad{background:rgba(139,92,246,.06);border-color:rgba(139,92,246,.2)}
