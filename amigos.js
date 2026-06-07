@@ -18,35 +18,51 @@ let _chatRefreshTimer = null
 let _lastChatSignature = ''
 let _unreadCounts = {}   // { [friendId]: number }
 
-// ── Unread message tracking via localStorage ──────
-function getChatLastSeen(friendId) {
-  try { return parseInt(localStorage.getItem(`chat_seen_${friendId}`) || '0') } catch { return 0 }
+// ── Unread message tracking via Supabase chat_receipts ──
+async function markChatRead(userId, friendId) {
+  try {
+    await supabase.from('chat_receipts').upsert(
+      { user_id: userId, friend_id: friendId, last_read_at: new Date().toISOString() },
+      { onConflict: 'user_id,friend_id' }
+    )
+    _unreadCounts[friendId] = 0
+  } catch (e) { console.warn('[chat] markChatRead error:', e) }
 }
-function setChatLastSeen(friendId) {
-  try { localStorage.setItem(`chat_seen_${friendId}`, Date.now().toString()) } catch {}
-}
+
 async function fetchUnreadCounts(userId, friendIds) {
   if (!friendIds.length) return {}
   try {
-    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString() // últimos 30 días
-    const { data } = await withTimeout(
-      supabase
-        .from('friend_messages')
+    // Traer receipts del usuario actual
+    const { data: receipts } = await withTimeout(
+      supabase.from('chat_receipts')
+        .select('friend_id, last_read_at')
+        .eq('user_id', userId)
+        .in('friend_id', friendIds)
+    )
+    const readMap = {}
+    ;(receipts || []).forEach(r => { readMap[r.friend_id] = r.last_read_at })
+
+    // Traer mensajes recientes
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    const { data: msgs } = await withTimeout(
+      supabase.from('friend_messages')
         .select('sender_id, created_at')
         .eq('receiver_id', userId)
         .in('sender_id', friendIds)
         .gte('created_at', since)
     )
+
     const counts = {}
-    ;(data || []).forEach(msg => {
-      const lastSeen = getChatLastSeen(msg.sender_id)
-      const msgTime  = new Date(msg.created_at).getTime()
-      if (msgTime > lastSeen) {
+    ;(msgs || []).forEach(msg => {
+      const lastRead = readMap[msg.sender_id]
+      // Sin receipt (nunca abrió el chat) → todo no leído
+      // Con receipt → contar solo mensajes posteriores al receipt
+      if (!lastRead || msg.created_at > lastRead) {
         counts[msg.sender_id] = (counts[msg.sender_id] || 0) + 1
       }
     })
     return counts
-  } catch { return {} }
+  } catch (e) { console.warn('[chat] fetchUnreadCounts error:', e); return {} }
 }
 
 // ── FIX: debounce + guard para evitar refreshes superpuestos ─────
@@ -429,9 +445,8 @@ async function handleFriendsPanelClick(e) {
 }
 
 function openChat(friend) {
-  setChatLastSeen(friend.id)
+  if (_currentUser) markChatRead(_currentUser.id, friend.id)
   _unreadCounts[friend.id] = 0
-  // Actualizar badge en la tarjeta sin re-render completo
   const card = document.querySelector(`.social-card[data-friend-id="${friend.id}"]`)
   card?.querySelector('.chat-unread-badge')?.remove()
   if (!_currentUser) return

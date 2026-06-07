@@ -15,6 +15,8 @@ import {
 } from './medals.js'
 import { openTriviaModal } from './trivia.js'
 import { openOnceIdealModal } from './once-ideal.js'
+import { syncExchangeOffers, findMatches, notifyNewMatches, openIntercambiosModal } from './intercambios.js'
+import { initNotificaciones, destroyNotificaciones, getUnreadCount, getAllNotifs, markRead, markAllRead, deleteNotificacion, renderNotifPanel } from './notificaciones.js'
 console.log('Supabase conectado:', supabase)
 
 const authScreen = document.getElementById('auth-screen');
@@ -50,8 +52,14 @@ function enterAlbumShell(mode, user = null) {
   if (currentUser) {
     syncCloudState(currentUser);
     refreshFriendsPanel(currentUser).catch(console.error);
-    // Verificar/crear perfil (non-blocking)
     checkAndHandleFirstLogin(currentUser).catch(console.error);
+
+    // Notificaciones + intercambios
+    initNotificaciones(currentUser.id, (notifs) => updateNotifBell(notifs)).catch(console.error);
+    // Sync inicial de ofertas de intercambio
+    setTimeout(() => scheduleExchangeSync(), 3000);
+  } else {
+    destroyNotificaciones();
   }
 }
 
@@ -1163,10 +1171,25 @@ export async function unlockMusicMedal() {
   }
 }
 
+let _exchangeSyncTimer = null
+const _profilesCache = {}   // { [userId]: profile }
+
+function scheduleExchangeSync() {
+  if (!currentUser) return
+  clearTimeout(_exchangeSyncTimer)
+  _exchangeSyncTimer = setTimeout(async () => {
+    await syncExchangeOffers(
+      currentUser.id, albumData, INTRO_DATA,
+      getStickerState, getRepetidaCount, hasReserva
+    )
+  }, 4000)   // debounce 4s para no saturar en clics rápidos
+}
+
 function updateAll() {
   updateStatsBar();
   buildGroupTabs();
   checkAndUnlockMedals();
+  scheduleExchangeSync();
 
   // 🎉 Fase 4 — celebración álbum completo
   const gs = getGlobalStats();
@@ -2274,7 +2297,76 @@ function _injectInAppBtns(){
 loadA11yPrefs();
 setupA11yUI();
 applyA11yPrefs();
-saveA11yPrefs(); // garantiza que localStorage tenga el tema aunque nunca se haya abierto el panel
+saveA11yPrefs();
+
+// ── Campana de notificaciones ──────────────────────
+function updateNotifBell(notifs) {
+  const count = notifs.filter(n => !n.read).length;
+  const bell  = document.getElementById('notif-bell');
+  const badge = document.getElementById('notif-badge');
+  const panel = document.getElementById('notif-panel-body');
+  if (badge) {
+    badge.textContent = count > 9 ? '9+' : count;
+    badge.style.display = count > 0 ? '' : 'none';
+  }
+  if (panel && document.getElementById('notif-panel')?.classList.contains('open')) {
+    renderNotifPanel(panel, notifs);
+    bindNotifPanel(panel);
+  }
+}
+
+function bindNotifPanel(panel) {
+  // Marcar leída al hacer clic
+  panel.querySelectorAll('.notif-item').forEach(el => {
+    el.addEventListener('click', () => {
+      markRead(el.dataset.notifId);
+    });
+  });
+  // Eliminar
+  panel.querySelectorAll('.notif-item-del').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      deleteNotificacion(btn.dataset.del);
+    });
+  });
+  // Aceptar/rechazar intercambio
+  panel.querySelectorAll('.notif-action-btn').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const accept = btn.dataset.action === 'accept';
+      btn.disabled = true;
+      const { respondExchangeRequest } = await import('./intercambios.js');
+      await respondExchangeRequest(btn.dataset.id, accept, currentUser?.id);
+      btn.closest('.notif-item-actions').innerHTML = accept ? '✅ Aceptado' : '❌ Rechazado';
+    });
+  });
+}
+
+// Bell toggle
+document.getElementById('notif-bell')?.addEventListener('click', () => {
+  const panel = document.getElementById('notif-panel');
+  if (!panel) return;
+  const isOpen = panel.classList.toggle('open');
+  if (isOpen) {
+    markAllRead();
+    const body = panel.querySelector('#notif-panel-body');
+    renderNotifPanel(body, getAllNotifs());
+    bindNotifPanel(body);
+  }
+});
+document.addEventListener('click', e => {
+  const panel = document.getElementById('notif-panel');
+  const bell  = document.getElementById('notif-bell');
+  if (panel?.classList.contains('open') && !panel.contains(e.target) && e.target !== bell) {
+    panel.classList.remove('open');
+  }
+});
+
+// Botón intercambios
+document.getElementById('btn-intercambios')?.addEventListener('click', () => {
+  if (!currentUser) return;
+  openIntercambiosModal(currentUser.id, _profilesCache);
+});
 
 // ════════════ COUNTDOWN INAUGURAL ════════════
 (function initCountdown() {

@@ -2142,3 +2142,94 @@ html[data-theme="light"] .trivia-box{box-shadow:0 12px 40px rgba(0,0,0,.12)}
 .once-pos-badge{display:inline-flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:.6rem;font-weight:900;letter-spacing:.06em;padding:1px 4px;border-radius:4px;background:var(--once-color,var(--gold));color:#111;flex-shrink:0}
 .once-pos-badge.pos-unknown{background:var(--bg4);color:var(--dim)}
 .once-slot-country{display:flex;align-items:center;gap:3px;flex-wrap:wrap;justify-content:center;font-size:.58rem}
+
+/* ══════════════════════════════════════════════
+   FASE 7 — Notificaciones + Intercambios
+   ══════════════════════════════════════════════ */
+
+/* ── Campana de notificaciones ── */
+#notif-wrap{position:relative;display:inline-flex;align-items:center}
+.notif-bell-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;transition:all .2s}
+.notif-bell-btn:hover{background:var(--bg3);transform:scale(1.06)}
+.notif-badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:var(--red);color:#fff;font-size:.65rem;font-weight:900;display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--card);font-family:'Barlow Condensed',sans-serif;pointer-events:none}
+
+/* ── Panel de notificaciones ── */
+#notif-panel{position:absolute;top:calc(100% + 8px);right:0;width:320px;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 16px 40px rgba(0,0,0,.3);z-index:9000;display:none;flex-direction:column;overflow:hidden;animation:notifPanelIn .25s ease}
+#notif-panel.open{display:flex}
+@keyframes notifPanelIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.notif-panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.notif-panel-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:.06em;color:var(--text)}
+.notif-mark-all{font-size:.72rem;color:var(--dim);background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:6px}
+.notif-mark-all:hover{background:var(--bg3);color:var(--text)}
+.notif-panel-body{max-height:380px;overflow-y:auto;padding:6px}
+.notif-empty{text-align:center;padding:24px;color:var(--dim);font-size:.88rem;font-style:italic}
+
+/* ── Item de notificación ── */
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .15s;position:relative}
+.notif-item:hover{background:var(--bg3)}
+.notif-item.unread{background:color-mix(in srgb,var(--gold) 6%,var(--card))}
+.notif-item.unread::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--gold);border-radius:0 3px 3px 0}
+.notif-item-icon{font-size:1.3rem;flex-shrink:0;width:28px;text-align:center}
+.notif-item-body{flex:1;min-width:0}
+.notif-item-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;color:var(--text);letter-spacing:.03em}
+.notif-item-msg{font-size:.78rem;color:var(--dim);line-height:1.35;margin-top:2px}
+.notif-item-time{font-size:.7rem;color:var(--muted);margin-top:3px}
+.notif-item-del{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.75rem;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
+.notif-item:hover .notif-item-del{opacity:1}
+.notif-item-actions{display:flex;gap:5px;margin-top:6px}
+.notif-action-btn{padding:4px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:.78rem;cursor:pointer;transition:all .15s}
+.notif-action-btn.accept:hover{background:rgba(34,197,94,.15);border-color:#22c55e}
+.notif-action-btn.reject:hover{background:rgba(239,68,68,.12);border-color:#ef4444}
+
+/* ── Toast de notificación ── */
+.notif-toast{position:fixed;bottom:90px;right:20px;z-index:10000;display:flex;align-items:center;gap:12px;padding:12px 18px;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.3);transform:translateX(120%);transition:transform .35s cubic-bezier(.16,1,.3,1);max-width:300px;pointer-events:all}
+.notif-toast.notif-toast-in{transform:translateX(0)}
+.notif-toast-icon{font-size:1.6rem;flex-shrink:0}
+.notif-toast-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.notif-toast-msg{font-size:.82rem;color:var(--text);line-height:1.3}
+.notif-toast-close{width:24px;height:24px;border-radius:50%;background:var(--bg3);border:none;color:var(--dim);cursor:pointer;font-size:.75rem;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+
+/* ── Modal de intercambios ── */
+.intercambios-backdrop{position:fixed;inset:0;z-index:15000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .3s;padding:16px}
+.intercambios-backdrop.intercambios-visible{opacity:1;pointer-events:all}
+.intercambios-backdrop.intercambios-hiding{opacity:0;pointer-events:none}
+.intercambios-box{background:var(--card);border:1px solid var(--border);border-radius:20px;width:100%;max-width:580px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:triviaIn .35s cubic-bezier(.16,1,.3,1) both}
+.intercambios-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.intercambios-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.06em;color:var(--gold)}
+.intercambios-close{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--dim);cursor:pointer;font-size:.9rem}
+.intercambios-loading{padding:20px;overflow-y:auto;flex:1}
+.int-spinner{text-align:center;padding:32px;color:var(--dim);font-style:italic;font-size:.9rem}
+.int-empty{text-align:center;padding:32px 20px;color:var(--dim)}
+.int-empty-icon{font-size:2.5rem;margin-bottom:12px}
+.int-empty small{display:block;margin-top:8px;font-size:.8rem;color:var(--muted)}
+.int-section-label{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:10px 4px 6px;border-bottom:1px solid var(--border);margin-bottom:8px}
+
+/* Match card */
+.int-match-card{border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;background:var(--card2)}
+.int-match-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px}
+.int-match-user{display:flex;align-items:center;gap:10px}
+.int-match-username{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--text)}
+.int-match-score{font-size:.78rem;color:var(--dim)}
+.int-match-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.int-match-col{background:var(--bg3);border-radius:10px;padding:8px 10px}
+.int-col-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;font-family:'Barlow Condensed',sans-serif}
+.int-chip{display:inline-block;font-size:.72rem;padding:2px 7px;border-radius:10px;background:var(--bg4);border:1px solid var(--border);color:var(--text);margin:2px 2px 2px 0;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.int-chip-more{display:inline-block;font-size:.7rem;padding:2px 7px;border-radius:10px;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.25);color:var(--gold);margin:2px 0}
+
+/* Request card */
+.int-request-card{border:1px solid rgba(245,197,24,.3);border-radius:14px;padding:14px;margin-bottom:10px;background:color-mix(in srgb,var(--gold) 6%,var(--card2));display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.int-req-avatar{width:36px;height:36px;border-radius:50%;background:var(--gold);color:#111;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.int-req-body{flex:1;min-width:0}
+.int-req-user{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--text)}
+.int-req-detail{font-size:.78rem;color:var(--dim);margin:2px 0}
+.int-req-stickers{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.int-req-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* Buttons */
+.int-btn-request,.int-btn-accept,.int-btn-reject{padding:8px 14px;border-radius:10px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.04em;transition:all .2s}
+.int-btn-request{background:var(--gold);color:#111}
+.int-btn-request:hover:not(:disabled){transform:scale(1.04)}
+.int-btn-accept{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid #22c55e}
+.int-btn-reject{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid #ef4444}
+.int-btn-accept:hover:not(:disabled){background:rgba(34,197,94,.25)}
+.int-btn-reject:hover:not(:disabled){background:rgba(239,68,68,.2)}

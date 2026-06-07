@@ -78,9 +78,16 @@ export async function openOnceIdealModal(grp, gColor, countries, userId = null) 
   document.getElementById('once-modal')?.remove()
 
   const groupPlayers = getGroupPlayersData(grp, countries)
-  const allPlayers   = countries.flatMap(c => (groupPlayers[c] || []).map(name => ({ name, country: c })))
-  const countryMap   = {}
-  allPlayers.forEach(({ name, country }) => { countryMap[name] = country })
+  // groupPlayers[c] = [{name, pos}, ...] — extraer correctamente
+  const allPlayers = countries.flatMap(c =>
+    (groupPlayers[c] || []).map(p => ({
+      name:    p.name,
+      pos:     p.pos || '?',
+      country: c,
+    }))
+  )
+  const countryMap = {}
+  allPlayers.forEach(p => { countryMap[p.name] = p.country })
 
   let formation  = '4-3-3'
   let selected   = []   // array de player strings en slots
