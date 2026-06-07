@@ -199,7 +199,7 @@ const albumData = {
   "🇨🇻 Cabo Verde":["Cabo Verde Logo","Vozinha","Logan Costa","Pico","Steven Moreira","João Paulo","Kevin Pina","Jamiro Monteiro","Yannick Semedo","Ryan Mendes","Jovane Cabral","Dailon Livramento"],
   "🇸🇦 Arabia Saudí":["Saudi Arabia Logo","Nawaf Alaqidi","Hassan Altambakti","Jehad Thikri","Saud Abdulhamid","Nasser Aldawsari","Abdullah Alkhaibari","Musab Aljuwayr","Feras Albrikan","Salem Aldawsari","Saleh Abu Alshamat","Saleh Alshehri"],
   "🇺🇾 Uruguay":["Uruguay Logo","Sergio Rochet","José María Giménez","Ronald Araújo","Sebastián Cáceres","Mathías Olivera","Nahitan Nández","Federico Valverde","Rodrigo Bentancur","Manuel Ugarte","Facundo Pellistri","Darwin Núñez"],
-  "🇫🇷 Francia":["France Logo","Mike Maignan","William Saliba","Jules Koundé","Théo Hernández","Aurélien Tchouaméni","Eduaco Camavinga","Ousmane Dembélé","Kylian Mbappé","Bradley Barcola","Désiré Doué","Hugo Ekitiké"],
+  "🇫🇷 Francia":["France Logo","Mike Maignan","William Saliba","Jules Koundé","Théo Hernández","Aurélien Tchouaméni","Eduardo Camavinga","Ousmane Dembélé","Kylian Mbappé","Bradley Barcola","Désiré Doué","Hugo Ekitiké"],
   "🇸🇳 Senegal":["Senegal Logo","Édouard Mendy","Kalidou Koulibaly","Moussa Niakhaté","El Hadji Malick Diouf","Idrissa Gana Gueye","Pape Matar Sarr","Sadio Mané","Iliman Ndiaye","Krépin Diatta","Ismaïla Sarr","Nicolas Jackson"],
   "🇮🇶 Irak":["Iraq Logo","Jalal Hassan","Hussein Ali","Akam Hashem","Merchas Doski","Zaid Tahseen","Zidane Iqbal","Amir Al-Ammari","Ibrahim Bayesh","Ali Jasim","Aimar Sher","Mohanad Ali"],
   "🇳🇴 Noruega":["Norway Logo","Ørjan Nyland","Julian Ryerson","Kristoffer Vassbakk Ajer","David Møller Wolfe","Martin Ødegaard","Sander Berge","Patrick Berg","Erling Haaland","Antonio Nusa","Oscar Bobb","Alexander Sørloth"],
