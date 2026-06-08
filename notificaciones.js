@@ -85,6 +85,7 @@ export function getAllNotifs()    { return _notifs }
 // ── Realtime ──────────────────────────────────────
 function subscribeRealtime() {
   if (!_userId) return
+  if (_sub) return;
   _sub = supabase
     .channel(`notifs_${_userId}`)
     .on('postgres_changes', {
