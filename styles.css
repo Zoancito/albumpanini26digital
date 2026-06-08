@@ -2266,3 +2266,177 @@ html[data-theme="light"] .trivia-box{box-shadow:0 12px 40px rgba(0,0,0,.12)}
 .mun-curiosidad-label{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:6px}
 .mun-curiosidad-text{font-size:.9rem;color:var(--text);line-height:1.55}
 html[data-theme="light"] .mun-curiosidad{background:rgba(139,92,246,.06);border-color:rgba(139,92,246,.2)}
+
+/* ══════════════════════════════════════════════
+   ETAPA A — Feed Social
+   ══════════════════════════════════════════════ */
+
+/* ── Panel del feed ── */
+.feed-panel{position:fixed;inset:0;z-index:12000;background:var(--bg);overflow-y:auto;
+  animation:feedSlideIn .3s cubic-bezier(.16,1,.3,1)}
+@keyframes feedSlideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.feed-panel-inner{max-width:680px;margin:0 auto;padding:0 0 100px}
+.feed-panel-header{display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;
+  background:var(--bg);z-index:1;backdrop-filter:blur(10px)}
+.feed-panel-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.06em;color:var(--gold);margin:0}
+.feed-panel-close{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);
+  background:var(--card2);color:var(--dim);cursor:pointer;font-size:1rem;transition:all .2s}
+.feed-panel-close:hover{background:var(--bg3);color:var(--text)}
+
+/* ── Selector de categorías ── */
+.feed-cats-wrap{padding:16px 20px 8px;border-bottom:1px solid var(--border)}
+.feed-cats-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.feed-cats-label{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.feed-surprise-btn{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;
+  padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card2);
+  color:var(--dim);cursor:pointer;transition:all .2s;letter-spacing:.04em}
+.feed-surprise-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--gold)}
+.feed-cat-selector{display:flex;gap:8px;flex-wrap:wrap}
+.feed-cat-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:20px;
+  border:1px solid var(--border);background:var(--card2);color:var(--dim);cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.04em;
+  transition:all .2s;white-space:nowrap}
+.feed-cat-btn:hover{border-color:var(--cat-color,var(--gold));color:var(--text)}
+.feed-cat-btn.active{background:color-mix(in srgb,var(--cat-color,var(--gold)) 15%,var(--card2));
+  border-color:var(--cat-color,var(--gold));color:var(--text)}
+.feed-cat-btn.muted{opacity:.5;border-style:dashed}
+.feed-cat-icon{font-size:1rem}
+.feed-cat-muted-icon{font-size:.75rem;opacity:.7}
+.feed-cats-hint{font-size:.72rem;color:var(--muted);margin-top:8px;font-style:italic}
+
+/* ── Posts ── */
+.feed-posts{padding:12px 20px;display:flex;flex-direction:column;gap:12px}
+.feed-loading,.feed-error,.feed-empty{text-align:center;padding:40px 20px;color:var(--dim);font-size:.92rem}
+.feed-empty-icon{font-size:2.5rem;margin-bottom:10px}
+.feed-empty-title{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;
+  color:var(--text);margin-bottom:6px;letter-spacing:.04em}
+.feed-empty-sub{font-size:.85rem;color:var(--dim)}
+
+/* ── Post card ── */
+.feed-post{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;transition:border-color .2s}
+.feed-post:hover{border-color:var(--gold)}
+.fp-header{display:flex;align-items:flex-start;gap:10px;padding:14px 16px 0;position:relative}
+.fp-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;overflow:hidden;
+  background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.fp-avatar-img{width:100%;height:100%;object-fit:cover}
+.fp-avatar-fb{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--gold)}
+.fp-meta{flex:1;min-width:0}
+.fp-author{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;
+  color:var(--text);letter-spacing:.02em}
+.fp-sub{display:flex;align-items:center;gap:4px;font-size:.78rem;color:var(--dim)}
+.fp-username{color:var(--dim);text-decoration:none}
+.fp-username:hover{color:var(--gold);text-decoration:underline}
+.fp-dot{color:var(--border)}
+.fp-time{color:var(--muted)}
+.fp-cat-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;
+  font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.08em;
+  background:color-mix(in srgb,var(--cat-color,var(--gold)) 15%,transparent);
+  border:1px solid color-mix(in srgb,var(--cat-color,var(--gold)) 35%,transparent);
+  color:var(--cat-color,var(--gold));flex-shrink:0;white-space:nowrap}
+.fp-menu-wrap{position:relative;flex-shrink:0}
+.fp-menu-btn{width:30px;height:30px;border-radius:8px;border:none;background:none;
+  color:var(--dim);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
+.fp-menu-btn:hover{background:var(--bg3);color:var(--text)}
+.fp-menu{position:absolute;top:100%;right:0;z-index:100;background:var(--card);
+  border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);
+  min-width:210px;padding:4px;overflow:hidden}
+.fp-menu-item{width:100%;padding:9px 12px;text-align:left;background:none;border:none;
+  color:var(--text);font-size:.85rem;cursor:pointer;border-radius:7px;display:flex;gap:8px}
+.fp-menu-item:hover{background:var(--bg3)}
+.fp-content{padding:10px 16px 8px;font-size:.95rem;line-height:1.55;color:var(--text);
+  white-space:pre-wrap;word-break:break-word}
+.fp-media{padding:0 16px 10px}
+.fp-img{width:100%;border-radius:10px;max-height:360px;object-fit:cover;
+  border:1px solid var(--border);display:block}
+.fp-actions{display:flex;align-items:center;gap:8px;padding:8px 16px 12px;border-top:1px solid var(--border)}
+.fp-apoyo-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;
+  border:1px solid var(--border);background:none;color:var(--dim);cursor:pointer;font-size:.83rem;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.04em;transition:all .2s}
+.fp-apoyo-btn:hover{border-color:var(--gold);color:var(--gold)}
+.fp-apoyo-btn.active{background:rgba(245,197,24,.1);border-color:var(--gold);color:var(--gold)}
+.fp-apoyo-btn:disabled{opacity:.6;cursor:default}
+.fp-apoyo-icon{font-size:1rem}
+.fp-share-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;
+  border:1px solid var(--border);background:none;color:var(--dim);cursor:pointer;font-size:.83rem;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;transition:all .2s;margin-left:auto}
+.fp-share-btn:hover{background:var(--bg3);color:var(--text)}
+.fp-new{animation:fpNew .4s ease}
+@keyframes fpNew{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.fp-fade-out{animation:fpFade .35s ease forwards}
+@keyframes fpFade{to{opacity:0;transform:scale(.96)}}
+
+/* ── Load more ── */
+.feed-load-more-btn{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);
+  background:var(--card2);color:var(--dim);cursor:pointer;font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:.9rem;letter-spacing:.06em;transition:all .2s;margin-top:4px}
+.feed-load-more-btn:hover{background:var(--bg3);border-color:var(--gold);color:var(--text)}
+
+/* ── Compose FAB ── */
+.compose-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;
+  border:none;background:var(--gold);color:#111;font-size:1.4rem;cursor:pointer;z-index:11000;
+  box-shadow:0 8px 24px rgba(245,197,24,.4);transition:all .25s;display:flex;
+  align-items:center;justify-content:center}
+.compose-fab:hover{transform:scale(1.1);box-shadow:0 12px 32px rgba(245,197,24,.5)}
+
+/* ── Compose modal ── */
+.compose-backdrop{position:fixed;inset:0;z-index:16000;display:flex;align-items:flex-end;
+  justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;transition:opacity .3s;padding:0 0 0}
+@media(min-width:600px){.compose-backdrop{align-items:center;padding:16px}}
+.compose-backdrop.compose-visible{opacity:1;pointer-events:all}
+.compose-backdrop.compose-hiding{opacity:0;pointer-events:none}
+.compose-box{background:var(--card);border:1px solid var(--border);border-radius:20px 20px 0 0;
+  width:100%;max-width:600px;padding:20px;display:flex;flex-direction:column;gap:14px;
+  box-shadow:0 -8px 40px rgba(0,0,0,.3);animation:composeUp .3s cubic-bezier(.16,1,.3,1)}
+@media(min-width:600px){.compose-box{border-radius:20px;animation:triviaIn .3s cubic-bezier(.16,1,.3,1)}}
+@keyframes composeUp{from{transform:translateY(100%)}to{transform:none}}
+.compose-header{display:flex;align-items:center;justify-content:space-between}
+.compose-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;
+  letter-spacing:.06em;color:var(--text)}
+.compose-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);
+  background:var(--card2);color:var(--dim);cursor:pointer;font-size:.9rem}
+.compose-cats-label{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--dim);display:block;margin-bottom:7px}
+.compose-cat-btns{display:flex;gap:7px;flex-wrap:wrap}
+.compose-cat-btn{padding:6px 12px;border-radius:20px;border:1px solid var(--border);
+  background:var(--card2);color:var(--dim);font-family:'Barlow Condensed',sans-serif;
+  font-size:.82rem;font-weight:700;cursor:pointer;transition:all .18s}
+.compose-cat-btn.active{background:color-mix(in srgb,var(--cat-color,var(--gold)) 18%,var(--card2));
+  border-color:var(--cat-color,var(--gold));color:var(--text)}
+.compose-textarea{width:100%;min-height:100px;max-height:200px;padding:12px;border-radius:12px;
+  border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:.95rem;
+  line-height:1.5;resize:vertical;font-family:'Barlow',sans-serif}
+.compose-textarea:focus{outline:none;border-color:var(--gold)}
+.compose-textarea::placeholder{color:var(--muted)}
+.compose-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.compose-char-count{font-size:.78rem;color:var(--dim);font-family:'Barlow Condensed',sans-serif;flex-shrink:0}
+.compose-actions{display:flex;gap:8px;align-items:center;flex:1;min-width:0}
+.compose-img-url{flex:1;padding:7px 10px;border-radius:8px;border:1px solid var(--border);
+  background:var(--bg2);color:var(--text);font-size:.8rem;min-width:0}
+.compose-img-url:focus{outline:none;border-color:var(--gold)}
+.compose-submit{padding:9px 20px;border-radius:999px;border:none;background:var(--gold);
+  color:#111;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;
+  letter-spacing:.06em;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.compose-submit:disabled{opacity:.5;cursor:not-allowed}
+.compose-submit:hover:not(:disabled){transform:scale(1.04)}
+
+/* ── Feed toast ── */
+.feed-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);
+  z-index:20000;background:var(--card);border:1px solid var(--border);border-radius:999px;
+  padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.88rem;
+  letter-spacing:.04em;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,.25);
+  opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+.feed-toast.feed-toast-in{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── Feed action button ── */
+.feed-action-btn{background:color-mix(in srgb,var(--gold) 12%,var(--card2)) !important;
+  border-color:rgba(245,197,24,.3) !important}
+.feed-action-btn:hover{background:color-mix(in srgb,var(--gold) 22%,var(--card2)) !important}
+
+/* Light mode overrides */
+html[data-theme="light"] .feed-panel{background:var(--bg)}
+html[data-theme="light"] .feed-post:hover{border-color:var(--gold)}
+html[data-theme="light"] .fp-menu{box-shadow:0 8px 24px rgba(0,0,0,.12)}

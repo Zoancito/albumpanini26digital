@@ -17,6 +17,7 @@ import { openTriviaModal } from './trivia.js'
 import { openOnceIdealModal } from './once-ideal.js'
 import { syncExchangeOffers, findMatches, notifyNewMatches, openIntercambiosModal } from './intercambios.js'
 import { initNotificaciones, destroyNotificaciones, getUnreadCount, getAllNotifs, markRead, markAllRead, deleteNotificacion, renderNotifPanel } from './notificaciones.js'
+import { initFeed, openComposeModal, showFeedToast, FEED_CATEGORIES } from './feed.js'
 console.log('Supabase conectado:', supabase)
 
 const authScreen = document.getElementById('auth-screen');
@@ -56,6 +57,9 @@ function enterAlbumShell(mode, user = null) {
 
     // Notificaciones + intercambios
     initNotificaciones(currentUser.id, (notifs) => updateNotifBell(notifs)).catch(console.error);
+    // Feed social
+    initFeed(currentUser.id).catch(console.error);
+    document.getElementById('compose-fab')?.style.removeProperty('display');
     // Sync inicial de ofertas de intercambio
     setTimeout(() => scheduleExchangeSync(), 3000);
   } else {
@@ -199,7 +203,7 @@ const albumData = {
   "🇨🇻 Cabo Verde":["Cabo Verde Logo","Vozinha","Logan Costa","Pico","Steven Moreira","João Paulo","Kevin Pina","Jamiro Monteiro","Yannick Semedo","Ryan Mendes","Jovane Cabral","Dailon Livramento"],
   "🇸🇦 Arabia Saudí":["Saudi Arabia Logo","Nawaf Alaqidi","Hassan Altambakti","Jehad Thikri","Saud Abdulhamid","Nasser Aldawsari","Abdullah Alkhaibari","Musab Aljuwayr","Feras Albrikan","Salem Aldawsari","Saleh Abu Alshamat","Saleh Alshehri"],
   "🇺🇾 Uruguay":["Uruguay Logo","Sergio Rochet","José María Giménez","Ronald Araújo","Sebastián Cáceres","Mathías Olivera","Nahitan Nández","Federico Valverde","Rodrigo Bentancur","Manuel Ugarte","Facundo Pellistri","Darwin Núñez"],
-  "🇫🇷 Francia":["France Logo","Mike Maignan","William Saliba","Jules Koundé","Théo Hernández","Aurélien Tchouaméni","Eduardo Camavinga","Ousmane Dembélé","Kylian Mbappé","Bradley Barcola","Désiré Doué","Hugo Ekitiké"],
+  "🇫🇷 Francia":["France Logo","Mike Maignan","William Saliba","Jules Koundé","Théo Hernández","Aurélien Tchouaméni","Eduaco Camavinga","Ousmane Dembélé","Kylian Mbappé","Bradley Barcola","Désiré Doué","Hugo Ekitiké"],
   "🇸🇳 Senegal":["Senegal Logo","Édouard Mendy","Kalidou Koulibaly","Moussa Niakhaté","El Hadji Malick Diouf","Idrissa Gana Gueye","Pape Matar Sarr","Sadio Mané","Iliman Ndiaye","Krépin Diatta","Ismaïla Sarr","Nicolas Jackson"],
   "🇮🇶 Irak":["Iraq Logo","Jalal Hassan","Hussein Ali","Akam Hashem","Merchas Doski","Zaid Tahseen","Zidane Iqbal","Amir Al-Ammari","Ibrahim Bayesh","Ali Jasim","Aimar Sher","Mohanad Ali"],
   "🇳🇴 Noruega":["Norway Logo","Ørjan Nyland","Julian Ryerson","Kristoffer Vassbakk Ajer","David Møller Wolfe","Martin Ødegaard","Sander Berge","Patrick Berg","Erling Haaland","Antonio Nusa","Oscar Bobb","Alexander Sørloth"],
@@ -2362,8 +2366,25 @@ document.addEventListener('click', e => {
   }
 });
 
-// Botón intercambios
-document.getElementById('btn-intercambios')?.addEventListener('click', () => {
+// ── Feed panel ─────────────────────────────────────
+document.getElementById('btn-feed')?.addEventListener('click', () => {
+  const panel = document.getElementById('feed-panel');
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : '';
+  if (!isOpen && !currentUser) {
+    // Cargar feed anónimo (solo lectura)
+    import('./feed.js').then(({ initFeed }) => initFeed(null));
+  }
+});
+
+document.getElementById('feed-close')?.addEventListener('click', () => {
+  document.getElementById('feed-panel').style.display = 'none';
+});
+
+document.getElementById('compose-fab')?.addEventListener('click', () => {
+  openComposeModal(currentUser?.id || null);
+});
   if (!currentUser) return;
   openIntercambiosModal(currentUser.id, _profilesCache);
 });
