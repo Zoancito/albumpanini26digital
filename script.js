@@ -2385,9 +2385,12 @@ document.getElementById('feed-close')?.addEventListener('click', () => {
 document.getElementById('compose-fab')?.addEventListener('click', () => {
   openComposeModal(currentUser?.id || null);
 });
-//  if (!currentUser) return;
-//  openIntercambiosModal(currentUser.id, _profilesCache);
-// });
+
+// Botón intercambios
+document.getElementById('btn-intercambios')?.addEventListener('click', () => {
+  if (!currentUser) return;
+  openIntercambiosModal(currentUser.id, _profilesCache);
+});
 
 // ════════════ COUNTDOWN INAUGURAL ════════════
 (function initCountdown() {
