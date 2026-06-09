@@ -259,7 +259,8 @@ function renderPost(p) {
               ⏳ No quiero ver ${cat.label || p.category} ahora
             </button>
             ${p.user_id === _userId
-              ? `<button class="fp-menu-item fp-delete-btn" data-post="${p.id}">🗑️ Eliminar</button>`
+              ? `<button class="fp-menu-item fp-edit-btn" data-post="${p.id}">✏️ Editar</button>
+               <button class="fp-menu-item fp-delete-btn" data-post="${p.id}">🗑️ Eliminar</button>`
               : ''}
           </div>
         </div>
@@ -320,6 +321,11 @@ function bindPost(card, p) {
     card.classList.add('fp-fade-out')
     setTimeout(() => card.remove(), 350)
     showFeedToast(`⏳ No verás más "${CAT_MAP[cat]?.label || cat}" por 24 horas`)
+  })
+
+  // Editar
+  card.querySelector('.fp-edit-btn')?.addEventListener('click', () => {
+    openEditModal(p, card)
   })
 
   // Eliminar
@@ -423,6 +429,105 @@ function renderCategorySelector() {
       showFeedToast('🎲 ¡Sorpréndeme activado!')
     }
   }
+}
+
+// ── Editar post propio ────────────────────────────
+function openEditModal(post, card) {
+  document.getElementById('edit-modal')?.remove()
+
+  const cat = CAT_MAP[post.category] || {}
+  const modal = document.createElement('div')
+  modal.id = 'edit-modal'
+  modal.className = 'compose-backdrop'
+  modal.innerHTML = `
+    <div class="compose-box">
+      <div class="compose-header">
+        <div class="compose-title">✏️ Editar post</div>
+        <button class="compose-close" id="edit-close" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="compose-cats">
+        <span class="compose-cats-label">Categoría</span>
+        <div class="compose-cat-btns">
+          <span class="compose-cat-btn active" style="--cat-color:${cat.color||'var(--gold)'}">
+            ${cat.icon || '⚽'} ${cat.label || post.category}
+          </span>
+        </div>
+      </div>
+      <textarea class="compose-textarea" id="edit-text"
+        maxlength="500">${esc(post.content)}</textarea>
+      <div class="compose-footer">
+        <div class="compose-char-count"><span id="edit-chars">${post.content.length}</span>/500</div>
+        <div class="compose-actions">
+          <input type="url" class="compose-img-url" id="edit-img-url"
+            placeholder="URL de imagen (opcional)"
+            value="${post.media_url || ''}">
+          <button class="compose-submit" id="edit-submit">Guardar cambios</button>
+        </div>
+      </div>
+    </div>`
+
+  const closeModal = () => {
+    modal.classList.add('compose-hiding')
+    setTimeout(() => modal.remove(), 300)
+  }
+
+  modal.querySelector('#edit-close').addEventListener('click', closeModal)
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal() })
+  document.addEventListener('keydown', function esc(e) {
+    if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', esc) }
+  })
+
+  modal.querySelector('#edit-text').addEventListener('input', function() {
+    modal.querySelector('#edit-chars').textContent = this.value.length
+  })
+
+  modal.querySelector('#edit-submit').addEventListener('click', async () => {
+    const content   = modal.querySelector('#edit-text').value.trim()
+    const media_url = modal.querySelector('#edit-img-url').value.trim() || null
+    if (!content) return
+
+    const btn = modal.querySelector('#edit-submit')
+    btn.disabled = true; btn.textContent = 'Guardando…'
+
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .update({ content, media_url })
+        .eq('id', post.id)
+        .eq('user_id', _userId)
+
+      if (error) throw error
+
+      // Actualizar el DOM del post sin recargar el feed
+      const contentEl = card.querySelector('.fp-content')
+      if (contentEl) contentEl.textContent = content
+
+      const mediaEl = card.querySelector('.fp-media')
+      if (media_url && mediaEl) {
+        mediaEl.innerHTML = `<img src="${media_url}" alt="Imagen del post" class="fp-img" loading="lazy"
+          onerror="this.parentElement.style.display='none'">`
+        mediaEl.style.display = ''
+      } else if (!media_url && mediaEl) {
+        mediaEl.style.display = 'none'
+      }
+
+      // Actualizar el objeto en memoria
+      post.content   = content
+      post.media_url = media_url
+
+      closeModal()
+      showFeedToast('✅ Post actualizado')
+    } catch (e) {
+      console.error('[feed] edit error:', e)
+      btn.disabled = false; btn.textContent = 'Error, reintentar'
+    }
+  })
+
+  document.body.appendChild(modal)
+  requestAnimationFrame(() => modal.classList.add('compose-visible'))
+  const textarea = modal.querySelector('#edit-text')
+  textarea.focus()
+  textarea.setSelectionRange(textarea.value.length, textarea.value.length)
 }
 
 // ── Crear post ────────────────────────────────────
