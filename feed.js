@@ -28,6 +28,38 @@ export async function initFeed(userId) {
   await Promise.all([loadPreferences(), loadMutes()])
   renderCategorySelector()
   await loadFeed()
+  subscribeReactions()
+}
+
+// ── Suscripción realtime a reacciones ─────────────
+let _reactionSub = null
+function subscribeReactions() {
+  _reactionSub?.unsubscribe()
+  _reactionSub = supabase
+    .channel('feed_reactions')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'post_reactions',
+    }, payload => {
+      const postId = payload.new?.post_id || payload.old?.post_id
+      if (!postId) return
+      updatePostReactionCount(postId)
+    })
+    .subscribe()
+}
+
+async function updatePostReactionCount(postId) {
+  try {
+    const { count } = await supabase
+      .from('post_reactions')
+      .select('*', { count: 'exact', head: true })
+      .eq('post_id', postId)
+
+    // Actualizar todos los elementos del feed con ese post_id
+    document.querySelectorAll(`.feed-post[data-post-id="${postId}"] .fp-apoyo-count`)
+      .forEach(el => { el.textContent = count ?? 0 })
+  } catch (e) { console.warn('[feed] updateReactionCount:', e) }
 }
 
 // ── Preferencias ──────────────────────────────────
