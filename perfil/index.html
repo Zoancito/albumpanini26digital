@@ -308,6 +308,9 @@ html[data-theme="contrast"] #a11y-panel{background:#000;border-left:2px solid #f
 
         <!-- Zona de amistad: se rellena dinámicamente -->
         <div class="friend-zone" id="friend-zone" style="display:none"></div>
+
+        <!-- Sección de creador -->
+        <div id="creator-section" style="display:none"></div>
       </div>
     </div>
 
@@ -345,6 +348,7 @@ html[data-theme="contrast"] #a11y-panel{background:#000;border-left:2px solid #f
 <script type="module">
 import { supabase } from '../supabase.js'
 import { renderMedallero, computeMedalsFromProgress } from '../medals.js'
+import { renderCreatorSection } from '../creadores.js'
 import {
   getFriendshipStatus,
   sendFriendRequest,
@@ -472,6 +476,12 @@ async function loadPage(uname) {
     // 4. Renderizar perfil y zona de amistad
     renderProfile(profile)
     renderFriendZone(level)
+
+    // Sección de creador
+    const creatorContainer = document.getElementById('creator-section')
+    if (creatorContainer) {
+      renderCreatorSection(creatorContainer, profile.id, _currentUser?.id || null)
+    }
 
     // 5. Renderizar sección de álbum según nivel
     if (level === 'own' || level === 2) {
