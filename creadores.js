@@ -1,0 +1,393 @@
+// ═══════════════════════════════════════════════════
+//  ÁLBUM MUNDIAL 2026 — creadores.js
+//  Sistema de creadores validados por la comunidad
+// ═══════════════════════════════════════════════════
+import { supabase } from './supabase.js'
+
+// ── Categorías disponibles para creadores ─────────
+export const CREATOR_CATEGORIES = [
+  { id: 'album',       label: 'Coleccionismo',     icon: '📘', color: '#f5c518' },
+  { id: 'mundial',     label: 'Mundial 2026',       icon: '🌍', color: '#34d399' },
+  { id: 'fichajes',    label: 'Mercado de Fichajes',icon: '💸', color: '#60a5fa' },
+  { id: 'tactica',     label: 'Análisis táctico',   icon: '🧠', color: '#a78bfa' },
+  { id: 'humor',       label: 'Humor futbolero',    icon: '😂', color: '#fb923c' },
+  { id: 'noticias',    label: 'Noticias',           icon: '📰', color: '#94a3b8' },
+  { id: 'equipo',      label: 'Mi equipo',          icon: '🏟️', color: '#f472b6' },
+  { id: 'femenino',    label: 'Fútbol femenino',    icon: '⚽', color: '#e879f9' },
+]
+
+const CAT_MAP = Object.fromEntries(CREATOR_CATEGORIES.map(c => [c.id, c]))
+export const getCatDef = id => CAT_MAP[id] || { id, label: id, icon: '⚽', color: 'var(--gold)' }
+
+// ── Obtener perfil de creador ─────────────────────
+export async function getCreatorProfile(userId) {
+  try {
+    const { data } = await supabase
+      .from('creator_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle()
+    return data || null
+  } catch (e) { return null }
+}
+
+// ── Activar modo creador ──────────────────────────
+export async function activateCreator(userId, proposedCategories) {
+  if (!userId || !proposedCategories.length) return null
+  const { data, error } = await supabase
+    .from('creator_profiles')
+    .upsert({
+      user_id: userId,
+      proposed_categories: proposedCategories.slice(0, 5),
+      is_active: true,
+      activated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id' })
+    .select().single()
+  if (error) throw error
+  return data
+}
+
+// ── Desactivar modo creador ───────────────────────
+export async function deactivateCreator(userId) {
+  await supabase
+    .from('creator_profiles')
+    .update({ is_active: false })
+    .eq('user_id', userId)
+}
+
+// ── Votar por categoría de un creador ────────────
+export async function voteCreatorCategory(creatorId, voterId, category) {
+  const { error } = await supabase
+    .from('creator_category_votes')
+    .upsert({ creator_id: creatorId, voter_id: voterId, category },
+      { onConflict: 'creator_id,voter_id,category' })
+  if (error) throw error
+  await recalcValidatedCategories(creatorId)
+}
+
+// ── Quitar voto ───────────────────────────────────
+export async function unvoteCreatorCategory(creatorId, voterId, category) {
+  await supabase
+    .from('creator_category_votes')
+    .delete()
+    .eq('creator_id', creatorId)
+    .eq('voter_id', voterId)
+    .eq('category', category)
+  await recalcValidatedCategories(creatorId)
+}
+
+// ── Recalcular categorías validadas ───────────────
+// Una categoría se valida cuando ≥3 votos distintos (o propuesta con ≥1 voto si < 10 apoyos)
+async function recalcValidatedCategories(creatorId) {
+  try {
+    const [{ data: votes }, { data: profile }] = await Promise.all([
+      supabase.from('creator_category_votes')
+        .select('category').eq('creator_id', creatorId),
+      supabase.from('profiles')
+        .select('apoyo_count').eq('id', creatorId).single(),
+    ])
+
+    const threshold = (profile?.apoyo_count || 0) < 50 ? 1 : 3
+    const counts = {}
+    ;(votes || []).forEach(v => { counts[v.category] = (counts[v.category] || 0) + 1 })
+    const validated = Object.entries(counts)
+      .filter(([, n]) => n >= threshold)
+      .map(([cat]) => cat)
+
+    await supabase.from('creator_profiles')
+      .update({ validated_categories: validated })
+      .eq('user_id', creatorId)
+    return validated
+  } catch (e) { console.warn('[creadores] recalc error:', e); return [] }
+}
+
+// ── Obtener votos de un creador (para UI) ─────────
+export async function getCreatorVotes(creatorId, myUserId = null) {
+  try {
+    const { data } = await supabase
+      .from('creator_category_votes')
+      .select('category, voter_id')
+      .eq('creator_id', creatorId)
+
+    const counts = {}; const myVotes = new Set()
+    ;(data || []).forEach(v => {
+      counts[v.category] = (counts[v.category] || 0) + 1
+      if (v.voter_id === myUserId) myVotes.add(v.category)
+    })
+    return { counts, myVotes }
+  } catch (e) { return { counts: {}, myVotes: new Set() } }
+}
+
+// ── Feed Talentos Ocultos (<1000 apoyos) ──────────
+export async function loadTalentosOcultos(limit = 20) {
+  try {
+    // Creadores activos con < 1000 apoyos
+    const { data: creators } = await supabase
+      .from('creator_profiles')
+      .select('user_id, validated_categories, proposed_categories')
+      .eq('is_active', true)
+      .limit(100)
+
+    if (!creators?.length) return []
+
+    const ids = creators.map(c => c.user_id)
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username, full_name, avatar_url, apoyo_count')
+      .in('id', ids)
+      .lt('apoyo_count', 1000)
+      .order('apoyo_count', { ascending: false })
+      .limit(limit)
+
+    // Enriquecer con datos del creator_profile
+    const crMap = Object.fromEntries(creators.map(c => [c.user_id, c]))
+    return (profiles || []).map(p => ({
+      ...p,
+      ...crMap[p.id],
+    }))
+  } catch (e) { console.warn('[creadores] talentos error:', e); return [] }
+}
+
+// ── Estadísticas del creador ──────────────────────
+export async function getCreatorStats(userId) {
+  try {
+    const [postsRes, reactionsRes] = await Promise.all([
+      supabase.from('posts').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('post_reactions')
+        .select('post_id, posts!inner(user_id)')
+        .eq('posts.user_id', userId),
+    ])
+    const totalPosts   = postsRes.count || 0
+    const totalApoyos  = reactionsRes.data?.length || 0
+    return {
+      totalPosts,
+      totalApoyos,
+      avgApoyosPerPost: totalPosts ? (totalApoyos / totalPosts).toFixed(1) : 0,
+    }
+  } catch (e) { return { totalPosts: 0, totalApoyos: 0, avgApoyosPerPost: 0 } }
+}
+
+// ── Renderizar sección de creador en perfil público ─
+export async function renderCreatorSection(container, profileId, currentUserId) {
+  if (!container) return
+  const [creator, { counts, myVotes }] = await Promise.all([
+    getCreatorProfile(profileId),
+    getCreatorVotes(profileId, currentUserId),
+  ])
+
+  if (!creator?.is_active) {
+    container.innerHTML = ''; container.style.display = 'none'; return
+  }
+
+  container.style.display = ''
+  const isOwn = profileId === currentUserId
+
+  const cats = creator.proposed_categories || []
+  const validated = new Set(creator.validated_categories || [])
+
+  container.innerHTML = `
+    <div class="creator-section">
+      <div class="creator-badge-row">
+        <span class="creator-badge">🎙️ CREADOR</span>
+        ${validated.size > 0
+          ? `<span class="creator-validated-hint">✅ ${validated.size} categoría${validated.size > 1?'s':''} validada${validated.size > 1?'s':''} por la comunidad</span>`
+          : `<span class="creator-validated-hint pending">⏳ Pendiente de validación</span>`}
+      </div>
+
+      <div class="creator-cats-label">
+        ${isOwn ? 'Tus categorías propuestas' : 'Vota las categorías que mejor lo describen'}
+      </div>
+      <div class="creator-cats-list">
+        ${cats.map(catId => {
+          const cat    = getCatDef(catId)
+          const count  = counts[catId] || 0
+          const voted  = myVotes.has(catId)
+          const isVal  = validated.has(catId)
+          return `
+            <div class="creator-cat-item${isVal?' validated':''}">
+              <span class="creator-cat-icon">${cat.icon}</span>
+              <span class="creator-cat-name">${cat.label}</span>
+              ${isVal ? '<span class="creator-cat-check">✅</span>' : ''}
+              <span class="creator-cat-votes">${count} voto${count !== 1?'s':''}</span>
+              ${!isOwn && currentUserId ? `
+                <button class="creator-vote-btn${voted?' voted':''}"
+                  data-creator="${profileId}" data-cat="${catId}" data-voted="${voted}">
+                  ${voted ? '👍 Votado' : '👍 Votar'}
+                </button>` : ''}
+            </div>`
+        }).join('')}
+      </div>
+      ${isOwn ? `
+        <button class="creator-manage-btn" id="creator-manage-btn">
+          ⚙️ Gestionar categorías
+        </button>` : ''}
+    </div>`
+
+  // Bind votos
+  container.querySelectorAll('.creator-vote-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const creatorId = btn.dataset.creator
+      const cat       = btn.dataset.cat
+      const wasVoted  = btn.dataset.voted === 'true'
+      btn.disabled = true
+      try {
+        if (wasVoted) {
+          await unvoteCreatorCategory(creatorId, currentUserId, cat)
+        } else {
+          await voteCreatorCategory(creatorId, currentUserId, cat)
+        }
+        // Re-render
+        await renderCreatorSection(container, profileId, currentUserId)
+      } catch (e) {
+        btn.disabled = false
+        console.error('[creadores] vote error:', e)
+      }
+    })
+  })
+
+  // Gestionar categorías (solo propio)
+  container.querySelector('#creator-manage-btn')?.addEventListener('click', () => {
+    openManageCategoriesModal(profileId, cats)
+  })
+}
+
+// ── Modal de gestión de categorías ───────────────
+export function openManageCategoriesModal(userId, currentCats) {
+  document.getElementById('creator-manage-modal')?.remove()
+  let selected = [...currentCats]
+
+  const modal = document.createElement('div')
+  modal.id = 'creator-manage-modal'
+  modal.className = 'compose-backdrop'
+  modal.innerHTML = `
+    <div class="compose-box">
+      <div class="compose-header">
+        <div class="compose-title">🎙️ Mis categorías como creador</div>
+        <button class="compose-close" id="cm-close">✕</button>
+      </div>
+      <p class="creator-manage-hint">Elige hasta 5 categorías que representen tu contenido. La comunidad votará cuáles son reales.</p>
+      <div class="creator-manage-cats" id="cm-cats">
+        ${CREATOR_CATEGORIES.map(c => `
+          <button class="creator-manage-cat-btn${selected.includes(c.id)?' active':''}"
+            data-cat="${c.id}" style="--cat-color:${c.color}">
+            ${c.icon} ${c.label}
+          </button>`).join('')}
+      </div>
+      <div class="compose-footer">
+        <div class="compose-char-count"><span id="cm-count">${selected.length}</span>/5 seleccionadas</div>
+        <div class="compose-actions">
+          <button class="compose-submit" id="cm-save">Guardar</button>
+        </div>
+      </div>
+    </div>`
+
+  const closeModal = () => {
+    modal.classList.add('compose-hiding')
+    setTimeout(() => modal.remove(), 300)
+  }
+  modal.querySelector('#cm-close').addEventListener('click', closeModal)
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal() })
+
+  modal.querySelectorAll('.creator-manage-cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cat = btn.dataset.cat
+      if (selected.includes(cat)) {
+        selected = selected.filter(c => c !== cat)
+        btn.classList.remove('active')
+      } else {
+        if (selected.length >= 5) return
+        selected.push(cat)
+        btn.classList.add('active')
+      }
+      modal.querySelector('#cm-count').textContent = selected.length
+    })
+  })
+
+  modal.querySelector('#cm-save').addEventListener('click', async () => {
+    const btn = modal.querySelector('#cm-save')
+    btn.disabled = true; btn.textContent = 'Guardando…'
+    try {
+      await activateCreator(userId, selected)
+      closeModal()
+      // Recargar sección
+      const container = document.getElementById('creator-section')
+      if (container) await renderCreatorSection(container, userId, userId)
+    } catch (e) {
+      btn.disabled = false; btn.textContent = 'Error, reintentar'
+    }
+  })
+
+  document.body.appendChild(modal)
+  requestAnimationFrame(() => modal.classList.add('compose-visible'))
+}
+
+// ── Modal Talentos Ocultos ────────────────────────
+export async function openTalentosOcultosModal() {
+  document.getElementById('talentos-modal')?.remove()
+
+  const modal = document.createElement('div')
+  modal.id = 'talentos-modal'
+  modal.className = 'intercambios-backdrop'
+  modal.innerHTML = `
+    <div class="intercambios-box">
+      <div class="intercambios-header">
+        <div class="intercambios-title">🌟 Talentos Ocultos</div>
+        <button class="intercambios-close" id="talentos-close">✕</button>
+      </div>
+      <div class="talentos-subheader">
+        Creadores con menos de 1.000 apoyos — descúbrelos antes que nadie
+      </div>
+      <div id="talentos-list" class="talentos-list">
+        <div class="int-spinner">Buscando talentos…</div>
+      </div>
+    </div>`
+
+  const closeModal = () => {
+    modal.classList.add('intercambios-hiding')
+    setTimeout(() => modal.remove(), 350)
+  }
+  modal.querySelector('#talentos-close').addEventListener('click', closeModal)
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal() })
+  document.addEventListener('keydown', function esc(e) {
+    if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', esc) }
+  })
+
+  document.body.appendChild(modal)
+  requestAnimationFrame(() => modal.classList.add('intercambios-visible'))
+
+  const talentos = await loadTalentosOcultos(24)
+  const list = modal.querySelector('#talentos-list')
+
+  if (!talentos.length) {
+    list.innerHTML = '<div class="int-empty"><div class="int-empty-icon">🌟</div>Aún no hay creadores registrados. ¡Sé el primero!</div>'
+    return
+  }
+
+  list.innerHTML = talentos.map(t => {
+    const cats = (t.validated_categories?.length ? t.validated_categories : t.proposed_categories) || []
+    const initials = (t.full_name || t.username || '?').trim()
+      .split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()
+    return `
+      <a class="talento-card" href="/perfil/${encodeURIComponent(t.username || '')}" target="_blank">
+        <div class="talento-avatar">
+          ${t.avatar_url
+            ? `<img src="${t.avatar_url}" alt="" class="talento-avatar-img">`
+            : `<span class="talento-avatar-fb">${initials}</span>`}
+        </div>
+        <div class="talento-info">
+          <div class="talento-name">${t.full_name || t.username || '?'}</div>
+          <div class="talento-username">@${t.username || '?'}</div>
+          <div class="talento-cats">
+            ${cats.slice(0,3).map(c => {
+              const cat = getCatDef(c)
+              return `<span class="talento-cat" style="--cat-color:${cat.color}">${cat.icon} ${cat.label}</span>`
+            }).join('')}
+          </div>
+        </div>
+        <div class="talento-apoyos">
+          <span class="talento-apoyo-count">${t.apoyo_count || 0}</span>
+          <span class="talento-apoyo-label">apoyos</span>
+        </div>
+      </a>`
+  }).join('')
+}

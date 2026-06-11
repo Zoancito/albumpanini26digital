@@ -3,6 +3,7 @@
 //  Sistema de perfiles futboleros
 // ═══════════════════════════════════════════════════
 import { supabase } from './supabase.js'
+import { getCreatorProfile, activateCreator, deactivateCreator, openManageCategoriesModal } from './creadores.js'
 
 // ── Estado interno ────────────────────────────────
 let _currentUser    = null
@@ -503,6 +504,25 @@ export function openProfileViewModal() {
         setTimeout(() => { copyBtn.textContent = '📋 Copiar enlace' }, 2000)
       })
     }
+  }
+
+  // Botón modo creador (solo perfil propio)
+  const creatorBtn = document.getElementById('pview-creator-btn')
+  if (creatorBtn && _currentUser) {
+    getCreatorProfile(_currentUser.id).then(creator => {
+      const isCreator = creator?.is_active
+      creatorBtn.textContent     = isCreator ? '🎙️ Gestionar mis categorías' : '🎙️ Activar modo creador'
+      creatorBtn.dataset.active  = isCreator ? 'true' : 'false'
+      creatorBtn.style.display   = ''
+      creatorBtn.onclick = async () => {
+        if (isCreator) {
+          openManageCategoriesModal(_currentUser.id, creator.proposed_categories || [])
+        } else {
+          // Activar directamente abriendo el modal de categorías
+          openManageCategoriesModal(_currentUser.id, [])
+        }
+      }
+    })
   }
 
   modal.classList.add('visible')

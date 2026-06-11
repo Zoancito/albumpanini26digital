@@ -18,6 +18,7 @@ import { openOnceIdealModal } from './once-ideal.js'
 import { syncExchangeOffers, findMatches, notifyNewMatches, openIntercambiosModal } from './intercambios.js'
 import { initNotificaciones, destroyNotificaciones, getUnreadCount, getAllNotifs, markRead, markAllRead, deleteNotificacion, renderNotifPanel } from './notificaciones.js'
 import { initFeed, openComposeModal, showFeedToast, FEED_CATEGORIES } from './feed.js'
+import { openTalentosOcultosModal } from './creadores.js'
 console.log('Supabase conectado:', supabase)
 
 const authScreen = document.getElementById('auth-screen');
@@ -2390,6 +2391,11 @@ document.getElementById('compose-fab')?.addEventListener('click', () => {
 document.getElementById('btn-intercambios')?.addEventListener('click', () => {
   if (!currentUser) return;
   openIntercambiosModal(currentUser.id, _profilesCache);
+});
+
+// Botón Talentos Ocultos
+document.getElementById('btn-talentos')?.addEventListener('click', () => {
+  openTalentosOcultosModal();
 });
 
 // ════════════ COUNTDOWN INAUGURAL ════════════

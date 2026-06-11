@@ -3,6 +3,7 @@
 //  Sistema de feed social con filtros por categoría
 // ═══════════════════════════════════════════════════
 import { supabase } from './supabase.js'
+import { getCatDef as getCreatorCatDef } from './creadores.js'
 
 // ── Categorías disponibles ────────────────────────
 export const FEED_CATEGORIES = [
@@ -18,7 +19,8 @@ let _userId        = null
 let _activeFilters = []      // hasta 3 categorías activas
 let _mutes         = {}      // { category: mutedUntil|null }
 let _posts         = []
-let _profilesCache = {}      // { userId: {username, avatar_url, full_name} }
+let _profilesCache   = {}   // { userId: {username, avatar_url, full_name} }
+let _creatorCache    = {}   // { userId: true/false }
 let _page          = 0
 const PAGE_SIZE    = 15
 
@@ -154,11 +156,12 @@ export async function loadFeed(append = false) {
     const unknownIds = [...new Set((data || []).map(p => p.user_id))]
       .filter(id => !_profilesCache[id])
     if (unknownIds.length) {
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, username, full_name, avatar_url')
-        .in('id', unknownIds)
+      const [{ data: profiles }, { data: creators }] = await Promise.all([
+        supabase.from('profiles').select('id, username, full_name, avatar_url').in('id', unknownIds),
+        supabase.from('creator_profiles').select('user_id').eq('is_active', true).in('user_id', unknownIds),
+      ])
       ;(profiles || []).forEach(p => { _profilesCache[p.id] = p })
+      ;(creators || []).forEach(c => { _creatorCache[c.user_id] = true })
     }
 
     // Cargar mis reacciones en este lote
@@ -242,7 +245,10 @@ function renderPost(p) {
             : `<span class="fp-avatar-fb">${initials}</span>`}
         </div>
         <div class="fp-meta">
-          <div class="fp-author">${esc(profile.full_name || profile.username || 'Usuario')}</div>
+          <div class="fp-author">
+          ${esc(profile.full_name || profile.username || 'Usuario')}
+          ${_creatorCache[p.user_id] ? '<span class="fp-creator-badge">🎙️</span>' : ''}
+        </div>
           <div class="fp-sub">
             <a class="fp-username" href="/perfil/${encodeURIComponent(profile.username || '')}">@${esc(profile.username || '?')}</a>
             <span class="fp-dot">·</span>
