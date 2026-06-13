@@ -94,7 +94,7 @@ export async function uploadAvatar(userId, file) {
 
 export async function apoyarPerfil(profileId) {
   // Usa un RPC para incrementar de forma segura
-  const { data, error } = await supabase.rpc('increment_apoyo', { profile_id: profileId })
+  const { data, error } = await supabase.rpc('increment_apoyo', { target_profile_id: profileId })
   if (error) throw error
   return data   // devuelve el nuevo total
 }

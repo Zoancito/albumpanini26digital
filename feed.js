@@ -537,8 +537,23 @@ function openEditModal(post, card) {
 }
 
 // ── Crear post ────────────────────────────────────
-export function openComposeModal(userId) {
+export async function openComposeModal(userId) {
   if (!userId) { showFeedToast('Inicia sesión para publicar'); return }
+
+  // Si el usuario es creador, mostrar SUS categorías propuestas
+  let composeCats = FEED_CATEGORIES
+  try {
+    const { data: cp } = await supabase
+      .from('creator_profiles')
+      .select('proposed_categories')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .maybeSingle()
+    if (cp?.proposed_categories?.length) {
+      composeCats = cp.proposed_categories.map(id => getCreatorCatDef(id))
+    }
+  } catch (e) { /* fallback a FEED_CATEGORIES */ }
+
   document.getElementById('compose-modal')?.remove()
 
   const modal = document.createElement('div')
@@ -553,7 +568,7 @@ export function openComposeModal(userId) {
       <div class="compose-cats">
         <span class="compose-cats-label">Categoría</span>
         <div class="compose-cat-btns">
-          ${FEED_CATEGORIES.map(c => `
+          ${composeCats.map(c => `
             <button class="compose-cat-btn" data-cat="${c.id}" style="--cat-color:${c.color}">
               ${c.icon} ${c.label}
             </button>`).join('')}

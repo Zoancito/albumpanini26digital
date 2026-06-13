@@ -121,7 +121,6 @@ export async function getCreatorVotes(creatorId, myUserId = null) {
 // ── Feed Talentos Ocultos (<1000 apoyos) ──────────
 export async function loadTalentosOcultos(limit = 20) {
   try {
-    // Creadores activos con < 1000 apoyos
     const { data: creators } = await supabase
       .from('creator_profiles')
       .select('user_id, validated_categories, proposed_categories')
@@ -136,15 +135,32 @@ export async function loadTalentosOcultos(limit = 20) {
       .select('id, username, full_name, avatar_url, apoyo_count')
       .in('id', ids)
       .lt('apoyo_count', 1000)
-      .order('apoyo_count', { ascending: false })
-      .limit(limit)
 
-    // Enriquecer con datos del creator_profile
+    if (!profiles?.length) return []
+
+    // Calcular calidad: reacciones / posts (promedio por post)
+    const statsResults = await Promise.all(profiles.map(p => getCreatorStats(p.id)))
+
     const crMap = Object.fromEntries(creators.map(c => [c.user_id, c]))
-    return (profiles || []).map(p => ({
+    const enriched = profiles.map((p, i) => ({
       ...p,
       ...crMap[p.id],
+      _stats: statsResults[i],
+      _calidad: (statsResults[i]?.totalPosts > 0)
+        ? statsResults[i].totalApoyos / statsResults[i].totalPosts
+        : 0,
     }))
+
+    // Ordenar: con posts primero, luego por calidad desc
+    enriched.sort((a, b) => {
+      const aP = a._stats?.totalPosts || 0
+      const bP = b._stats?.totalPosts || 0
+      if (aP > 0 && bP === 0) return -1
+      if (aP === 0 && bP > 0) return 1
+      return b._calidad - a._calidad
+    })
+
+    return enriched.slice(0, limit)
   } catch (e) { console.warn('[creadores] talentos error:', e); return [] }
 }
 
@@ -170,9 +186,11 @@ export async function getCreatorStats(userId) {
 // ── Renderizar sección de creador en perfil público ─
 export async function renderCreatorSection(container, profileId, currentUserId) {
   if (!container) return
-  const [creator, { counts, myVotes }] = await Promise.all([
+  const [creator, { counts, myVotes }, profile] = await Promise.all([
     getCreatorProfile(profileId),
     getCreatorVotes(profileId, currentUserId),
+    supabase.from('profiles').select('apoyo_count').eq('id', profileId).maybeSingle()
+      .then(r => r.data),
   ])
 
   if (!creator?.is_active) {
@@ -221,7 +239,42 @@ export async function renderCreatorSection(container, profileId, currentUserId) 
         <button class="creator-manage-btn" id="creator-manage-btn">
           ⚙️ Gestionar categorías
         </button>` : ''}
-    </div>`
+    </div>
+    <div id="early-sup-slot"></div>`
+
+  // Cargar primeros 10 Ojeadores si el creador ya cruzó 1.000
+  const apoyo_count = profile?.apoyo_count || 0
+  if (apoyo_count >= 1000) {
+    const { data: earlyRows } = await supabase
+      .from('early_supporters')
+      .select('supporter_id, apoyo_number, profiles:supporter_id(username, full_name, avatar_url)')
+      .eq('creator_id', profileId)
+      .order('apoyo_number', { ascending: true })
+      .limit(10)
+
+    const slot = container.querySelector('#early-sup-slot')
+    if (slot && earlyRows?.length) {
+      slot.innerHTML = `
+        <div class="early-sup-section">
+          <div class="early-sup-title">🔭 Primeros Ojeadores de Talento</div>
+          <div class="early-sup-list">
+            ${earlyRows.map(r => {
+              const p = r.profiles || {}
+              const ini = (p.full_name || p.username || '?').trim()
+                .split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()
+              return `
+                <a class="early-sup-item" href="/perfil/${encodeURIComponent(p.username || '')}" title="Ojeador #${r.apoyo_number}">
+                  ${p.avatar_url
+                    ? `<img src="${p.avatar_url}" class="early-sup-avatar" alt="">`
+                    : `<div class="early-sup-avatar-fb">${ini}</div>`}
+                  <span class="early-sup-name">${p.full_name || p.username || '?'}</span>
+                  <span class="early-sup-num">#${r.apoyo_number}</span>
+                </a>`
+            }).join('')}
+          </div>
+        </div>`
+    }
+  }
 
   // Bind votos
   container.querySelectorAll('.creator-vote-btn').forEach(btn => {
@@ -367,6 +420,8 @@ export async function openTalentosOcultosModal() {
     const cats = (t.validated_categories?.length ? t.validated_categories : t.proposed_categories) || []
     const initials = (t.full_name || t.username || '?').trim()
       .split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()
+    const calidad  = typeof t._calidad === 'number' ? t._calidad.toFixed(1) : '—'
+    const posts    = t._stats?.totalPosts || 0
     return `
       <a class="talento-card" href="/perfil/${encodeURIComponent(t.username || '')}" target="_blank">
         <div class="talento-avatar">
@@ -384,9 +439,13 @@ export async function openTalentosOcultosModal() {
             }).join('')}
           </div>
         </div>
-        <div class="talento-apoyos">
+        <div class="talento-apoyos" title="${t.apoyo_count || 0} apoyos totales">
           <span class="talento-apoyo-count">${t.apoyo_count || 0}</span>
           <span class="talento-apoyo-label">apoyos</span>
+        </div>
+        <div class="talento-calidad" title="Reacciones promedio por post">
+          <span class="talento-cal-val">${posts > 0 ? calidad : '—'}</span>
+          <span class="talento-cal-label">reac/post</span>
         </div>
       </a>`
   }).join('')

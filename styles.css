@@ -2525,3 +2525,47 @@ html[data-theme="light"] .fp-menu{box-shadow:0 8px 24px rgba(0,0,0,.12)}
   line-height:1}
 .talento-apoyo-label{font-size:.65rem;color:var(--dim);font-family:'Barlow Condensed',sans-serif;
   text-transform:uppercase;letter-spacing:.06em}
+
+/* ══════════════════════════════════════════
+   ETAPA C — Sistema de Apoyo
+   ══════════════════════════════════════════ */
+
+/* ── Badge Ojeador de Talento ── */
+.ojeador-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(99,102,241,.12));border:1px solid rgba(168,85,247,.35);color:#c084fc;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.06em;flex-shrink:0}
+.ojeador-badge-icon{font-size:.9rem}
+.ojeador-zone{display:flex;align-items:center;gap:8px;padding:10px 20px;border-top:1px solid var(--border);flex-wrap:wrap}
+.ojeador-count-text{font-size:.8rem;color:var(--dim)}
+html[data-theme="light"] .ojeador-badge{background:linear-gradient(135deg,rgba(168,85,247,.1),rgba(99,102,241,.08));border-color:rgba(168,85,247,.3)}
+
+/* ── Primeros Ojeadores en perfil creador ── */
+.early-sup-section{padding:14px 20px;border-top:1px solid var(--border)}
+.early-sup-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.early-sup-list{display:flex;flex-wrap:wrap;gap:8px}
+.early-sup-item{display:flex;align-items:center;gap:7px;padding:5px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);text-decoration:none;transition:border-color .2s}
+.early-sup-item:hover{border-color:rgba(168,85,247,.5)}
+.early-sup-avatar{width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--bg2)}
+.early-sup-avatar-fb{width:26px;height:26px;border-radius:50%;background:rgba(245,197,24,.15);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.7rem;color:var(--gold);flex-shrink:0}
+.early-sup-name{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.82rem;color:var(--text);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.early-sup-num{font-family:'Bebas Neue',sans-serif;font-size:.85rem;color:rgba(168,85,247,.8);flex-shrink:0}
+html[data-theme="light"] .early-sup-item{background:var(--card2)}
+
+/* ── Historial de apoyos (perfil propio) ── */
+.apoyo-hist-section{padding:14px 20px;border-top:1px solid var(--border)}
+.apoyo-hist-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.apoyo-hist-list{display:flex;flex-direction:column;gap:6px}
+.apoyo-hist-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);text-decoration:none;transition:border-color .2s}
+.apoyo-hist-item:hover{border-color:var(--gold)}
+.apoyo-hist-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;background:var(--bg2)}
+.apoyo-hist-avatar-fb{width:30px;height:30px;border-radius:50%;background:rgba(245,197,24,.12);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.75rem;color:var(--gold)}
+.apoyo-hist-info{flex:1;min-width:0}
+.apoyo-hist-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.88rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.apoyo-hist-user{font-size:.75rem;color:var(--dim)}
+.apoyo-hist-date{font-size:.72rem;color:var(--dim);flex-shrink:0}
+.apoyo-hist-empty{font-size:.85rem;color:var(--dim);padding:8px 0;text-align:center}
+.apoyo-hist-ojeador{display:inline-flex;align-items:center;gap:3px;font-size:.7rem;color:#c084fc;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);border-radius:999px;padding:1px 6px;margin-top:2px}
+html[data-theme="light"] .apoyo-hist-item{background:var(--card2)}
+
+/* ── Talentos: métrica calidad ── */
+.talento-calidad{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;min-width:52px}
+.talento-cal-val{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#22c55e;line-height:1}
+.talento-cal-label{font-size:.6rem;color:var(--dim);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;text-align:center}
