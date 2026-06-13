@@ -10,6 +10,11 @@ export const FEED_CATEGORIES = [
   { id: 'album',    label: 'Álbum',             icon: '📘', color: '#f5c518' },
   { id: 'mundial',  label: 'Mundial 2026',       icon: '🌍', color: '#34d399' },
   { id: 'fichajes', label: 'Mercado de Fichajes',icon: '💸', color: '#60a5fa' },
+  { id: 'tactica',     label: 'Análisis táctico',   icon: '🧠', color: '#a78bfa' },
+  { id: 'humor',       label: 'Humor futbolero',    icon: '😂', color: '#fb923c' },
+  { id: 'noticias',    label: 'Noticias',           icon: '📰', color: '#94a3b8' },
+  { id: 'equipo',      label: 'Mi equipo',          icon: '🏟️', color: '#f472b6' },
+  { id: 'femenino',    label: 'Fútbol femenino',    icon: '⚽', color: '#e879f9' },
 ]
 
 const CAT_MAP = Object.fromEntries(FEED_CATEGORIES.map(c => [c.id, c]))
