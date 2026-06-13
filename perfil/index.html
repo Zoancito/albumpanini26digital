@@ -306,11 +306,20 @@ html[data-theme="contrast"] #a11y-panel{background:#000;border-left:2px solid #f
           <span class="apoyo-hint" id="apoyo-hint"></span>
         </div>
 
+        <!-- Badge Ojeador de Talento (solo si el usuario logueado tiene ojeador_count > 0) -->
+        <div class="ojeador-zone" id="ojeador-zone" style="display:none">
+          <span class="ojeador-badge"><span class="ojeador-badge-icon">🔭</span> Ojeador de Talento</span>
+          <span class="ojeador-count-text" id="ojeador-count-text"></span>
+        </div>
+
         <!-- Zona de amistad: se rellena dinámicamente -->
         <div class="friend-zone" id="friend-zone" style="display:none"></div>
 
         <!-- Sección de creador -->
         <div id="creator-section" style="display:none"></div>
+
+        <!-- Historial de apoyos dados (solo visible en perfil propio) -->
+        <div id="apoyo-hist-section" style="display:none"></div>
       </div>
     </div>
 
@@ -603,60 +612,179 @@ function renderProfile(p) {
 
   // Apoyar
   renderApoyoBtn(p)
+
+  // Badge Ojeador (si es perfil propio con ojeador_count > 0, o cualquier perfil con badge)
+  renderOjeadorZone(p)
+
+  // Historial de apoyos dados (solo en perfil propio)
+  if (_isOwnProfile) renderHistorialApoyos()
 }
 
 // ── Render: botón Apoyar ──────────────────────────
-const APOYO_KEY = 'apoyo_dado_'
-function renderApoyoBtn(p) {
-  const zone     = document.getElementById('apoyo-zone')
-  const btn      = document.getElementById('apoyo-btn')
-  const countEl  = document.getElementById('apoyo-count')
-  const hintEl   = document.getElementById('apoyo-hint')
+async function renderApoyoBtn(p) {
+  const zone    = document.getElementById('apoyo-zone')
+  const btn     = document.getElementById('apoyo-btn')
+  const countEl = document.getElementById('apoyo-count')
+  const hintEl  = document.getElementById('apoyo-hint')
   if (!zone || !btn) return
 
-  const total = p.apoyo_count || 0
-  if (countEl) countEl.textContent = total
+  if (countEl) countEl.textContent = p.apoyo_count || 0
 
-  // Si es mi propio perfil, solo mostrar contador
   if (_isOwnProfile) {
     btn.disabled = true
     btn.classList.add('apoyo-own')
-    if (hintEl) hintEl.textContent = `${total} apoyo${total !== 1 ? 's' : ''} recibido${total !== 1 ? 's' : ''}`
+    const t = p.apoyo_count || 0
+    if (hintEl) hintEl.textContent = `${t} apoyo${t !== 1 ? 's' : ''} recibido${t !== 1 ? 's' : ''}`
     return
   }
 
-  // Verificar si ya apoyé (guardado en localStorage)
-  const yaDi = localStorage.getItem(APOYO_KEY + p.id) === 'true'
-  if (yaDi) {
-    btn.disabled = true
-    btn.classList.add('apoyo-done')
-    const label = btn.querySelector('.apoyo-label')
-    if (label) label.textContent = '¡Apoyado!'
-    if (hintEl) hintEl.textContent = 'Ya apoyaste este perfil 🏆'
+  if (!_currentUser) {
+    btn.addEventListener('click', () => {
+      if (hintEl) { hintEl.textContent = 'Inicia sesión para apoyar'; setTimeout(() => { hintEl.textContent = '' }, 2500) }
+    })
     return
   }
+
+  const [{ data: apoyoRow }, { data: earlyRow }] = await Promise.all([
+    supabase.from('profile_apoyos').select('created_at')
+      .eq('supporter_id', _currentUser.id).eq('supported_id', p.id).maybeSingle(),
+    supabase.from('early_supporters').select('apoyo_number')
+      .eq('creator_id', p.id).eq('supporter_id', _currentUser.id).maybeSingle(),
+  ])
+
+  let yaApoyé = !!apoyoRow
+  let currentEarly = earlyRow
+  _updateApoyoUI(btn, countEl, hintEl, yaApoyé, p.apoyo_count || 0, currentEarly)
 
   btn.addEventListener('click', async () => {
     btn.disabled = true
     const label = btn.querySelector('.apoyo-label')
-    if (label) label.textContent = 'Apoyando...'
+    if (label) label.textContent = yaApoyé ? 'Quitando...' : 'Apoyando...'
     try {
-      const { error } = await supabase.rpc('increment_apoyo', { profile_id: p.id })
+      const { error } = await supabase.rpc('increment_apoyo', { target_profile_id: p.id })
       if (error) throw error
-      const newTotal = total + 1
+      yaApoyé = !yaApoyé
+      const delta    = yaApoyé ? 1 : -1
+      const newTotal = Math.max(0, parseInt(countEl?.textContent || 0) + delta)
       if (countEl) countEl.textContent = newTotal
-      localStorage.setItem(APOYO_KEY + p.id, 'true')
-      btn.classList.add('apoyo-done')
-      if (label) label.textContent = '¡Apoyado!'
-      if (hintEl) hintEl.textContent = 'Ya apoyaste este perfil 🏆'
+
+      if (yaApoyé && !currentEarly) {
+        const { data } = await supabase.from('early_supporters').select('apoyo_number')
+          .eq('creator_id', p.id).eq('supporter_id', _currentUser.id).maybeSingle()
+        currentEarly = data
+      }
+      // Badge Ojeador es permanente — no se borra aunque quite el apoyo
+
+      _updateApoyoUI(btn, countEl, hintEl, yaApoyé, newTotal, currentEarly)
       btn.classList.add('apoyo-burst')
       setTimeout(() => btn.classList.remove('apoyo-burst'), 600)
     } catch (err) {
       console.error('apoyo error:', err)
+      if (hintEl) hintEl.textContent = err.message || 'Error al apoyar'
+    } finally {
       btn.disabled = false
-      if (label) label.textContent = 'Apoyar'
     }
-  }, { once: true })
+  })
+}
+
+function _updateApoyoUI(btn, countEl, hintEl, yaApoyé, total, earlyRow) {
+  const label = btn.querySelector('.apoyo-label')
+  btn.classList.toggle('apoyo-done', yaApoyé)
+  btn.classList.remove('apoyo-own')
+  if (label) label.textContent = yaApoyé ? '¡Apoyado!' : 'Apoyar'
+  if (hintEl) {
+    if (earlyRow) {
+      hintEl.innerHTML = `🔭 Ojeador #${earlyRow.apoyo_number} de los primeros 1.000`
+    } else if (yaApoyé) {
+      hintEl.textContent = 'Ya apoyaste este perfil 🏆'
+    } else {
+      const faltan = Math.max(0, 1000 - total)
+      hintEl.textContent = total < 1000
+        ? `¡Quedan ${faltan} lugares de Ojeador de Talento!`
+        : `${total.toLocaleString('es-CL')} apoyos`
+    }
+  }
+}
+
+// ── Badge Ojeador en perfil propio ───────────────
+function renderOjeadorZone(p) {
+  const zone      = document.getElementById('ojeador-zone')
+  const countText = document.getElementById('ojeador-count-text')
+  if (!zone) return
+  const n = p.ojeador_count || 0
+  if (_isOwnProfile && n > 0) {
+    if (countText) countText.textContent = `Has sido Ojeador de ${n} creador${n !== 1 ? 'es' : ''}`
+    zone.style.display = ''
+  } else {
+    zone.style.display = 'none'
+  }
+}
+
+// ── Historial de apoyos dados (perfil propio) ────
+async function renderHistorialApoyos() {
+  const section = document.getElementById('apoyo-hist-section')
+  if (!section || !_currentUser) return
+
+  section.style.display = ''
+  section.innerHTML = `
+    <div class="apoyo-hist-section">
+      <div class="apoyo-hist-title">🏆 Creadores que has apoyado</div>
+      <div class="apoyo-hist-list" id="apoyo-hist-list">
+        <div class="apoyo-hist-empty">Cargando…</div>
+      </div>
+    </div>`
+
+  try {
+    // Traer a quiénes apoyé
+    const { data: rows } = await supabase
+      .from('profile_apoyos')
+      .select('supported_id, created_at')
+      .eq('supporter_id', _currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(20)
+
+    const list = section.querySelector('#apoyo-hist-list')
+    if (!rows?.length) {
+      list.innerHTML = `<div class="apoyo-hist-empty">Aún no has apoyado ningún creador</div>`
+      return
+    }
+
+    // Traer perfiles y si eres Ojeador de alguno
+    const ids = rows.map(r => r.supported_id)
+    const [{ data: profiles }, { data: earlyRows }] = await Promise.all([
+      supabase.from('profiles').select('id, username, full_name, avatar_url').in('id', ids),
+      supabase.from('early_supporters')
+        .select('creator_id, apoyo_number')
+        .eq('supporter_id', _currentUser.id)
+        .in('creator_id', ids),
+    ])
+
+    const pMap = Object.fromEntries((profiles || []).map(p => [p.id, p]))
+    const eMap = Object.fromEntries((earlyRows || []).map(e => [e.creator_id, e]))
+
+    list.innerHTML = rows.map(r => {
+      const p    = pMap[r.supported_id] || {}
+      const earl = eMap[r.supported_id]
+      const ini  = (p.full_name || p.username || '?').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()
+      const fecha = new Date(r.created_at).toLocaleDateString('es-CL', { day:'numeric', month:'short', year:'2-digit' })
+      return `
+        <a class="apoyo-hist-item" href="/perfil/${encodeURIComponent(p.username || '')}">
+          ${p.avatar_url
+            ? `<img src="${p.avatar_url}" class="apoyo-hist-avatar" alt="">`
+            : `<div class="apoyo-hist-avatar-fb">${ini}</div>`}
+          <div class="apoyo-hist-info">
+            <div class="apoyo-hist-name">${p.full_name || p.username || 'Perfil desconocido'}</div>
+            <div class="apoyo-hist-user">@${p.username || '?'}</div>
+            ${earl ? `<div class="apoyo-hist-ojeador">🔭 Ojeador #${earl.apoyo_number}</div>` : ''}
+          </div>
+          <div class="apoyo-hist-date">${fecha}</div>
+        </a>`
+    }).join('')
+  } catch (e) {
+    console.error('[historial apoyo]', e)
+    const list = section.querySelector('#apoyo-hist-list')
+    if (list) list.innerHTML = `<div class="apoyo-hist-empty">Error al cargar historial</div>`
+  }
 }
 
 // ── Sincronizar medallas desde progress real ──────
