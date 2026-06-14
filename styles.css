@@ -1893,16 +1893,17 @@ html[data-theme="light"] .medallero-header{background:linear-gradient(135deg,#dd
 .medallero-empty{color:var(--dim);font-size:.88rem;font-style:italic;text-align:center;padding:16px 0}
 
 /* ── Grid de medallas ── */
-.medallero-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;width:100%}
-@media(max-width:480px){.medallero-grid{grid-template-columns:repeat(4,1fr)}}
-@media(max-width:340px){.medallero-grid{grid-template-columns:repeat(3,1fr)}}
+.medallero-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;width:100%}
+@media(max-width:700px){.medallero-grid{grid-template-columns:repeat(8,1fr)}}
+@media(max-width:480px){.medallero-grid{grid-template-columns:repeat(6,1fr)}}
+@media(max-width:340px){.medallero-grid{grid-template-columns:repeat(5,1fr)}}
 
 /* ── Medalla individual ── */
-.medal{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:transform .2s}
-.medal:hover{transform:translateY(-3px)}
-.medal-circle{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;border:2px solid var(--border);background:var(--card2)}
-.medal-flag{font-size:1.7rem;line-height:1;position:relative;z-index:1}
-.medal-name{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.04em;text-align:center;color:var(--dim);line-height:1.2;max-width:72px;word-break:break-word}
+.medal{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:transform .2s}
+.medal:hover{transform:translateY(-2px)}
+.medal-circle{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;border:2px solid var(--border);background:var(--card2)}
+.medal-flag{font-size:1.2rem;line-height:1;position:relative;z-index:1}
+.medal-name{font-family:'Barlow Condensed',sans-serif;font-size:.55rem;font-weight:700;letter-spacing:.03em;text-align:center;color:var(--dim);line-height:1.2;max-width:50px;word-break:break-word}
 
 /* ── Medalla desbloqueada ── */
 .medal-unlocked .medal-circle{
@@ -2569,3 +2570,23 @@ html[data-theme="light"] .apoyo-hist-item{background:var(--card2)}
 .talento-calidad{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;min-width:52px}
 .talento-cal-val{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#22c55e;line-height:1}
 .talento-cal-label{font-size:.6rem;color:var(--dim);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;text-align:center}
+
+/* ── Posts del creador en perfil ── */
+.creator-posts-wrap{border-top:1px solid var(--border)}
+.creator-posts-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px 8px;gap:8px}
+.creator-posts-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.creator-posts-count{font-family:'Bebas Neue',sans-serif;font-size:.9rem;color:var(--gold)}
+.creator-posts-list{display:flex;flex-direction:column;gap:0}
+.creator-post-card{padding:12px 20px;border-top:1px solid var(--border);transition:background .15s}
+.creator-post-card:hover{background:var(--bg3)}
+.creator-post-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.creator-post-cat{display:inline-flex;align-items:center;gap:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.07em;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--cat-color,var(--gold)) 12%,transparent);color:var(--cat-color,var(--gold));border:1px solid color-mix(in srgb,var(--cat-color,var(--gold)) 30%,transparent)}
+.creator-post-date{font-size:.72rem;color:var(--dim)}
+.creator-post-body{font-size:.9rem;color:var(--text);line-height:1.5;white-space:pre-wrap;word-break:break-word;margin-bottom:8px}
+.creator-post-img{width:100%;max-height:220px;object-fit:cover;border-radius:10px;margin-bottom:8px}
+.creator-post-footer{display:flex;align-items:center;gap:10px}
+.creator-post-react-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card2);color:var(--dim);font-size:.8rem;cursor:pointer;transition:all .18s;font-family:'Barlow Condensed',sans-serif;font-weight:600}
+.creator-post-react-btn:hover:not(:disabled){border-color:rgba(245,101,39,.5);color:#f56527;background:rgba(245,101,39,.07)}
+.creator-post-react-btn.reacted{border-color:rgba(245,101,39,.5);color:#f56527;background:rgba(245,101,39,.1)}
+html[data-theme="light"] .creator-post-card:hover{background:#f0f5ff}
+html[data-theme="light"] .creator-post-react-btn{background:#fff;color:#4b5e78}
