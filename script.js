@@ -18,7 +18,7 @@ import { openOnceIdealModal } from './once-ideal.js'
 import { syncExchangeOffers, findMatches, notifyNewMatches, openIntercambiosModal } from './intercambios.js'
 import { initNotificaciones, destroyNotificaciones, getUnreadCount, getAllNotifs, markRead, markAllRead, deleteNotificacion, renderNotifPanel } from './notificaciones.js'
 import { initFeed, openComposeModal, showFeedToast, FEED_CATEGORIES } from './feed.js'
-console.log('Supabase conectado:', supabase)
+console.log('Supabase conectado')
 
 const authScreen = document.getElementById('auth-screen');
 const loginButton = document.getElementById('google-login');
