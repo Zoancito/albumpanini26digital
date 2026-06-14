@@ -19,7 +19,7 @@ import { syncExchangeOffers, findMatches, notifyNewMatches, openIntercambiosModa
 import { initNotificaciones, destroyNotificaciones, getUnreadCount, getAllNotifs, markRead, markAllRead, deleteNotificacion, renderNotifPanel } from './notificaciones.js'
 import { initFeed, openComposeModal, showFeedToast, FEED_CATEGORIES } from './feed.js'
 import { openTalentosOcultosModal } from './creadores.js'
-console.log('Supabase conectado:', supabase)
+console.log('Supabase conectado')
 
 const authScreen = document.getElementById('auth-screen');
 const loginButton = document.getElementById('google-login');
