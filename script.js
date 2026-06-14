@@ -19,7 +19,7 @@ import { syncExchangeOffers, findMatches, notifyNewMatches, openIntercambiosModa
 import { initNotificaciones, destroyNotificaciones, getUnreadCount, getAllNotifs, markRead, markAllRead, deleteNotificacion, renderNotifPanel } from './notificaciones.js'
 import { initFeed, openComposeModal, showFeedToast, FEED_CATEGORIES } from './feed.js'
 import { openTalentosOcultosModal } from './creadores.js'
-console.log('Supabase conectado')
+
 
 const authScreen = document.getElementById('auth-screen');
 const loginButton = document.getElementById('google-login');
@@ -138,7 +138,7 @@ loginButton?.addEventListener('click', async () => {
   });
 
   if (error) {
-    console.error('Error login:', error);
+    .error('Error login:', error);
   }
 });
 
@@ -149,7 +149,7 @@ guestButton?.addEventListener('click', () => {
 logoutButton?.addEventListener('click', async () => {
   const { error } = await supabase.auth.signOut();
   if (error) {
-    console.error('Error logout:', error);
+    .error('Error logout:', error);
     return;
   }
   showAuthScreen();
@@ -486,7 +486,7 @@ async function syncCloudState(user) {
     );
 
     if (error) {
-      console.error('Error cargando progreso online:', error);
+      .error('Error cargando progreso online:', error);
       setProfileStatus('Error sync');
       return;
     }
@@ -505,10 +505,10 @@ async function syncCloudState(user) {
     }
   } catch (err) {
     if (err?.name === 'SyncTimeoutError') {
-      console.warn('La sincronización online está tardando más de lo esperado. La app sigue con el progreso local.');
+      .warn('La sincronización online está tardando más de lo esperado. La app sigue con el progreso local.');
       setProfileStatus('Local listo');
     } else {
-      console.error('Error inesperado sincronizando progreso online:', err);
+      .error('Error inesperado sincronizando progreso online:', err);
       setProfileStatus('Error sync');
     }
   } finally {
@@ -546,10 +546,10 @@ async function saveCloudStateNow(user = currentUser, opts = {}) {
     );
   } catch (err) {
     if (err?.name === 'SyncTimeoutError') {
-      console.warn('El guardado online está tardando más de lo esperado. Se mantiene el guardado local.');
+      .warn('El guardado online está tardando más de lo esperado. Se mantiene el guardado local.');
       if (!opts.silent) setProfileStatus('Sync pendiente');
     } else {
-      console.error('Error inesperado guardando progreso online:', err);
+      .error('Error inesperado guardando progreso online:', err);
       if (!opts.silent) setProfileStatus('Error sync');
     }
     return;
