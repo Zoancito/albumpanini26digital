@@ -29,10 +29,22 @@ html[data-theme="contrast"]{
 }
 html[data-theme="light"] body{background-image:radial-gradient(circle,#d7e1f0 1px,transparent 1px)}
 html[data-theme="contrast"] body{background-image:none}
+html[data-theme="light"] .card-inner{background:#ffffff;border-color:rgba(0,0,0,.08);box-shadow:0 8px 28px rgba(0,0,0,.08)}
 html[data-theme="light"] .card-hero{background:linear-gradient(135deg,#dde8f7,#c8d8f0,#d0dff5)}
 html[data-theme="light"] .album-section-header{background:linear-gradient(135deg,#dde8f7,#cfdcf0)}
 html[data-theme="light"] .album-section-title{color:var(--text)}
-html[data-theme="light"] .card-full-name{color:var(--text)}
+html[data-theme="light"] .creator-section{background:var(--card2,#f6f8fc);border-top-color:rgba(0,0,0,.08)}
+html[data-theme="light"] .creator-cat-item{background:#eef3fb;border-color:rgba(0,0,0,.1)}
+html[data-theme="light"] .creator-cat-name{color:#0d1a2b}
+html[data-theme="light"] .creator-cat-votes{color:#4b5e78}
+html[data-theme="light"] .creator-vote-btn{background:#fff;color:#4b5e78;border-color:rgba(0,0,0,.15)}
+html[data-theme="light"] .creator-badge{background:linear-gradient(135deg,rgba(167,139,250,.15),rgba(245,197,24,.1));border-color:rgba(167,139,250,.4)}
+html[data-theme="light"] .creator-manage-btn{background:#eef3fb;color:#4b5e78;border-color:rgba(0,0,0,.12)}
+html[data-theme="light"] .creator-validated-hint.pending{color:#4b5e78}
+html[data-theme="light"] .album-section-header-row{background:linear-gradient(135deg,#dde8f7,#cfdcf0)}
+html[data-theme="light"] .album-toggle-btn{background:rgba(212,164,0,.08);border-color:rgba(212,164,0,.3)}
+html[data-theme="light"] .sgroup-header{background:var(--card2,#f6f8fc)}
+html[data-theme="light"] .card-full-name{color:#0d1a2b}
 html[data-theme="light"] .sc{background:var(--bg3)}
 html[data-theme="light"] .sc.s-tengo{background:#d4f0e2;border-color:rgba(34,197,94,.4)}
 html[data-theme="light"] .sc.s-falta{background:#fde8e8;border-color:rgba(229,9,20,.25)}
@@ -318,6 +330,9 @@ html[data-theme="contrast"] #a11y-panel{background:#000;border-left:2px solid #f
         <!-- Sección de creador -->
         <div id="creator-section" style="display:none"></div>
 
+        <!-- Posts del creador en su propio perfil -->
+        <div id="creator-posts-section" style="display:none"></div>
+
         <!-- Historial de apoyos dados (solo visible en perfil propio) -->
         <div id="apoyo-hist-section" style="display:none"></div>
       </div>
@@ -333,9 +348,9 @@ html[data-theme="contrast"] #a11y-panel{background:#000;border-left:2px solid #f
             <div class="medallero-subtitle" id="medallero-subtitle">Cargando...</div>
           </div>
         </div>
-        <button class="medallero-toggle-main" id="medallero-toggle" aria-expanded="true">▲</button>
+        <button class="medallero-toggle-main" id="medallero-toggle" aria-expanded="false">▼</button>
       </div>
-      <div id="medallero-body">
+      <div id="medallero-body" style="display:none">
         <div id="medallero-container"></div>
       </div>
     </div>
@@ -616,6 +631,9 @@ function renderProfile(p) {
   // Badge Ojeador (si es perfil propio con ojeador_count > 0, o cualquier perfil con badge)
   renderOjeadorZone(p)
 
+  // Posts del creador en su perfil (si tiene creator_profile activo)
+  renderCreatorPosts(p.id)
+
   // Historial de apoyos dados (solo en perfil propio)
   if (_isOwnProfile) renderHistorialApoyos()
 }
@@ -718,6 +736,114 @@ function renderOjeadorZone(p) {
   } else {
     zone.style.display = 'none'
   }
+}
+
+// ── Posts del creador en su perfil ───────────────
+async function renderCreatorPosts(profileId) {
+  const section = document.getElementById('creator-posts-section')
+  if (!section) return
+
+  // ¿Es creador activo?
+  const { data: cp } = await supabase
+    .from('creator_profiles')
+    .select('is_active, validated_categories, proposed_categories')
+    .eq('user_id', profileId)
+    .maybeSingle()
+
+  if (!cp?.is_active) return
+
+  // Traer sus posts (máx 10 más recientes)
+  const { data: posts } = await supabase
+    .from('posts')
+    .select('id, content, category, created_at, media_url')
+    .eq('user_id', profileId)
+    .order('created_at', { ascending: false })
+    .limit(10)
+
+  if (!posts?.length) return
+
+  // Traer mis reacciones (si estoy logueado)
+  let myReactions = new Set()
+  if (_currentUser) {
+    const { data: reacts } = await supabase
+      .from('post_reactions')
+      .select('post_id')
+      .eq('user_id', _currentUser.id)
+      .in('post_id', posts.map(p => p.id))
+    ;(reacts || []).forEach(r => myReactions.add(r.post_id))
+  }
+
+  // Traer conteo de reacciones por post
+  const reactionCounts = {}
+  await Promise.all(posts.map(async p => {
+    const { count } = await supabase
+      .from('post_reactions')
+      .select('*', { count: 'exact', head: true })
+      .eq('post_id', p.id)
+    reactionCounts[p.id] = count || 0
+  }))
+
+  section.style.display = ''
+  section.innerHTML = `
+    <div class="creator-posts-wrap">
+      <div class="creator-posts-header">
+        <span class="creator-posts-title">📰 Publicaciones del creador</span>
+        <span class="creator-posts-count">${posts.length} post${posts.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="creator-posts-list" id="creator-posts-list">
+        ${posts.map(p => {
+          const fecha = new Date(p.created_at).toLocaleDateString('es-CL', { day:'numeric', month:'short', year:'2-digit' })
+          const reacted = myReactions.has(p.id)
+          // obtener catDef desde import de creadores.js no disponible aquí — usar mapa local
+          const catMap = {
+            album:     { icon:'📒', label:'Álbum', color:'#f5c518' },
+            mundial:   { icon:'🌍', label:'Mundial', color:'#22c55e' },
+            fichajes:  { icon:'🔀', label:'Fichajes', color:'#818cf8' },
+          }
+          const cat = catMap[p.category] || { icon:'📌', label: p.category, color:'#888' }
+          return `
+            <div class="creator-post-card" data-post-id="${p.id}">
+              <div class="creator-post-top">
+                <span class="creator-post-cat" style="--cat-color:${cat.color}">${cat.icon} ${cat.label}</span>
+                <span class="creator-post-date">${fecha}</span>
+              </div>
+              <div class="creator-post-body">${esc(p.content)}</div>
+              ${p.media_url ? `<img class="creator-post-img" src="${p.media_url}" alt="" loading="lazy">` : ''}
+              <div class="creator-post-footer">
+                <button class="creator-post-react-btn ${reacted ? 'reacted' : ''}"
+                  data-post-id="${p.id}" ${!_currentUser ? 'disabled' : ''}>
+                  🔥 <span class="creator-post-react-count">${reactionCounts[p.id]}</span>
+                </button>
+              </div>
+            </div>`
+        }).join('')}
+      </div>
+    </div>`
+
+  // Bind reacciones
+  section.querySelectorAll('.creator-post-react-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!_currentUser) return
+      const postId  = btn.dataset.postId
+      const reacted = btn.classList.contains('reacted')
+      const countEl = btn.querySelector('.creator-post-react-count')
+
+      btn.disabled = true
+      try {
+        if (reacted) {
+          await supabase.from('post_reactions').delete()
+            .eq('post_id', postId).eq('user_id', _currentUser.id)
+          btn.classList.remove('reacted')
+          if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1)
+        } else {
+          await supabase.from('post_reactions').insert({ post_id: postId, user_id: _currentUser.id })
+          btn.classList.add('reacted')
+          if (countEl) countEl.textContent = parseInt(countEl.textContent) + 1
+        }
+      } catch (e) { console.error('[react]', e) }
+      finally { btn.disabled = false }
+    })
+  })
 }
 
 // ── Historial de apoyos dados (perfil propio) ────
