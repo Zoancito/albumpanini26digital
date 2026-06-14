@@ -66,10 +66,11 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
 
 /* ── Layout ── */
 .page-wrap{max-width:720px;margin:0 auto;padding:0 16px 80px}
-.back-bar{display:flex;align-items:center;justify-content:space-between;padding:20px 0 0}
-.back-link{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.06em;text-decoration:none;transition:all .2s}
+.back-bar{display:flex;align-items:center;gap:10px;padding:20px 0 0}
+.back-link{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.06em;text-decoration:none;transition:all .2s;cursor:pointer}
 .back-link:hover{background:var(--card2);color:var(--text);border-color:#334a6e}
-.back-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.2em;color:var(--gold);text-transform:uppercase}
+.back-home-link{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;border:1px solid rgba(245,197,24,.25);background:rgba(245,197,24,.06);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-decoration:none;transition:all .2s;margin-left:auto}
+.back-home-link:hover{background:rgba(245,197,24,.14);border-color:var(--gold)}
 
 /* ── Profile card ── */
 .profile-card{margin:20px 0 0}
@@ -260,8 +261,8 @@ html[data-theme="contrast"] #a11y-panel{background:#000;border-left:2px solid #f
 <div id="state-content">
   <div class="page-wrap">
     <div class="back-bar">
-      <a href="https://albumpanini26digital.vercel.app" class="back-link">⚽ Álbum Mundial 2026</a>
-      <span class="back-eyebrow">Panini Digital · Perfil</span>
+      <button class="back-link" id="back-btn" onclick="history.length > 1 ? history.back() : (location.href='https://albumpanini26digital.vercel.app')">← Volver</button>
+      <a href="https://albumpanini26digital.vercel.app" class="back-home-link">⚽ Álbum Mundial 2026</a>
     </div>
 
     <!-- Profile card -->
@@ -739,49 +740,56 @@ function renderOjeadorZone(p) {
 }
 
 // ── Posts del creador en su perfil ───────────────
+const PERFIL_CAT_MAP = {
+  album:    { icon:'📘', label:'Álbum',               color:'#f5c518' },
+  mundial:  { icon:'🌍', label:'Mundial 2026',        color:'#34d399' },
+  fichajes: { icon:'💸', label:'Mercado de Fichajes', color:'#60a5fa' },
+  tactica:  { icon:'🧠', label:'Análisis táctico',    color:'#a78bfa' },
+  humor:    { icon:'😂', label:'Humor futbolero',     color:'#fb923c' },
+  noticias: { icon:'📰', label:'Noticias',            color:'#94a3b8' },
+  equipo:   { icon:'🏟️', label:'Mi equipo',           color:'#f472b6' },
+  femenino: { icon:'⚽', label:'Fútbol femenino',     color:'#e879f9' },
+}
+
+function _timeAgo(iso) {
+  const d = Math.floor((Date.now() - new Date(iso)) / 1000)
+  if (d < 60)    return 'hace un momento'
+  if (d < 3600)  return `hace ${Math.floor(d/60)}m`
+  if (d < 86400) return `hace ${Math.floor(d/3600)}h`
+  if (d < 604800) return `hace ${Math.floor(d/86400)}d`
+  return new Date(iso).toLocaleDateString('es-CL', { day:'numeric', month:'short' })
+}
+
 async function renderCreatorPosts(profileId) {
   const section = document.getElementById('creator-posts-section')
   if (!section) return
 
-  // ¿Es creador activo?
   const { data: cp } = await supabase
-    .from('creator_profiles')
-    .select('is_active, validated_categories, proposed_categories')
-    .eq('user_id', profileId)
-    .maybeSingle()
-
+    .from('creator_profiles').select('is_active').eq('user_id', profileId).maybeSingle()
   if (!cp?.is_active) return
 
-  // Traer sus posts (máx 10 más recientes)
   const { data: posts } = await supabase
-    .from('posts')
-    .select('id, content, category, created_at, media_url')
-    .eq('user_id', profileId)
-    .order('created_at', { ascending: false })
-    .limit(10)
-
+    .from('posts').select('id, content, category, created_at, media_url')
+    .eq('user_id', profileId).order('created_at', { ascending: false }).limit(20)
   if (!posts?.length) return
 
-  // Traer mis reacciones (si estoy logueado)
-  let myReactions = new Set()
+  let myReacts = new Set()
   if (_currentUser) {
-    const { data: reacts } = await supabase
-      .from('post_reactions')
-      .select('post_id')
-      .eq('user_id', _currentUser.id)
-      .in('post_id', posts.map(p => p.id))
-    ;(reacts || []).forEach(r => myReactions.add(r.post_id))
+    const { data: rr } = await supabase.from('post_reactions').select('post_id')
+      .eq('user_id', _currentUser.id).in('post_id', posts.map(p => p.id))
+    ;(rr || []).forEach(r => myReacts.add(r.post_id))
   }
 
-  // Traer conteo de reacciones por post
-  const reactionCounts = {}
+  const counts = {}
   await Promise.all(posts.map(async p => {
-    const { count } = await supabase
-      .from('post_reactions')
-      .select('*', { count: 'exact', head: true })
-      .eq('post_id', p.id)
-    reactionCounts[p.id] = count || 0
+    const { count } = await supabase.from('post_reactions')
+      .select('*', { count:'exact', head:true }).eq('post_id', p.id)
+    counts[p.id] = count || 0
   }))
+
+  const profile  = _profileData
+  const initials = (profile.full_name || profile.username || '?')
+    .trim().split(/\s+/).slice(0,2).map(x => x[0]).join('').toUpperCase()
 
   section.style.display = ''
   section.innerHTML = `
@@ -790,58 +798,72 @@ async function renderCreatorPosts(profileId) {
         <span class="creator-posts-title">📰 Publicaciones del creador</span>
         <span class="creator-posts-count">${posts.length} post${posts.length !== 1 ? 's' : ''}</span>
       </div>
-      <div class="creator-posts-list" id="creator-posts-list">
+      <div class="creator-posts-list">
         ${posts.map(p => {
-          const fecha = new Date(p.created_at).toLocaleDateString('es-CL', { day:'numeric', month:'short', year:'2-digit' })
-          const reacted = myReactions.has(p.id)
-          // obtener catDef desde import de creadores.js no disponible aquí — usar mapa local
-          const catMap = {
-            album:     { icon:'📒', label:'Álbum', color:'#f5c518' },
-            mundial:   { icon:'🌍', label:'Mundial', color:'#22c55e' },
-            fichajes:  { icon:'🔀', label:'Fichajes', color:'#818cf8' },
-          }
-          const cat = catMap[p.category] || { icon:'📌', label: p.category, color:'#888' }
+          const cat     = PERFIL_CAT_MAP[p.category] || { icon:'📌', label:p.category, color:'#888' }
+          const reacted = myReacts.has(p.id)
           return `
-            <div class="creator-post-card" data-post-id="${p.id}">
-              <div class="creator-post-top">
-                <span class="creator-post-cat" style="--cat-color:${cat.color}">${cat.icon} ${cat.label}</span>
-                <span class="creator-post-date">${fecha}</span>
+            <article class="feed-post" data-post-id="${p.id}">
+              <div class="fp-header">
+                <div class="fp-avatar">
+                  ${profile.avatar_url
+                    ? `<img src="${profile.avatar_url}" alt="" class="fp-avatar-img">`
+                    : `<span class="fp-avatar-fb">${initials}</span>`}
+                </div>
+                <div class="fp-meta">
+                  <div class="fp-author">${esc(profile.full_name || profile.username || 'Usuario')} <span class="fp-creator-badge">🎙️</span></div>
+                  <div class="fp-sub">
+                    <span class="fp-username">@${esc(profile.username || '?')}</span>
+                    <span class="fp-dot">·</span>
+                    <span class="fp-time">${_timeAgo(p.created_at)}</span>
+                  </div>
+                </div>
+                <span class="fp-cat-badge" style="--cat-color:${cat.color}">${cat.icon} ${cat.label}</span>
               </div>
-              <div class="creator-post-body">${esc(p.content)}</div>
-              ${p.media_url ? `<img class="creator-post-img" src="${p.media_url}" alt="" loading="lazy">` : ''}
-              <div class="creator-post-footer">
-                <button class="creator-post-react-btn ${reacted ? 'reacted' : ''}"
-                  data-post-id="${p.id}" ${!_currentUser ? 'disabled' : ''}>
-                  🔥 <span class="creator-post-react-count">${reactionCounts[p.id]}</span>
+              <div class="fp-content">${esc(p.content)}</div>
+              ${p.media_url ? `<div class="fp-media"><img src="${p.media_url}" alt="Imagen" class="fp-img" loading="lazy" onerror="this.parentElement.style.display='none'"></div>` : ''}
+              <div class="fp-actions">
+                <button class="fp-apoyo-btn${reacted ? ' active' : ''} perfil-react-btn"
+                  data-post="${p.id}" aria-label="Reaccionar" ${!_currentUser ? 'disabled' : ''}>
+                  <span class="fp-apoyo-icon">🏆</span>
+                  <span class="fp-apoyo-count">${counts[p.id]}</span>
                 </button>
+                <button class="fp-share-btn perfil-share-btn" data-post="${p.id}"><span>🔗</span> Compartir</button>
               </div>
-            </div>`
+            </article>`
         }).join('')}
       </div>
     </div>`
 
-  // Bind reacciones
-  section.querySelectorAll('.creator-post-react-btn').forEach(btn => {
+  section.querySelectorAll('.perfil-react-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (!_currentUser) return
-      const postId  = btn.dataset.postId
-      const reacted = btn.classList.contains('reacted')
-      const countEl = btn.querySelector('.creator-post-react-count')
-
+      const postId  = btn.dataset.post
+      const reacted = btn.classList.contains('active')
+      const countEl = btn.querySelector('.fp-apoyo-count')
       btn.disabled = true
       try {
         if (reacted) {
-          await supabase.from('post_reactions').delete()
-            .eq('post_id', postId).eq('user_id', _currentUser.id)
-          btn.classList.remove('reacted')
+          await supabase.from('post_reactions').delete().eq('post_id', postId).eq('user_id', _currentUser.id)
+          btn.classList.remove('active')
           if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1)
         } else {
           await supabase.from('post_reactions').insert({ post_id: postId, user_id: _currentUser.id })
-          btn.classList.add('reacted')
+          btn.classList.add('active')
           if (countEl) countEl.textContent = parseInt(countEl.textContent) + 1
         }
-      } catch (e) { console.error('[react]', e) }
+      } catch (e) { console.error('[react perfil]', e) }
       finally { btn.disabled = false }
+    })
+  })
+
+  section.querySelectorAll('.perfil-share-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const url = `${location.origin}/perfil/${encodeURIComponent(profile.username || '')}`
+      navigator.clipboard?.writeText(url).then(() => {
+        btn.textContent = '✅ Copiado'
+        setTimeout(() => { btn.innerHTML = '<span>🔗</span> Compartir' }, 2000)
+      })
     })
   })
 }
@@ -1160,26 +1182,46 @@ function renderFullAlbumSection(profile, progress) {
 
   section.innerHTML = `
     <div class="album-section" style="margin-top:20px">
-      <div class="album-section-header">
-        <div class="album-section-eyebrow">Colección · Mundial 2026</div>
-        <div class="album-section-title" id="album-section-title">ÁLBUM DE ${esc((profile.full_name || profile.username).toUpperCase().split(' ')[0])}</div>
+      <div class="album-section-header-row" id="album-toggle-header" style="cursor:pointer" tabindex="0" role="button" aria-expanded="false">
+        <div>
+          <div class="album-section-eyebrow">Colección · Mundial 2026</div>
+          <div class="album-section-title" id="album-section-title">ÁLBUM DE ${esc((profile.full_name || profile.username).toUpperCase().split(' ')[0])}</div>
+        </div>
+        <button class="album-toggle-btn" id="album-toggle-btn" aria-expanded="false">📋 Ver álbum</button>
       </div>
-      <div class="album-stats">
-        <div class="album-stat" style="--a-accent:#f5c518"><span class="album-stat-v" id="as-total">${total}</span><span class="album-stat-l">Total</span></div>
-        <div class="album-stat" style="--a-accent:#22c55e"><span class="album-stat-v" id="as-tengo">${tengo}</span><span class="album-stat-l">Tengo</span></div>
-        <div class="album-stat" style="--a-accent:#f43f5e"><span class="album-stat-v" id="as-falta">${falta}</span><span class="album-stat-l">Faltan</span></div>
-        <div class="album-stat" style="--a-accent:#f59e0b"><span class="album-stat-v" id="as-rep">${rep}</span><span class="album-stat-l">🔄 Repet.</span></div>
-        <div class="album-stat" style="--a-accent:#818cf8"><span class="album-stat-v" id="as-res">${res}</span><span class="album-stat-l">📌 Reserv.</span></div>
+      <div id="album-collapsible" style="display:none">
+        <div class="album-stats">
+          <div class="album-stat" style="--a-accent:#f5c518"><span class="album-stat-v" id="as-total">${total}</span><span class="album-stat-l">Total</span></div>
+          <div class="album-stat" style="--a-accent:#22c55e"><span class="album-stat-v" id="as-tengo">${tengo}</span><span class="album-stat-l">Tengo</span></div>
+          <div class="album-stat" style="--a-accent:#f43f5e"><span class="album-stat-v" id="as-falta">${falta}</span><span class="album-stat-l">Faltan</span></div>
+          <div class="album-stat" style="--a-accent:#f59e0b"><span class="album-stat-v" id="as-rep">${rep}</span><span class="album-stat-l">🔄 Repet.</span></div>
+          <div class="album-stat" style="--a-accent:#818cf8"><span class="album-stat-v" id="as-res">${res}</span><span class="album-stat-l">📌 Reserv.</span></div>
+        </div>
+        <div class="album-tabs">
+          <button class="atab active" data-filter="all">Todos · ${pct}</button>
+          <button class="atab" data-filter="tengo">✅ Tengo</button>
+          <button class="atab" data-filter="falta">❌ Faltan</button>
+          <button class="atab" data-filter="repetida">🔄 Repetidas</button>
+          <button class="atab" data-filter="reserva">📌 Reservadas</button>
+        </div>
+        <div class="album-body" id="album-body"></div>
       </div>
-      <div class="album-tabs">
-        <button class="atab active" data-filter="all">Todos · ${pct}</button>
-        <button class="atab" data-filter="tengo">✅ Tengo</button>
-        <button class="atab" data-filter="falta">❌ Faltan</button>
-        <button class="atab" data-filter="repetida">🔄 Repetidas</button>
-        <button class="atab" data-filter="reserva">📌 Reservadas</button>
-      </div>
-      <div class="album-body" id="album-body"></div>
     </div>`
+
+  // Toggle accordion
+  const toggleHeader = section.querySelector('#album-toggle-header')
+  const toggleBtn    = section.querySelector('#album-toggle-btn')
+  const collapsible  = section.querySelector('#album-collapsible')
+  function toggleAlbum(e) {
+    if (e.target.closest('#album-collapsible')) return
+    const isOpen = collapsible.style.display !== 'none'
+    collapsible.style.display = isOpen ? 'none' : ''
+    toggleBtn.textContent = isOpen ? '📋 Ver álbum' : '📋 Cerrar álbum'
+    toggleBtn.setAttribute('aria-expanded', String(!isOpen))
+    toggleHeader.setAttribute('aria-expanded', String(!isOpen))
+  }
+  toggleHeader.addEventListener('click', toggleAlbum)
+  toggleHeader.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleAlbum(e) } })
 
   // Tab listeners
   section.querySelectorAll('.atab').forEach(btn => {
