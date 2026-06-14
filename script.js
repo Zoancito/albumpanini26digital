@@ -18,8 +18,7 @@ import { openOnceIdealModal } from './once-ideal.js'
 import { syncExchangeOffers, findMatches, notifyNewMatches, openIntercambiosModal } from './intercambios.js'
 import { initNotificaciones, destroyNotificaciones, getUnreadCount, getAllNotifs, markRead, markAllRead, deleteNotificacion, renderNotifPanel } from './notificaciones.js'
 import { initFeed, openComposeModal, showFeedToast, FEED_CATEGORIES } from './feed.js'
-import { openTalentosOcultosModal } from './creadores.js'
-console.log('Supabase conectado correctamente')
+console.log('Supabase conectado:', supabase)
 
 const authScreen = document.getElementById('auth-screen');
 const loginButton = document.getElementById('google-login');
@@ -138,7 +137,7 @@ loginButton?.addEventListener('click', async () => {
   });
 
   if (error) {
-    .error('Error login:', error);
+    console.error('Error login:', error);
   }
 });
 
@@ -149,7 +148,7 @@ guestButton?.addEventListener('click', () => {
 logoutButton?.addEventListener('click', async () => {
   const { error } = await supabase.auth.signOut();
   if (error) {
-    .error('Error logout:', error);
+    console.error('Error logout:', error);
     return;
   }
   showAuthScreen();
@@ -204,7 +203,7 @@ const albumData = {
   "🇨🇻 Cabo Verde":["Cabo Verde Logo","Vozinha","Logan Costa","Pico","Steven Moreira","João Paulo","Kevin Pina","Jamiro Monteiro","Yannick Semedo","Ryan Mendes","Jovane Cabral","Dailon Livramento"],
   "🇸🇦 Arabia Saudí":["Saudi Arabia Logo","Nawaf Alaqidi","Hassan Altambakti","Jehad Thikri","Saud Abdulhamid","Nasser Aldawsari","Abdullah Alkhaibari","Musab Aljuwayr","Feras Albrikan","Salem Aldawsari","Saleh Abu Alshamat","Saleh Alshehri"],
   "🇺🇾 Uruguay":["Uruguay Logo","Sergio Rochet","José María Giménez","Ronald Araújo","Sebastián Cáceres","Mathías Olivera","Nahitan Nández","Federico Valverde","Rodrigo Bentancur","Manuel Ugarte","Facundo Pellistri","Darwin Núñez"],
-  "🇫🇷 Francia":["France Logo","Mike Maignan","William Saliba","Jules Koundé","Théo Hernández","Aurélien Tchouaméni","Eduardo Camavinga","Ousmane Dembélé","Kylian Mbappé","Bradley Barcola","Désiré Doué","Hugo Ekitiké"],
+  "🇫🇷 Francia":["France Logo","Mike Maignan","William Saliba","Jules Koundé","Théo Hernández","Aurélien Tchouaméni","Eduaco Camavinga","Ousmane Dembélé","Kylian Mbappé","Bradley Barcola","Désiré Doué","Hugo Ekitiké"],
   "🇸🇳 Senegal":["Senegal Logo","Édouard Mendy","Kalidou Koulibaly","Moussa Niakhaté","El Hadji Malick Diouf","Idrissa Gana Gueye","Pape Matar Sarr","Sadio Mané","Iliman Ndiaye","Krépin Diatta","Ismaïla Sarr","Nicolas Jackson"],
   "🇮🇶 Irak":["Iraq Logo","Jalal Hassan","Hussein Ali","Akam Hashem","Merchas Doski","Zaid Tahseen","Zidane Iqbal","Amir Al-Ammari","Ibrahim Bayesh","Ali Jasim","Aimar Sher","Mohanad Ali"],
   "🇳🇴 Noruega":["Norway Logo","Ørjan Nyland","Julian Ryerson","Kristoffer Vassbakk Ajer","David Møller Wolfe","Martin Ødegaard","Sander Berge","Patrick Berg","Erling Haaland","Antonio Nusa","Oscar Bobb","Alexander Sørloth"],
@@ -486,7 +485,7 @@ async function syncCloudState(user) {
     );
 
     if (error) {
-      .error('Error cargando progreso online:', error);
+      console.error('Error cargando progreso online:', error);
       setProfileStatus('Error sync');
       return;
     }
@@ -505,10 +504,10 @@ async function syncCloudState(user) {
     }
   } catch (err) {
     if (err?.name === 'SyncTimeoutError') {
-      .warn('La sincronización online está tardando más de lo esperado. La app sigue con el progreso local.');
+      console.warn('La sincronización online está tardando más de lo esperado. La app sigue con el progreso local.');
       setProfileStatus('Local listo');
     } else {
-      .error('Error inesperado sincronizando progreso online:', err);
+      console.error('Error inesperado sincronizando progreso online:', err);
       setProfileStatus('Error sync');
     }
   } finally {
@@ -546,10 +545,10 @@ async function saveCloudStateNow(user = currentUser, opts = {}) {
     );
   } catch (err) {
     if (err?.name === 'SyncTimeoutError') {
-      .warn('El guardado online está tardando más de lo esperado. Se mantiene el guardado local.');
+      console.warn('El guardado online está tardando más de lo esperado. Se mantiene el guardado local.');
       if (!opts.silent) setProfileStatus('Sync pendiente');
     } else {
-      .error('Error inesperado guardando progreso online:', err);
+      console.error('Error inesperado guardando progreso online:', err);
       if (!opts.silent) setProfileStatus('Error sync');
     }
     return;
@@ -2391,11 +2390,6 @@ document.getElementById('compose-fab')?.addEventListener('click', () => {
 document.getElementById('btn-intercambios')?.addEventListener('click', () => {
   if (!currentUser) return;
   openIntercambiosModal(currentUser.id, _profilesCache);
-});
-
-// Botón Talentos Ocultos
-document.getElementById('btn-talentos')?.addEventListener('click', () => {
-  openTalentosOcultosModal();
 });
 
 // ════════════ COUNTDOWN INAUGURAL ════════════
