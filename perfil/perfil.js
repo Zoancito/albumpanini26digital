@@ -32,9 +32,14 @@ const PERFIL_CAT_MAP = {
 document.addEventListener('DOMContentLoaded', loadPage)
 
 async function loadPage() {
-  // Leer username de la URL: /perfil/zoancito98
-  const slug = location.pathname.split('/').filter(Boolean).pop()
-  if (!slug || slug === 'perfil') { showError('Perfil no encontrado'); return }
+  // Leer username: ?u=zoancito98 (via 404.html redirect) o /perfil/zoancito98 directo
+  const params           = new URLSearchParams(location.search)
+  const usernameFromQuery = params.get('u')
+  const usernameFromPath  = location.pathname.replace(/\/$/, '').split('/').pop()
+  const slug = usernameFromQuery
+    || (usernameFromPath && usernameFromPath !== 'index.html' ? usernameFromPath : null)
+
+  if (!slug || slug === 'perfil') { showError('No se especificó ningún usuario'); return }
 
   // Sesión actual
   const { data: { user } } = await supabase.auth.getUser()
@@ -42,7 +47,7 @@ async function loadPage() {
 
   // Cargar perfil
   const { data: profile, error } = await supabase
-    .from('profiles').select('*').eq('username', slug).maybeSingle()
+    .from('profiles').select('*').eq('username', slug.toLowerCase()).maybeSingle()
   if (error || !profile) { showError('Perfil no encontrado'); return }
 
   _profileData  = profile
