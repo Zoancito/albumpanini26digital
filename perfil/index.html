@@ -1,58 +1,273 @@
 <!DOCTYPE html>
 <html lang="es" data-theme="dark">
-<script>
-  // Aplicar tema antes del render para evitar flash
-  try {
-    const t = localStorage.getItem('pf-theme')
-    if (t) document.documentElement.setAttribute('data-theme', t)
-  } catch(e) {}
-</script>
+<script>try{var _p=JSON.parse(localStorage.getItem('album_panini_2026_accessibility')||'{}');if(_p.theme)document.documentElement.setAttribute('data-theme',_p.theme);}catch(e){}</script>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil · Panini Digital Mundial 2026</title>
-  <meta name="description" content="Perfil de coleccionista en el Álbum Panini Digital Mundial 2026">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../styles.css">
-  <link rel="stylesheet" href="perfil.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfil Futbolero · Álbum Mundial 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c18;--bg2:#0f1524;--bg3:#16203a;--bg4:#1d2a48;
+  --card:#111827;--card2:#1a2234;--border:#1e2f4a;
+  --text:#e8edf5;--dim:#7a8aaa;--muted:#4a5568;
+  --gold:#f5c518;--red:#e50914;--green:#22c55e;
+}
+html[data-theme="light"]{
+  --bg:#f5f7fb;--bg2:#e9eef7;--bg3:#dde6f5;--bg4:#cfdcf0;
+  --card:#ffffff;--card2:#f6f8fc;--border:#c6d3e6;
+  --text:#0d1a2b;--dim:#485a76;--muted:#6c7b95;
+  --gold:#d4a400;--red:#c21d1d;--green:#178f4e;
+}
+html[data-theme="contrast"]{
+  --bg:#000;--bg2:#000;--bg3:#0a0a0a;--bg4:#111;
+  --card:#000;--card2:#111;--border:#fff;
+  --text:#fff;--dim:#f2f2f2;--muted:#d0d0d0;
+  --gold:#ffde00;--red:#ff4d4d;--green:#4dff88;
+}
+html[data-theme="light"] body{background-image:radial-gradient(circle,#d7e1f0 1px,transparent 1px)}
+html[data-theme="contrast"] body{background-image:none}
+html[data-theme="light"] .card-inner{background:#ffffff;border-color:rgba(0,0,0,.08);box-shadow:0 8px 28px rgba(0,0,0,.08)}
+html[data-theme="light"] .card-hero{background:linear-gradient(135deg,#dde8f7,#c8d8f0,#d0dff5)}
+html[data-theme="light"] .album-section-header{background:linear-gradient(135deg,#dde8f7,#cfdcf0)}
+html[data-theme="light"] .album-section-title{color:var(--text)}
+html[data-theme="light"] .creator-section{background:var(--card2,#f6f8fc);border-top-color:rgba(0,0,0,.08)}
+html[data-theme="light"] .creator-cat-item{background:#eef3fb;border-color:rgba(0,0,0,.1)}
+html[data-theme="light"] .creator-cat-name{color:#0d1a2b}
+html[data-theme="light"] .creator-cat-votes{color:#4b5e78}
+html[data-theme="light"] .creator-vote-btn{background:#fff;color:#4b5e78;border-color:rgba(0,0,0,.15)}
+html[data-theme="light"] .creator-badge{background:linear-gradient(135deg,rgba(167,139,250,.15),rgba(245,197,24,.1));border-color:rgba(167,139,250,.4)}
+html[data-theme="light"] .creator-manage-btn{background:#eef3fb;color:#4b5e78;border-color:rgba(0,0,0,.12)}
+html[data-theme="light"] .creator-validated-hint.pending{color:#4b5e78}
+html[data-theme="light"] .album-section-header-row{background:linear-gradient(135deg,#dde8f7,#cfdcf0)}
+html[data-theme="light"] .album-toggle-btn{background:rgba(212,164,0,.08);border-color:rgba(212,164,0,.3)}
+html[data-theme="light"] .sgroup-header{background:var(--card2,#f6f8fc)}
+html[data-theme="light"] .card-full-name{color:#0d1a2b}
+html[data-theme="light"] .sc{background:var(--bg3)}
+html[data-theme="light"] .sc.s-tengo{background:#d4f0e2;border-color:rgba(34,197,94,.4)}
+html[data-theme="light"] .sc.s-falta{background:#fde8e8;border-color:rgba(229,9,20,.25)}
+html[data-theme="light"] .sc.s-repetida{background:#fef3d0;border-color:rgba(245,158,11,.4)}
+html[data-theme="light"] .sc.s-reserva{background:#eaebff;border-color:rgba(99,102,241,.35)}
+html[data-theme="light"] .sc.s-tengo .sc-name{color:#14532d}
+html[data-theme="light"] .sc.s-falta .sc-name{color:#991b1b}
+html[data-theme="light"] .sc.s-repetida .sc-name{color:#78350f}
+html[data-theme="light"] .sc.s-reserva .sc-name{color:#3730a3}
+html[data-theme="light"] .sgroup{background:var(--card2)}
+html[data-theme="light"] .sgroup-track{background:var(--bg3)}
+html[data-theme="light"] ::-webkit-scrollbar-track{background:var(--bg2)}
+html[data-theme="light"] ::-webkit-scrollbar-thumb{background:#c6d3e6}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radial-gradient(circle,#1a2840 1px,transparent 1px);background-size:32px 32px;color:var(--text);min-height:100vh}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:#1e2f4a;border-radius:3px}
+
+/* ── Layout ── */
+.page-wrap{max-width:720px;margin:0 auto;padding:0 16px 80px}
+.back-bar{display:flex;align-items:center;gap:10px;padding:20px 0 0}
+.back-link{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.06em;text-decoration:none;transition:all .2s;cursor:pointer}
+.back-link:hover{background:var(--card2);color:var(--text);border-color:#334a6e}
+.back-home-link{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;border:1px solid rgba(245,197,24,.25);background:rgba(245,197,24,.06);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-decoration:none;transition:all .2s;margin-left:auto}
+.back-home-link:hover{background:rgba(245,197,24,.14);border-color:var(--gold)}
+
+/* ── Profile card ── */
+.profile-card{margin:20px 0 0}
+.card-inner{background:rgba(7,11,22,.93);border:1px solid rgba(245,197,24,.22);border-radius:22px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.6),0 0 60px rgba(245,197,24,.05)}
+.card-hero{position:relative;background:linear-gradient(135deg,#0c1526,#101e38,#0a1220);padding:32px 24px 24px;border-bottom:1px solid rgba(245,197,24,.14);overflow:hidden}
+.card-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(245,197,24,.1),transparent 70%);pointer-events:none}
+.card-hero-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;opacity:.85}
+.card-hero-main{display:flex;align-items:center;gap:18px;position:relative;z-index:1}
+.card-avatar{width:74px;height:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,var(--gold),#22c55e);color:#08101f;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;border:3px solid rgba(255,255,255,.15);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.card-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.card-full-name{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.03em;line-height:1;color:#fff}
+.card-username{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.12em;color:var(--gold);margin-top:4px}
+.card-bio{font-size:.85rem;line-height:1.55;color:var(--dim);margin-top:6px;font-style:italic}
+.card-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.card-stat{background:var(--card);padding:14px 18px;display:flex;flex-direction:column;gap:4px}
+.card-stat-label{font-family:'Barlow Condensed',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.card-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--text);letter-spacing:.03em}
+
+/* ── Friend action area ── */
+.friend-zone{padding:16px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.friend-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:999px;border:1px solid;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.07em;cursor:pointer;transition:all .2s;text-decoration:none;white-space:nowrap}
+.friend-btn.primary{background:var(--gold);color:#0a0f1e;border-color:var(--gold)}
+.friend-btn.primary:hover{background:#e0b200;box-shadow:0 6px 20px rgba(245,197,24,.35)}
+.friend-btn.secondary{background:transparent;color:var(--dim);border-color:var(--border)}
+.friend-btn.secondary:hover{background:var(--card2);color:var(--text);border-color:#334a6e}
+.friend-btn.pending{background:rgba(245,197,24,.08);color:var(--gold);border-color:rgba(245,197,24,.3)}
+.friend-btn.pending:hover{background:rgba(229,9,20,.1);color:#e57373;border-color:rgba(229,9,20,.3)}
+.friend-btn.confirmed{background:rgba(34,197,94,.08);color:var(--green);border-color:rgba(34,197,94,.3)}
+.friend-btn.confirmed:hover{background:rgba(229,9,20,.08);color:#e57373;border-color:rgba(229,9,20,.25)}
+.friend-btn.danger{background:transparent;color:#e57373;border-color:rgba(229,9,20,.3);font-size:.78rem;padding:7px 14px}
+.friend-btn.danger:hover{background:rgba(229,9,20,.1)}
+.friend-actions-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.friend-status-label{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+
+/* ── Album locked state ── */
+.album-locked{text-align:center;padding:48px 24px}
+.album-locked-icon{font-size:3rem;margin-bottom:14px;filter:grayscale(1);opacity:.5}
+.album-locked-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.04em;color:var(--text);margin-bottom:8px}
+.album-locked-sub{font-size:.88rem;line-height:1.6;color:var(--dim);max-width:340px;margin:0 auto 20px}
+.album-pct-preview{display:inline-flex;flex-direction:column;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:14px 28px;margin-top:4px}
+.album-pct-val{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;color:var(--gold);line-height:1}
+.album-pct-label{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+
+/* ── Album section ── */
+.album-section{margin-top:20px;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.album-section-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#0c1526,#0e1628)}
+.album-section-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.album-section-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.04em;color:#fff;line-height:1}
+
+/* ── Stats bar ── */
+.album-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border)}
+.album-stat{background:var(--bg2);padding:12px 8px;text-align:center;position:relative;overflow:hidden}
+.album-stat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--a-accent,var(--gold));opacity:.6}
+.album-stat-v{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;line-height:1;color:var(--a-accent,var(--gold));display:block}
+.album-stat-l{font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px;display:block;font-family:'Barlow Condensed',sans-serif}
+
+/* ── Filter tabs ── */
+.album-tabs{display:flex;gap:6px;padding:12px 14px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border)}
+.album-tabs::-webkit-scrollbar{display:none}
+.atab{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--dim);font-size:.78rem;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.atab:hover{background:var(--card2);color:var(--text)}
+.atab.active{background:var(--gold);color:#111;border-color:var(--gold)}
+
+/* ── Sticker groups ── */
+.album-body{padding:12px 14px}
+.sgroup{margin-bottom:14px;border-radius:10px;border:1px solid var(--border);overflow:hidden;background:var(--bg2)}
+.sgroup-header{display:flex;align-items:center;gap:10px;padding:10px 13px;cursor:pointer;user-select:none;transition:background .2s}
+.sgroup-header:hover{background:rgba(255,255,255,.03)}
+.sgroup-letter{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#000;flex-shrink:0}
+.sgroup-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;color:var(--text);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sgroup-prog{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.sgroup-track{width:60px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.sgroup-fill{height:100%;border-radius:2px;transition:width .4s}
+.sgroup-pct{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;color:var(--dim);min-width:30px;text-align:right}
+.sgroup-chev{color:var(--muted);transition:transform .3s;flex-shrink:0;font-size:.7rem}
+.sgroup.open .sgroup-chev{transform:rotate(180deg)}
+.sgroup-body{display:none;border-top:1px solid var(--border)}
+.sgroup.open .sgroup-body{display:block}
+.sticker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:5px;padding:10px}
+.sc{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:7px;background:var(--bg3);border:1px solid transparent}
+.sc.s-tengo{background:#0c2818;border-color:rgba(34,197,94,.35)}
+.sc.s-falta{background:#1a0808;border-color:rgba(229,9,20,.2)}
+.sc.s-repetida{background:#1e1200;border-color:rgba(245,158,11,.35)}
+.sc.s-reserva{background:#0e0d28;border-color:rgba(129,140,248,.35)}
+.sc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--muted)}
+.s-tengo .sc-dot{background:var(--green);box-shadow:0 0 8px rgba(34,197,94,.6)}
+.s-falta .sc-dot{background:var(--red)}
+.s-repetida .sc-dot{background:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,.5)}
+.s-reserva .sc-dot{background:#818cf8;box-shadow:0 0 8px rgba(129,140,248,.5)}
+.sc-num{font-family:'Bebas Neue',sans-serif;font-size:.78rem;color:var(--muted);min-width:16px;flex-shrink:0}
+.sc-name{flex:1;font-size:.78rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-tengo .sc-name{color:#6ee7b7}
+.s-falta .sc-name{color:#fca5a5}
+.s-repetida .sc-name{color:#fcd34d}
+.s-reserva .sc-name{color:#a5b4fc}
+.sc-badge{font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.05em;flex-shrink:0}
+.s-tengo .sc-badge{background:#052912;color:var(--green);border:1px solid #1a5e34}
+.s-falta .sc-badge{background:#1a0808;color:#e57373;border:1px solid #3a1515}
+.s-repetida .sc-badge{background:#422006;color:#f59e0b;border:1px solid #92400e}
+.s-reserva .sc-badge{background:#1e1b4b;color:#818cf8;border:1px solid #3730a3}
+
+/* ── No-progress state ── */
+.album-empty{text-align:center;padding:40px 20px;color:var(--dim)}
+.album-empty-icon{font-size:2.5rem;margin-bottom:10px}
+.album-empty-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.04em;color:var(--text);margin-bottom:6px}
+.album-empty-sub{font-size:.85rem;line-height:1.5}
+
+/* ── Loading ── */
+#state-loading{max-width:560px;margin:80px auto;padding:40px 20px;text-align:center}
+.loading-dots span{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);margin:0 3px;animation:ldot 1.2s ease-in-out infinite}
+.loading-dots span:nth-child(2){animation-delay:.2s}.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes ldot{0%,80%,100%{transform:scale(.4);opacity:.4}40%{transform:scale(1);opacity:1}}
+.state-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.04em;margin-top:12px}
+.state-sub{color:var(--dim);font-size:.9rem;margin-top:6px}
+#state-error{max-width:560px;margin:80px auto;padding:40px 20px;text-align:center}
+.state-icon{font-size:2.5rem;margin-bottom:12px}
+#state-content{display:none}
+
+/* ── CTA ── */
+.cta-section{text-align:center;margin:20px 0 0;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:16px}
+.cta-text{color:var(--dim);font-size:.85rem;margin-bottom:12px;line-height:1.5}
+.cta-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 28px;border-radius:999px;border:none;background:var(--gold);color:#0a0f1e;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;box-shadow:0 6px 24px rgba(245,197,24,.3);transition:transform .2s,box-shadow .2s}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(245,197,24,.42)}
+
+/* ── Toast ── */
+#pf-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--card);border:1px solid var(--border);border-radius:999px;padding:11px 22px;font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:700;letter-spacing:.06em;color:var(--text);box-shadow:0 8px 28px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:9999;white-space:nowrap}
+#pf-toast.visible{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:500px){.album-stats{grid-template-columns:repeat(3,1fr)}.card-hero{padding:22px 16px 18px}.card-full-name{font-size:1.6rem}.sticker-grid{grid-template-columns:1fr}.friend-zone{flex-direction:column;align-items:stretch}.friend-btn{justify-content:center}}
+
+/* ── Accesibilidad panel (copiado del álbum principal) ── */
+#a11y-fab{
+  position:fixed;right:16px;bottom:24px;z-index:10500;width:52px;height:52px;border-radius:50%;
+  border:2px solid rgba(0,0,0,.18);background:var(--gold);color:#111;font-size:1.45rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 12px 24px rgba(0,0,0,.28);
+  transition:transform .2s,box-shadow .2s;
+}
+#a11y-fab:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 16px 32px rgba(0,0,0,.34)}
+html[data-theme="light"] #a11y-fab{background:var(--gold);color:#111;border-color:rgba(0,0,0,.15);box-shadow:0 8px 20px rgba(0,0,0,.18)}
+html[data-theme="contrast"] #a11y-fab{background:#ff0;color:#000;border:2px solid #000;box-shadow:0 0 0 3px #ff0,0 8px 20px rgba(0,0,0,.5)}
+#a11y-panel{
+  position:fixed;top:0;right:0;bottom:0;width:min(380px,100%);z-index:10600;background:rgba(10,15,30,.97);
+  border-left:1px solid var(--border);backdrop-filter:blur(18px);transform:translateX(104%);
+  transition:transform .35s cubic-bezier(.16,1,.3,1);padding:18px 16px 22px;overflow:auto;
+}
+#a11y-panel.open{transform:translateX(0)}
+html[data-theme="light"] #a11y-panel{background:rgba(248,250,255,.98)}
+html[data-theme="contrast"] #a11y-panel{background:#000;border-left:2px solid #fff}
+.a11y-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.a11y-title{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:.04em;color:var(--gold)}
+.a11y-close{width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--text);cursor:pointer;font-size:1rem}
+.a11y-group{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 14px 12px;margin-bottom:12px}
+.a11y-group-label{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.a11y-font-btns,.a11y-mode-btns{display:flex;gap:8px;flex-wrap:wrap}
+.a11y-font-btn,.a11y-mode-btn{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--text);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;transition:all .2s}
+.a11y-font-btn.active,.a11y-mode-btn.active{background:var(--gold);color:#111;border-color:var(--gold)}
+.a11y-font-btn[data-size="small"]{font-size:.85rem}
+.a11y-font-btn[data-size="normal"]{font-size:1rem}
+.a11y-font-btn[data-size="large"]{font-size:1.15rem}
+.a11y-font-btn[data-size="xlarge"]{font-size:1.32rem}
+.a11y-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.a11y-toggle-desc{font-size:.92rem;color:var(--dim);line-height:1.35;max-width:22ch}
+.a11y-toggle-wrap{position:relative;display:inline-flex;align-items:center}
+.a11y-checkbox{position:absolute;opacity:0;pointer-events:none}
+.a11y-toggle-slider{width:54px;height:30px;border-radius:999px;background:var(--bg4);border:1px solid var(--border);position:relative;display:inline-block;transition:all .2s}
+.a11y-toggle-slider::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .22s cubic-bezier(.16,1,.3,1)}
+.a11y-checkbox:checked + .a11y-toggle-slider{background:var(--gold);border-color:var(--gold)}
+.a11y-checkbox:checked + .a11y-toggle-slider::after{transform:translateX(24px);background:#111}
+
+</style>
 </head>
 <body>
 
-<!-- Estado: cargando -->
-<div id="state-loading" style="max-width:560px;margin:80px auto;padding:40px 20px;text-align:center">
+<div id="state-loading">
   <div class="loading-dots"><span></span><span></span><span></span></div>
-  <div class="state-title">Cargando perfil…</div>
-  <div class="state-sub">Buscando al coleccionista</div>
+  <div class="state-title">CARGANDO PERFIL</div>
+  <div class="state-sub">Un momento...</div>
 </div>
 
-<!-- Estado: error -->
-<div id="state-error" style="display:none;max-width:560px;margin:80px auto;padding:40px 20px;text-align:center">
-  <div class="state-icon">😕</div>
-  <div class="state-title">Perfil no encontrado</div>
-  <div class="state-sub">El usuario no existe o fue eliminado.</div>
-  <a href="https://albumpanini26digital.vercel.app" class="cta-btn" style="margin-top:20px;display:inline-flex">⚽ Volver al álbum</a>
+<div id="state-error" style="display:none">
+  <div class="state-icon">🔴</div>
+  <div class="state-title" style="font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.04em">PERFIL NO ENCONTRADO</div>
+  <div class="state-sub" id="error-msg" style="color:var(--dim);font-size:.9rem;margin-top:8px">Este username no existe o fue eliminado.</div>
+  <br>
+  <a href="https://albumpanini26digital.vercel.app" class="cta-btn" style="margin-top:14px;display:inline-flex">← Volver al álbum</a>
 </div>
 
-<!-- Estado: contenido -->
-<div id="state-content" style="display:none">
+<div id="state-content">
   <div class="page-wrap">
-
-    <!-- Barra de navegación -->
     <div class="back-bar">
-      <button class="back-link" id="back-btn"
-        onclick="history.length > 1 ? history.back() : (location.href='https://albumpanini26digital.vercel.app')">
-        ← Volver
-      </button>
+      <button class="back-link" id="back-btn" onclick="history.length > 1 ? history.back() : (location.href='https://albumpanini26digital.vercel.app')">← Volver</button>
       <a href="https://albumpanini26digital.vercel.app" class="back-home-link">⚽ Álbum Mundial 2026</a>
     </div>
 
-    <!-- Tarjeta del perfil -->
+    <!-- Profile card -->
     <div class="profile-card">
       <div class="card-inner">
-
-        <!-- Hero: avatar + nombre -->
         <div class="card-hero">
           <div class="card-hero-eyebrow">Panini Official · Colección Digital · Mundial 2026</div>
           <div class="card-hero-main">
@@ -60,34 +275,38 @@
               <img id="pc-avatar-img" alt="" hidden>
               <span id="pc-avatar-fb">FC</span>
             </div>
-            <div class="card-hero-info">
-              <div class="card-full-name" id="pc-fullname"></div>
-              <div class="card-username"  id="pc-username"></div>
-              <div class="card-bio"       id="pc-bio"></div>
+            <div>
+              <div class="card-full-name" id="pc-fullname">—</div>
+              <div class="card-username" id="pc-username">@—</div>
+              <div class="card-bio" id="pc-bio" style="display:none"></div>
             </div>
+          </div>
+          <!-- Frase futbolera -->
+          <div class="card-frase-wrap" id="pc-frase-wrap" style="display:none">
+            <span class="card-frase-icon">💬</span>
+            <em class="card-frase" id="pc-frase"></em>
           </div>
         </div>
 
-        <!-- Stats: equipo / posición / estadio -->
         <div class="card-stats">
           <div class="card-stat">
-            <span class="card-stat-label">⚽ Selección favorita</span>
-            <span class="card-stat-val" id="pc-team"></span>
+            <span class="card-stat-label">🌍 Selección favorita</span>
+            <span class="card-stat-val" id="pc-team">—</span>
           </div>
           <div class="card-stat">
-            <span class="card-stat-label">🟣 Posición</span>
-            <span class="card-stat-val" id="pc-position"></span>
+            <span class="card-stat-label">🧤 Posición</span>
+            <span class="card-stat-val" id="pc-position">—</span>
           </div>
-          <div class="card-stat" style="grid-column:1 / -1">
+          <div class="card-stat" id="pc-estadio-wrap" style="display:none">
             <span class="card-stat-label">🏟️ Estadio / País fav.</span>
-            <span class="card-stat-val" id="pc-stadium"></span>
+            <span class="card-stat-val" id="pc-estadio">—</span>
           </div>
         </div>
 
         <!-- Jugadores favoritos -->
-        <div class="fav-players-section" id="fav-players-section" style="display:none">
-          <div class="fav-players-label">⭐ Jugadores favoritos del Mundial</div>
-          <div class="fav-players-list" id="fav-players-list"></div>
+        <div class="card-players-section" id="pc-players-section" style="display:none">
+          <div class="card-section-label">⭐ Jugadores favoritos del Mundial</div>
+          <div id="pc-jugadores" class="player-chips-row-view"></div>
         </div>
 
         <!-- Botón Apoyar -->
@@ -100,68 +319,1089 @@
           <span class="apoyo-hint" id="apoyo-hint"></span>
         </div>
 
-        <!-- Badge Ojeador de Talento -->
+        <!-- Badge Ojeador de Talento (solo si el usuario logueado tiene ojeador_count > 0) -->
         <div class="ojeador-zone" id="ojeador-zone" style="display:none">
-          <span class="ojeador-badge"><span>🔭</span> Ojeador de Talento</span>
+          <span class="ojeador-badge"><span class="ojeador-badge-icon">🔭</span> Ojeador de Talento</span>
           <span class="ojeador-count-text" id="ojeador-count-text"></span>
         </div>
 
-        <!-- Zona de amistad -->
+        <!-- Zona de amistad: se rellena dinámicamente -->
         <div class="friend-zone" id="friend-zone" style="display:none"></div>
 
-        <!-- Sección de creador (votos / categorías) -->
+        <!-- Sección de creador -->
         <div id="creator-section" style="display:none"></div>
 
-      </div><!-- /card-inner -->
-    </div><!-- /profile-card -->
+        <!-- Posts del creador en su propio perfil -->
+        <div id="creator-posts-section" style="display:none"></div>
 
-    <!-- ↓ FUERA DEL CARD: publicaciones del creador -->
-    <div id="creator-posts-section" style="display:none"></div>
-
-    <!-- ↓ FUERA DEL CARD: historial de apoyos (perfil propio) -->
-    <div id="apoyo-hist-section" style="display:none"></div>
+        <!-- Historial de apoyos dados (solo visible en perfil propio) -->
+        <div id="apoyo-hist-section" style="display:none"></div>
+      </div>
+    </div>
 
     <!-- Medallero -->
-    <div class="medallero-card" id="medallero-section" style="display:none">
-      <div class="medallero-header has-items" id="medallero-header">
-        <div class="medallero-title">
-          <span>🥇</span>
-          <span>MEDALLERO</span>
-          <span class="medallero-subtitle" id="medallero-subtitle"></span>
+    <div class="medallero-card" id="medallero-section">
+      <div class="medallero-header">
+        <div class="medallero-header-left">
+          <span class="medallero-title-icon">🏅</span>
+          <div>
+            <div class="medallero-title">MEDALLERO</div>
+            <div class="medallero-subtitle" id="medallero-subtitle">Cargando...</div>
+          </div>
         </div>
         <button class="medallero-toggle-main" id="medallero-toggle" aria-expanded="false">▼</button>
       </div>
       <div id="medallero-body" style="display:none">
-        <div id="medallero-container" style="padding:14px 16px"></div>
+        <div id="medallero-container"></div>
       </div>
     </div>
 
-    <!-- Álbum -->
+    <!-- Album section -->
     <div id="album-section"></div>
 
-    <!-- CTA para visitantes sin sesión -->
-    <div class="cta-section" id="cta-section" style="display:none">
-      <p class="cta-text">¿Quieres coleccionar tus figuritas del Mundial 2026?</p>
-      <a href="https://albumpanini26digital.vercel.app" class="cta-btn">🌍 Crear mi álbum gratis</a>
+    <!-- CTA -->
+    <div class="cta-section">
+      <div class="cta-text">¿Querés tu propio perfil y álbum digital del Mundial 2026?</div>
+      <a href="https://albumpanini26digital.vercel.app" class="cta-btn">⚽ Crear mi álbum gratis</a>
     </div>
 
-  </div><!-- /page-wrap -->
-</div><!-- /state-content -->
+  </div>
+</div>
 
-<!-- Toast -->
 <div id="pf-toast"></div>
 
-<!-- FAB Accesibilidad -->
-<button id="a11y-fab" aria-label="Accesibilidad">♿</button>
+<script type="module">
+import { supabase } from '../supabase.js'
+import { renderMedallero, computeMedalsFromProgress } from '../medals.js'
+import { renderCreatorSection } from '../creadores.js'
+import {
+  getFriendshipStatus,
+  sendFriendRequest,
+  acceptFriendRequest,
+  removeFriendship
+} from '../friendships.js'
+
+// ── Album data ────────────────────────────────────
+const INTRO_DATA = ["WE ARE PANINI Logo","Official Emblem /1","Official Emblem /2","Official Mascots","Official Slogan","Official Ball","Host Country Emblem - CAN","Host Country Emblem - MEX","Host Country Emblem - USA"];
+
+const albumData = {
+  "🇲🇽 México":["Mexico Logo","Luis Malagón","Johan Vásquez","César Montes","Jesús Gallardo","Israel Reyes","Edson Álvarez","Marcel Ruiz","Hirving Lozano","Raúl Jiménez","Alexis Vega","Roberto Alvarado"],
+  "🇿🇦 Sudáfrica":["South Africa Logo","Ronwen Williams","Aubrey Modiba","Mbekezeli Mbokazi","Siyabonga Ngezana","Khuliso Mudau","Teboho Mokoena","Yaya Sithole","Bathusi Aubaas","Sipho Mbule","Lyle Foster","Oswin Appollis"],
+  "🇰🇷 República de Corea":["Korea Republic Logo","Hyeonwoo Jo","Minjae Kim","Yumin Cho","Youngwoo Seol","Jaesung Lee","Inbeom Hwang","Kangin Lee","Jens Castrop","Heungmin Son","Heechan Hwang","Hyeongyu Oh"],
+  "🇨🇿 República Checa":["Czechia Logo","Matěj Kovář","Ladislav Krejčí","Vladimír Coufal","Jaroslav Zelený","Lukáš Provod","Lukáš Červ","Tomáš Souček","Pavel Šulc","Václav Černý","Adam Hložek","Patrik Schick"],
+  "🇨🇦 Canadá":["Canada Logo","Dayne St. Clair","Alphonso Davies","Richie Laryea","Derek Cornelius","Stephen Eustáquio","Ismaël Koné","Jacob Shaffelburg","Niko Sigur","Tajon Buchanan","Cyle Larin","Jonathan David"],
+  "🇧🇦 Bosnia y Herzegovina":["Bosnia-Herzegovina Logo","Nikola Vasilj","Amar Dedić","Sead Kolašinac","Tarik Muharemović","Nikola Katić","Benjamin Tahirović","Ivan Šunjić","Ermedin Demirović","Esmir Bajraktarević","Edin Džeko","Amar Memić"],
+  "🇶🇦 Catar":["Qatar Logo","Meshaal Barsham","Sultan Albrake","Boualem Khoukhi","Pedro Miguel","Mohammed Mannai","Karim Boudiaf","Assim Madibo","Edmílson Junior","Akram Hassan Afif","Ahmed Al-Ganehi","Almoez Ali"],
+  "🇨🇭 Suiza":["Switzerland Logo","Gregor Kobel","Manuel Akanji","Ricardo Rodríguez","Nico Elvedi","Silvan Widmer","Granit Xhaka","Remo Freuler","Fabian Rieder","Breel Embolo","Rubén Vargas","Dan Ndoye"],
+  "🇧🇷 Brasil":["Brazil Logo","Alisson","Marquinhos","Éder Militão","Gabriel Magalhães","Casemiro","Bruno Guimarães","Vinícius Júnior","Rodrygo","Matheus Cunha","Raphinha","Estêvão"],
+  "🇲🇦 Marruecos":["Morocco Logo","Yassine Bounou","Achraf Hakimi","Noussair Mazraoui","Nayef Aguerd","Romain Saïss","Sofyan Amrabat","Eliesse Ben Seghir","Bilal El Khannouss","Ismael Saibari","Youssef En-Nesyri","Brahim Díaz"],
+  "🇭🇹 Haití":["Haiti Logo","Johny Placide","Carlens Arcus","Ricardo Adé","Duke Lacroix","Leverton Pierre","Danley Jean Jacques","Jean-Ricner Bellegarde","Josué Casimir","Ruben Providence","Duckens Nazon","Frantzdy Pierrot"],
+  "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia":["Scotland Logo","Angus Gunn","Aaron Hickey","Andrew Robertson","John Souttar","Grant Hanley","Scott McTominay","Lewis Ferguson","Ryan Christie","John McGinn","Ché Adams","Ben Gannon-Doak"],
+  "🇺🇸 EE. UU.":["USA Logo","Matt Freese","Chris Richards","Tim Ream","Mark McKenzie","Tyler Adams","Weston McKennie","Timothy Weah","Malik Tillman","Christian Pulisic","Brenden Aaronson","Folarin Balogun"],
+  "🇵🇾 Paraguay":["Paraguay Logo","Orlando Gill","Gustavo Gómez","Juan José Cáceres","Omar Alderete","Júnior Alonso","Diego Gómez","Andrés Cubas","Julio Enciso","Miguel Almirón","Ramón Sosa","Antonio Sanabria"],
+  "🇦🇺 Australia":["Australia Logo","Mathew Ryan","Harry Souttar","Aziz Behich","Cameron Burgess","Lewis Miller","Jackson Irvine","Riley McGree","Aiden O'Neill","Connor Metcalfe","Kusini Yengi","Nestory Irankunda"],
+  "🇹🇷 Turquía":["Turkey Logo","Uğurcan Çakır","Mert Müldür","Abdülkerim Bardakcı","Merih Demiral","Ferdi Kadıoğlu","Hakan Çalhanoğlu","Orkun Kökçü","Arda Güler","Can Uzun","Kerem Aktürkoğlu","Kenan Yıldız"],
+  "🇩🇪 Alemania":["Germany Logo","Marc-André ter Stegen","Antonio Rüdiger","Jonathan Tah","David Raum","Florian Wirtz","Joshua Kimmich","Leon Goretzka","Jamal Musiala","Serge Gnabry","Kai Havertz","Nick Woltemade"],
+  "🇨🇼 Curaçao":["Curaçao Logo","Eloy Room","Armando Obispo","Sherel Floranus","Roshon van Eijma","Shurandy Sambo","Livano Comenencia","Juninho Bacuna","Leandro Bacuna","Kenji Gorré","Jürgen Locadia","Sontje Hansen"],
+  "🇨🇮 Costa de Marfil":["Côte d'Ivoire Logo","Yahia Fofana","Ghislain Konan","Wilfried Singo","Evan Ndicka","Willy Boly","Franck Kessié","Seko Fofana","Ibrahim Sangaree","Sébastien Haller","Simon Adingra","Evann Guessand"],
+  "🇪🇨 Ecuador":["Ecuador Logo","Hernán Galíndez","Piero Hincapié","Pervis Estupiñán","Willian Pacho","Ángelo Preciado","Kendry Páez","Moisés Caicedo","Alan Franco","Pedro Vite","Gonzalo Plata","Enner Valencia"],
+  "🇳🇱 Países Bajos":["Netherlands Logo","Bart Verbruggen","Virgil van Dijk","Micky van de Ven","Denzel Dumfries","Tijjani Reijnders","Ryan Gravenberch","Frenkie de Jong","Xavi Simons","Memphis Depay","Donyell Malen","Cody Gakpo"],
+  "🇯🇵 Japón":["Japan Logo","Zion Suzuki","Tsuyoshi Watanabe","Kaishu Sano","Ao Tanaka","Daichi Kamada","Ritsu Doan","Keito Nakamura","Takumi Minamino","Takefusa Kubo","Shuto Machino","Ayase Ueda"],
+  "🇸🇪 Suecia":["Sweden Logo","Viktor Johansson","Isak Hien","Emil Holm","Victor Nilsson Lindelöf","Lucas Bergvall","Yasin Ayari","Daniel Svensson","Dejan Kulusevski","Anthony Elanga","Alexander Isak","Viktor Gyökeres"],
+  "🇹🇳 Túnez":["Tunisia Logo","Aymen Dahmen","Montassar Talbi","Yassine Meriah","Ali Abdi","Ferjani Sassi","Ellyes Skhiri","Aïssa Laïdouni","Hannibal Mejbri","Naïm Sliti","Elias Achouri","Hazem Mastouri"],
+  "🇧🇪 Bélgica":["Belgium Logo","Thibaut Courtois","Arthur Theate","Timothy Castagne","Maxim De Cuyper","Youri Tielemans","Kevin De Bruyne","Amadou Onana","Jérémy Doku","Charles De Ketelaere","Leandro Trossard","Romelu Lukaku"],
+  "🇪🇬 Egipto":["Egypt Logo","Mohamed Elshenawy","Mohamed Hany","Yasser Ibrahim","Ramy Rabia","Marwan Attia","Zizo","Hamdy Fathy","Omar Marmoush","Mohamed Salah","Mostafa Mohamed","Trezeguet"],
+  "🇮🇷 RI de Irán":["IR Iran Logo","Alireza Beiranvand","Shojae Khalilzadeh","Milad Mohammadi","Ramin Rezaeian","Hossein Kanaani","Saeed Ezatolahi","Saman Ghoddos","Mohammad Mohebi","Mehdi Taremi","Sardar Azmoun","Alireza Jahanbakhsh"],
+  "🇳🇿 Nueva Zelanda":["New Zealand Logo","Max Crocombe","Michael Boxall","Liberato Cacace","Tim Payne","Finn Surman","Marko Stamenić","Joe Bell","Sarpreet Singh","Matthew Garbett","Chris Wood","Elijah Just"],
+  "🇪🇸 España":["Spain Logo","Unai Simón","Robin Le Normand","Dean Huijsen","Marc Cucurella","Rodri","Martín Zubimendi","Pedri","Fabián Ruiz","Lamine Yamal","Nico Williams","Mikel Oyarzabal"],
+  "🇨🇻 Cabo Verde":["Cabo Verde Logo","Vozinha","Logan Costa","Pico","Steven Moreira","João Paulo","Kevin Pina","Jamiro Monteiro","Yannick Semedo","Ryan Mendes","Jovane Cabral","Dailon Livramento"],
+  "🇸🇦 Arabia Saudí":["Saudi Arabia Logo","Nawaf Alaqidi","Hassan Altambakti","Jehad Thikri","Saud Abdulhamid","Nasser Aldawsari","Abdullah Alkhaibari","Musab Aljuwayr","Feras Albrikan","Salem Aldawsari","Saleh Abu Alshamat","Saleh Alshehri"],
+  "🇺🇾 Uruguay":["Uruguay Logo","Sergio Rochet","José María Giménez","Ronald Araújo","Sebastián Cáceres","Mathías Olivera","Nahitan Nández","Federico Valverde","Rodrigo Bentancur","Manuel Ugarte","Facundo Pellistri","Darwin Núñez"],
+  "🇫🇷 Francia":["France Logo","Mike Maignan","William Saliba","Jules Koundé","Théo Hernández","Aurélien Tchouaméni","Eduaco Camavinga","Ousmane Dembélé","Kylian Mbappé","Bradley Barcola","Désiré Doué","Hugo Ekitiké"],
+  "🇸🇳 Senegal":["Senegal Logo","Édouard Mendy","Kalidou Koulibaly","Moussa Niakhaté","El Hadji Malick Diouf","Idrissa Gana Gueye","Pape Matar Sarr","Sadio Mané","Iliman Ndiaye","Krépin Diatta","Ismaïla Sarr","Nicolas Jackson"],
+  "🇮🇶 Irak":["Iraq Logo","Jalal Hassan","Hussein Ali","Akam Hashem","Merchas Doski","Zaid Tahseen","Zidane Iqbal","Amir Al-Ammari","Ibrahim Bayesh","Ali Jasim","Aimar Sher","Mohanad Ali"],
+  "🇳🇴 Noruega":["Norway Logo","Ørjan Nyland","Julian Ryerson","Kristoffer Vassbakk Ajer","David Møller Wolfe","Martin Ødegaard","Sander Berge","Patrick Berg","Erling Haaland","Antonio Nusa","Oscar Bobb","Alexander Sørloth"],
+  "🇦🇷 Argentina":["Argentina Logo","Emiliano Martínez","Nahuel Molina","Cristian Romero","Nicolás Otamendi","Enzo Fernández","Alexis Mac Allister","Rodrigo De Paul","Julián Alvarez","Lionel Messi","Giuliano Simeone","Lautaro Martínez"],
+  "🇩🇿 Argelia":["Algeria Logo","Alexis Guendouz","Rayan Aït-Nouri","Ramy Bensebaini","Youcef Atal","Aïssa Mandi","Nabil Bentaleb","Riyad Mahrez","Saïd Benrahma","Amine Gouiri","Mohamed Amoura","Baghdad Bounedjah"],
+  "🇦🇹 Austria":["Austria Logo","Alexander Schlager","David Alaba","Kevin Danso","Philipp Lienhart","Konrad Laimer","Nicolas Seiwald","Marcel Sabitzer","Florian Grillitsch","Marko Arnautović","Christoph Baumgartner","Michael Gregoritsch"],
+  "🇯🇴 Jordania":["Jordan Logo","Yazeed Abulaila","Mohammad Abu Hashish","Yazan Al-Arab","Abdallah Nasib","Ibrahim Saadeh","Nizar Al-Rashdan","Noor Al-Rawabdeh","Yazan Al-Naimat","Mousa Al-Taamari","Mahmoud Al-Mardi","Ali Olwan"],
+  "🇵🇹 Portugal":["Portugal Logo","Diogo Costa","Rúben Dias","Nuno Mendes","Vitinha","Bernardo Silva","Bruno Fernandes","Rúben Neves","Cristiano Ronaldo","João Félix","Pedro Neto","Rafael Leão"],
+  "🇨🇩 República Democrática del Congo":["Congo DR Logo","Lionel Mpasi","Aaron Wan-Bissaka","Axel Tuanzebe","Arthur Masuaku","Chancel Mbemba","Ngal'ayel Mukau","Samuel Moutoussamy","Noah Sadiki","Théo Bongonda","Yoane Wissa","Cédric Bakambu"],
+  "🇺🇿 Uzbekistán":["Uzbekistan Logo","Utkir Yusupov","Abdukodir Khusanov","Farrukh Sayfiev","Sherzod Nasrullaev","Husniddin Aliqulov","Rustam Ashurmatov","Khojiakbar Alijonov","Odiljon Hamrobekov","Otabek Shukurov","Eldor Shomurodov","Abbosbek Fayzullaev"],
+  "🇨🇴 Colombia":["Colombia Logo","Camilo Vargas","Dávinson Sánchez","Yerry Mina","Daniel Muñoz","James Rodríguez","Jefferson Lerma","Richard Ríos","Juan Fernando Quintero","Luis Díaz","Jhon Arias","Luis Suárez"],
+  "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra":["England Logo","Jordan Pickford","Reece James","John Stones","Jude Bellingham","Declan Rice","Jordan Henderson","Phil Foden","Harry Kane","Bukayo Saka","Cole Palmer","Marcus Rashford"],
+  "🇭🇷 Croacia":["Croatia Logo","Dominik Livaković","Duje Ćaleta-Car","Joško Gvardiol","Josip Stanišić","Ivan Perišić","Luka Modrić","Mateo Kovačić","Lovro Majer","Mario Pašalić","Ante Budimir","Andrej Kramarić"],
+  "🇬🇭 Ghana":["Ghana Logo","Lawrence Ati Zigi","Alidu Seidu","Alexander Djiku","Gideon Mensah","Caleb Yirenkyi","Thomas Partey","Abdul Issahaku Fatawu","Mohammed Kudus","Kamaldeen Sulemana","Jordan Ayew","Antoine Semenyo"],
+  "🇵🇦 Panamá":["Panama Logo","Orlando Mosquera","Michael Amir Murillo","Andrés Andrade","Fidel Escobar","Aníbal Godoy","Cristian Martínez","Adalberto Carrasquilla","Édgar Bárcenas","José Fajardo","Ismael Díaz","José Luis Rodríguez"]
+};
+
+const GROUPS = {
+  A:['🇲🇽 México','🇿🇦 Sudáfrica','🇰🇷 República de Corea','🇨🇿 República Checa'],
+  B:['🇨🇦 Canadá','🇧🇦 Bosnia y Herzegovina','🇶🇦 Catar','🇨🇭 Suiza'],
+  C:['🇧🇷 Brasil','🇲🇦 Marruecos','🇭🇹 Haití','🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia'],
+  D:['🇺🇸 EE. UU.','🇵🇾 Paraguay','🇦🇺 Australia','🇹🇷 Turquía'],
+  E:['🇩🇪 Alemania','🇨🇼 Curaçao','🇨🇮 Costa de Marfil','🇪🇨 Ecuador'],
+  F:['🇳🇱 Países Bajos','🇯🇵 Japón','🇸🇪 Suecia','🇹🇳 Túnez'],
+  G:['🇧🇪 Bélgica','🇪🇬 Egipto','🇮🇷 RI de Irán','🇳🇿 Nueva Zelanda'],
+  H:['🇪🇸 España','🇨🇻 Cabo Verde','🇸🇦 Arabia Saudí','🇺🇾 Uruguay'],
+  I:['🇫🇷 Francia','🇸🇳 Senegal','🇮🇶 Irak','🇳🇴 Noruega'],
+  J:['🇦🇷 Argentina','🇩🇿 Argelia','🇦🇹 Austria','🇯🇴 Jordania'],
+  K:['🇵🇹 Portugal','🇨🇩 República Democrática del Congo','🇺🇿 Uzbekistán','🇨🇴 Colombia'],
+  L:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra','🇭🇷 Croacia','🇬🇭 Ghana','🇵🇦 Panamá']
+};
+
+const GROUP_COLORS = {
+  A:'#ff6b35',B:'#2dd4bf',C:'#fbbf24',D:'#f43f5e',
+  E:'#4ade80',F:'#a78bfa',G:'#fb923c',H:'#38bdf8',
+  I:'#e879f9',J:'#34d399',K:'#c084fc',L:'#f87171'
+}
+
+// ── Estado global de la página ────────────────────
+let _currentUser   = null   // usuario logueado (o null)
+let _profileData   = null   // perfil público que se muestra
+let _friendship    = null   // relación actual con ese perfil
+let _isOwnProfile  = false  // true si el perfil es del usuario logueado
+let _progress      = {}
+let _filter        = 'all'
+
+// ── URL parsing ───────────────────────────────────
+const params          = new URLSearchParams(window.location.search)
+const usernameFromQuery = params.get('u')
+const usernameFromPath  = window.location.pathname.replace(/\/$/, '').split('/').pop()
+const username = usernameFromQuery
+  || (usernameFromPath && usernameFromPath !== 'index.html' ? usernameFromPath : null)
+
+if (!username) {
+  showError('No se especificó ningún username.')
+} else {
+  loadPage(username)
+}
+
+// ── Carga principal ───────────────────────────────
+async function loadPage(uname) {
+  try {
+    // 1. Sesión actual (puede ser null si no está logueado)
+    const { data: { user } } = await supabase.auth.getUser()
+    _currentUser = user
+
+    // 2. Perfil público del username en la URL
+    const { data: profile, error: pErr } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('username', uname.toLowerCase())
+      .single()
+
+    if (pErr || !profile) { showError(`No existe el perfil "@${uname}".`); return }
+    _profileData = profile
+
+    // 3. Determinar nivel de acceso
+    const level = await determineLevel(user, profile)
+    _isOwnProfile = (level === 'own')
+
+    // 4. Renderizar perfil y zona de amistad
+    renderProfile(profile)
+    renderFriendZone(level)
+
+    // Sección de creador
+    const creatorContainer = document.getElementById('creator-section')
+    if (creatorContainer) {
+      renderCreatorSection(creatorContainer, profile.id, _currentUser?.id || null)
+    }
+
+    // 5. Renderizar sección de álbum según nivel
+    if (level === 'own' || level === 2) {
+      // Intentar cargar progreso (RLS lo permite solo si son amigos o es el dueño)
+      const { data: albumRow } = await supabase
+        .from('album_progress')
+        .select('progress')
+        .eq('user_id', profile.id)
+        .eq('album_id', 'wc2026')
+        .maybeSingle()
+
+      const progress = albumRow?.progress || {}
+      renderFullAlbumSection(profile, progress)
+
+      // Calcular medallas desde el progress real y sincronizar
+      await syncMedalsFromProgress(profile, progress)
+    } else {
+      // Calcular % sin necesitar el progreso detallado (stats públicos)
+      const pct = await getPublicPct(profile.id)
+      renderLockedAlbumSection(level, pct)
+      // Mostrar medallero con lo guardado en Supabase (sin recalcular)
+      await renderMedalleroSection(profile, level)
+    }
+
+    // 6. Mostrar página
+    document.getElementById('state-loading').style.display = 'none'
+    document.getElementById('state-content').style.display = 'block'
+    document.title = `${profile.full_name || profile.username} · Álbum Mundial 2026`
+
+  } catch (err) {
+    console.error(err)
+    showError('Error al cargar. Intenta de nuevo.')
+  }
+}
+
+// ── Nivel de acceso ───────────────────────────────
+async function determineLevel(user, profile) {
+  if (!user) return 0                          // anónimo
+  if (user.id === profile.id) return 'own'     // propio perfil
+
+  _friendship = await getFriendshipStatus(profile.id)
+  if (_friendship?.status === 'accepted') return 2   // amigos
+  return 1                                           // logueado, no amigo
+}
+
+// ── % público (sin RLS) ───────────────────────────
+// Usamos la policy pública de solo-lectura del progreso si existe,
+// si no, devolvemos null y el locked state no muestra el %.
+async function getPublicPct(userId) {
+  try {
+    const { data } = await supabase
+      .from('album_progress')
+      .select('progress')
+      .eq('user_id', userId)
+      .eq('album_id', 'wc2026')
+      .maybeSingle()
+
+    if (!data?.progress) return null
+    const prog = data.progress
+    let total = 0, tengo = 0
+    const allCountries = ['INTRO', ...Object.keys(albumData)]
+    allCountries.forEach(country => {
+      const stickers = country === 'INTRO' ? INTRO_DATA : albumData[country]
+      stickers.forEach((_, idx) => {
+        total++
+        if ((prog[country + '::' + idx] || 'none') === 'tengo') tengo++
+      })
+    })
+    return total > 0 ? Math.round((tengo / total) * 100) : 0
+  } catch {
+    return null
+  }
+}
+
+// ── Render: tarjeta de perfil ─────────────────────
+function renderProfile(p) {
+  const img = document.getElementById('pc-avatar-img')
+  const fb  = document.getElementById('pc-avatar-fb')
+  if (p.avatar_url) {
+    img.src = p.avatar_url; img.hidden = false; fb.hidden = true
+  } else {
+    img.hidden = true; fb.hidden = false
+    fb.textContent = (p.full_name || p.username || 'FC').trim()
+      .split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase() || 'FC'
+  }
+  document.getElementById('pc-fullname').textContent = p.full_name || p.username
+  document.getElementById('pc-username').textContent = '@' + p.username
+  document.getElementById('pc-team').textContent     = p.favorite_team || '—'
+  document.getElementById('pc-position').textContent = p.favorite_position || '—'
+
+  // Bio
+  const bioEl = document.getElementById('pc-bio')
+  if (p.bio) { bioEl.textContent = p.bio; bioEl.style.display = '' }
+
+  // Estadio / país
+  const estadioEl   = document.getElementById('pc-estadio')
+  const estadioWrap = document.getElementById('pc-estadio-wrap')
+  if (estadioEl && p.estadio_favorito) {
+    estadioEl.textContent = p.estadio_favorito
+    if (estadioWrap) estadioWrap.style.display = ''
+  }
+
+  // Frase futbolera
+  const fraseEl   = document.getElementById('pc-frase')
+  const fraseWrap = document.getElementById('pc-frase-wrap')
+  if (fraseEl && p.frase_futbolera) {
+    fraseEl.textContent = p.frase_futbolera
+    if (fraseWrap) fraseWrap.style.display = ''
+  }
+
+  // Jugadores favoritos
+  const jugsSection = document.getElementById('pc-players-section')
+  const jugsEl      = document.getElementById('pc-jugadores')
+  const jugs = Array.isArray(p.jugadores_favoritos) ? p.jugadores_favoritos : []
+  if (jugsEl && jugs.length) {
+    jugsEl.innerHTML = jugs.map(j => `<span class="player-chip-view">${j}</span>`).join('')
+    if (jugsSection) jugsSection.style.display = ''
+  }
+
+  // Apoyar
+  renderApoyoBtn(p)
+
+  // Badge Ojeador (si es perfil propio con ojeador_count > 0, o cualquier perfil con badge)
+  renderOjeadorZone(p)
+
+  // Posts del creador en su perfil (si tiene creator_profile activo)
+  renderCreatorPosts(p.id)
+
+  // Historial de apoyos dados (solo en perfil propio)
+  if (_isOwnProfile) renderHistorialApoyos()
+}
+
+// ── Render: botón Apoyar ──────────────────────────
+async function renderApoyoBtn(p) {
+  const zone    = document.getElementById('apoyo-zone')
+  const btn     = document.getElementById('apoyo-btn')
+  const countEl = document.getElementById('apoyo-count')
+  const hintEl  = document.getElementById('apoyo-hint')
+  if (!zone || !btn) return
+
+  if (countEl) countEl.textContent = p.apoyo_count || 0
+
+  if (_isOwnProfile) {
+    btn.disabled = true
+    btn.classList.add('apoyo-own')
+    const t = p.apoyo_count || 0
+    if (hintEl) hintEl.textContent = `${t} apoyo${t !== 1 ? 's' : ''} recibido${t !== 1 ? 's' : ''}`
+    return
+  }
+
+  if (!_currentUser) {
+    btn.addEventListener('click', () => {
+      if (hintEl) { hintEl.textContent = 'Inicia sesión para apoyar'; setTimeout(() => { hintEl.textContent = '' }, 2500) }
+    })
+    return
+  }
+
+  const [{ data: apoyoRow }, { data: earlyRow }] = await Promise.all([
+    supabase.from('profile_apoyos').select('created_at')
+      .eq('supporter_id', _currentUser.id).eq('supported_id', p.id).maybeSingle(),
+    supabase.from('early_supporters').select('apoyo_number')
+      .eq('creator_id', p.id).eq('supporter_id', _currentUser.id).maybeSingle(),
+  ])
+
+  let yaApoyé = !!apoyoRow
+  let currentEarly = earlyRow
+  _updateApoyoUI(btn, countEl, hintEl, yaApoyé, p.apoyo_count || 0, currentEarly)
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true
+    const label = btn.querySelector('.apoyo-label')
+    if (label) label.textContent = yaApoyé ? 'Quitando...' : 'Apoyando...'
+    try {
+      const { error } = await supabase.rpc('increment_apoyo', { target_profile_id: p.id })
+      if (error) throw error
+      yaApoyé = !yaApoyé
+      const delta    = yaApoyé ? 1 : -1
+      const newTotal = Math.max(0, parseInt(countEl?.textContent || 0) + delta)
+      if (countEl) countEl.textContent = newTotal
+
+      if (yaApoyé && !currentEarly) {
+        const { data } = await supabase.from('early_supporters').select('apoyo_number')
+          .eq('creator_id', p.id).eq('supporter_id', _currentUser.id).maybeSingle()
+        currentEarly = data
+      }
+      // Badge Ojeador es permanente — no se borra aunque quite el apoyo
+
+      _updateApoyoUI(btn, countEl, hintEl, yaApoyé, newTotal, currentEarly)
+      btn.classList.add('apoyo-burst')
+      setTimeout(() => btn.classList.remove('apoyo-burst'), 600)
+    } catch (err) {
+      console.error('apoyo error:', err)
+      if (hintEl) hintEl.textContent = err.message || 'Error al apoyar'
+    } finally {
+      btn.disabled = false
+    }
+  })
+}
+
+function _updateApoyoUI(btn, countEl, hintEl, yaApoyé, total, earlyRow) {
+  const label = btn.querySelector('.apoyo-label')
+  btn.classList.toggle('apoyo-done', yaApoyé)
+  btn.classList.remove('apoyo-own')
+  if (label) label.textContent = yaApoyé ? '¡Apoyado!' : 'Apoyar'
+  if (hintEl) {
+    if (earlyRow) {
+      hintEl.innerHTML = `🔭 Ojeador #${earlyRow.apoyo_number} de los primeros 1.000`
+    } else if (yaApoyé) {
+      hintEl.textContent = 'Ya apoyaste este perfil 🏆'
+    } else {
+      const faltan = Math.max(0, 1000 - total)
+      hintEl.textContent = total < 1000
+        ? `¡Quedan ${faltan} lugares de Ojeador de Talento!`
+        : `${total.toLocaleString('es-CL')} apoyos`
+    }
+  }
+}
+
+// ── Badge Ojeador en perfil propio ───────────────
+function renderOjeadorZone(p) {
+  const zone      = document.getElementById('ojeador-zone')
+  const countText = document.getElementById('ojeador-count-text')
+  if (!zone) return
+  const n = p.ojeador_count || 0
+  if (_isOwnProfile && n > 0) {
+    if (countText) countText.textContent = `Has sido Ojeador de ${n} creador${n !== 1 ? 'es' : ''}`
+    zone.style.display = ''
+  } else {
+    zone.style.display = 'none'
+  }
+}
+
+// ── Posts del creador en su perfil ───────────────
+const PERFIL_CAT_MAP = {
+  album:    { icon:'📘', label:'Álbum',               color:'#f5c518' },
+  mundial:  { icon:'🌍', label:'Mundial 2026',        color:'#34d399' },
+  fichajes: { icon:'💸', label:'Mercado de Fichajes', color:'#60a5fa' },
+  tactica:  { icon:'🧠', label:'Análisis táctico',    color:'#a78bfa' },
+  humor:    { icon:'😂', label:'Humor futbolero',     color:'#fb923c' },
+  noticias: { icon:'📰', label:'Noticias',            color:'#94a3b8' },
+  equipo:   { icon:'🏟️', label:'Mi equipo',           color:'#f472b6' },
+  femenino: { icon:'⚽', label:'Fútbol femenino',     color:'#e879f9' },
+}
+
+function _timeAgo(iso) {
+  const d = Math.floor((Date.now() - new Date(iso)) / 1000)
+  if (d < 60)    return 'hace un momento'
+  if (d < 3600)  return `hace ${Math.floor(d/60)}m`
+  if (d < 86400) return `hace ${Math.floor(d/3600)}h`
+  if (d < 604800) return `hace ${Math.floor(d/86400)}d`
+  return new Date(iso).toLocaleDateString('es-CL', { day:'numeric', month:'short' })
+}
+
+async function renderCreatorPosts(profileId) {
+  const section = document.getElementById('creator-posts-section')
+  if (!section) return
+
+  const { data: cp } = await supabase
+    .from('creator_profiles').select('is_active').eq('user_id', profileId).maybeSingle()
+  if (!cp?.is_active) return
+
+  const { data: posts } = await supabase
+    .from('posts').select('id, content, category, created_at, media_url')
+    .eq('user_id', profileId).order('created_at', { ascending: false }).limit(20)
+  if (!posts?.length) return
+
+  let myReacts = new Set()
+  if (_currentUser) {
+    const { data: rr } = await supabase.from('post_reactions').select('post_id')
+      .eq('user_id', _currentUser.id).in('post_id', posts.map(p => p.id))
+    ;(rr || []).forEach(r => myReacts.add(r.post_id))
+  }
+
+  const counts = {}
+  await Promise.all(posts.map(async p => {
+    const { count } = await supabase.from('post_reactions')
+      .select('*', { count:'exact', head:true }).eq('post_id', p.id)
+    counts[p.id] = count || 0
+  }))
+
+  const profile  = _profileData
+  const initials = (profile.full_name || profile.username || '?')
+    .trim().split(/\s+/).slice(0,2).map(x => x[0]).join('').toUpperCase()
+
+  section.style.display = ''
+  section.innerHTML = `
+    <div class="creator-posts-wrap">
+      <div class="creator-posts-header">
+        <span class="creator-posts-title">📰 Publicaciones del creador</span>
+        <span class="creator-posts-count">${posts.length} post${posts.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="creator-posts-list">
+        ${posts.map(p => {
+          const cat     = PERFIL_CAT_MAP[p.category] || { icon:'📌', label:p.category, color:'#888' }
+          const reacted = myReacts.has(p.id)
+          return `
+            <article class="feed-post" data-post-id="${p.id}">
+              <div class="fp-header">
+                <div class="fp-avatar">
+                  ${profile.avatar_url
+                    ? `<img src="${profile.avatar_url}" alt="" class="fp-avatar-img">`
+                    : `<span class="fp-avatar-fb">${initials}</span>`}
+                </div>
+                <div class="fp-meta">
+                  <div class="fp-author">${esc(profile.full_name || profile.username || 'Usuario')} <span class="fp-creator-badge">🎙️</span></div>
+                  <div class="fp-sub">
+                    <span class="fp-username">@${esc(profile.username || '?')}</span>
+                    <span class="fp-dot">·</span>
+                    <span class="fp-time">${_timeAgo(p.created_at)}</span>
+                  </div>
+                </div>
+                <span class="fp-cat-badge" style="--cat-color:${cat.color}">${cat.icon} ${cat.label}</span>
+              </div>
+              <div class="fp-content">${esc(p.content)}</div>
+              ${p.media_url ? `<div class="fp-media"><img src="${p.media_url}" alt="Imagen" class="fp-img" loading="lazy" onerror="this.parentElement.style.display='none'"></div>` : ''}
+              <div class="fp-actions">
+                <button class="fp-apoyo-btn${reacted ? ' active' : ''} perfil-react-btn"
+                  data-post="${p.id}" aria-label="Reaccionar" ${!_currentUser ? 'disabled' : ''}>
+                  <span class="fp-apoyo-icon">🏆</span>
+                  <span class="fp-apoyo-count">${counts[p.id]}</span>
+                </button>
+                <button class="fp-share-btn perfil-share-btn" data-post="${p.id}"><span>🔗</span> Compartir</button>
+              </div>
+            </article>`
+        }).join('')}
+      </div>
+    </div>`
+
+  section.querySelectorAll('.perfil-react-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!_currentUser) return
+      const postId  = btn.dataset.post
+      const reacted = btn.classList.contains('active')
+      const countEl = btn.querySelector('.fp-apoyo-count')
+      btn.disabled = true
+      try {
+        if (reacted) {
+          await supabase.from('post_reactions').delete().eq('post_id', postId).eq('user_id', _currentUser.id)
+          btn.classList.remove('active')
+          if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1)
+        } else {
+          await supabase.from('post_reactions').insert({ post_id: postId, user_id: _currentUser.id })
+          btn.classList.add('active')
+          if (countEl) countEl.textContent = parseInt(countEl.textContent) + 1
+        }
+      } catch (e) { console.error('[react perfil]', e) }
+      finally { btn.disabled = false }
+    })
+  })
+
+  section.querySelectorAll('.perfil-share-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const url = `${location.origin}/perfil/${encodeURIComponent(profile.username || '')}`
+      navigator.clipboard?.writeText(url).then(() => {
+        btn.textContent = '✅ Copiado'
+        setTimeout(() => { btn.innerHTML = '<span>🔗</span> Compartir' }, 2000)
+      })
+    })
+  })
+}
+
+// ── Historial de apoyos dados (perfil propio) ────
+async function renderHistorialApoyos() {
+  const section = document.getElementById('apoyo-hist-section')
+  if (!section || !_currentUser) return
+
+  section.style.display = ''
+  section.innerHTML = `
+    <div class="apoyo-hist-section">
+      <div class="apoyo-hist-title">🏆 Creadores que has apoyado</div>
+      <div class="apoyo-hist-list" id="apoyo-hist-list">
+        <div class="apoyo-hist-empty">Cargando…</div>
+      </div>
+    </div>`
+
+  try {
+    // Traer a quiénes apoyé
+    const { data: rows } = await supabase
+      .from('profile_apoyos')
+      .select('supported_id, created_at')
+      .eq('supporter_id', _currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(20)
+
+    const list = section.querySelector('#apoyo-hist-list')
+    if (!rows?.length) {
+      list.innerHTML = `<div class="apoyo-hist-empty">Aún no has apoyado ningún creador</div>`
+      return
+    }
+
+    // Traer perfiles y si eres Ojeador de alguno
+    const ids = rows.map(r => r.supported_id)
+    const [{ data: profiles }, { data: earlyRows }] = await Promise.all([
+      supabase.from('profiles').select('id, username, full_name, avatar_url').in('id', ids),
+      supabase.from('early_supporters')
+        .select('creator_id, apoyo_number')
+        .eq('supporter_id', _currentUser.id)
+        .in('creator_id', ids),
+    ])
+
+    const pMap = Object.fromEntries((profiles || []).map(p => [p.id, p]))
+    const eMap = Object.fromEntries((earlyRows || []).map(e => [e.creator_id, e]))
+
+    list.innerHTML = rows.map(r => {
+      const p    = pMap[r.supported_id] || {}
+      const earl = eMap[r.supported_id]
+      const ini  = (p.full_name || p.username || '?').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()
+      const fecha = new Date(r.created_at).toLocaleDateString('es-CL', { day:'numeric', month:'short', year:'2-digit' })
+      return `
+        <a class="apoyo-hist-item" href="/perfil/${encodeURIComponent(p.username || '')}">
+          ${p.avatar_url
+            ? `<img src="${p.avatar_url}" class="apoyo-hist-avatar" alt="">`
+            : `<div class="apoyo-hist-avatar-fb">${ini}</div>`}
+          <div class="apoyo-hist-info">
+            <div class="apoyo-hist-name">${p.full_name || p.username || 'Perfil desconocido'}</div>
+            <div class="apoyo-hist-user">@${p.username || '?'}</div>
+            ${earl ? `<div class="apoyo-hist-ojeador">🔭 Ojeador #${earl.apoyo_number}</div>` : ''}
+          </div>
+          <div class="apoyo-hist-date">${fecha}</div>
+        </a>`
+    }).join('')
+  } catch (e) {
+    console.error('[historial apoyo]', e)
+    const list = section.querySelector('#apoyo-hist-list')
+    if (list) list.innerHTML = `<div class="apoyo-hist-empty">Error al cargar historial</div>`
+  }
+}
+
+// ── Sincronizar medallas desde progress real ──────
+/**
+ * Calcula las medallas que corresponden según el progress actual
+ * y actualiza Supabase si difieren de lo guardado.
+ * Preserva la medalla musical (no depende del álbum).
+ */
+async function syncMedalsFromProgress(profile, progress) {
+  try {
+    const storedMedals  = Array.isArray(profile.medallas) ? profile.medallas : []
+    const musicMedal    = storedMedals.includes('music_note') ? ['music_note'] : []
+
+    // Calcular medallas desde el progress real
+    const computed = computeMedalsFromProgress(progress, albumData, INTRO_DATA)
+    const newSet   = [...new Set([...computed, ...musicMedal])]
+
+    // Comparar con las guardadas
+    const storedSet  = new Set(storedMedals)
+    const newSetSet  = new Set(newSet)
+    const changed    = newSet.some(id => !storedSet.has(id)) ||
+                       storedMedals.some(id => id !== 'music_note' && !newSetSet.has(id))
+
+    if (!changed) {
+      // Sin cambios: re-render con las ya guardadas
+      await renderMedalleroSection(profile, _isOwnProfile ? 'own' : 2)
+      return
+    }
+
+    // Guardar set corregido en Supabase
+    await supabase.from('profiles').update({ medallas: newSet }).eq('id', profile.id)
+    profile.medallas = newSet
+
+    // Re-render el medallero con los datos actualizados
+    await renderMedalleroSection(profile, _isOwnProfile ? 'own' : 2)
+  } catch (e) {
+    console.error('[medals] syncMedalsFromProgress error:', e)
+    // Fallback: render con lo que hay
+    await renderMedalleroSection(profile, _isOwnProfile ? 'own' : 2)
+  }
+}
+
+// ── Render: medallero ─────────────────────────────
+async function renderMedalleroSection(profile, level) {
+  const section   = document.getElementById('medallero-section')
+  const container = document.getElementById('medallero-container')
+  const subtitle  = document.getElementById('medallero-subtitle')
+  const toggle    = document.getElementById('medallero-toggle')
+  const body      = document.getElementById('medallero-body')
+  if (!section || !container) return
+
+  // Mostrar medallas bloqueadas solo en perfil propio
+  const showLocked = (level === 'own')
+
+  // Cargar medallas del perfil
+  const medals = Array.isArray(profile.medallas) ? profile.medallas : []
+
+  if (subtitle) {
+    subtitle.textContent = medals.length > 0
+      ? `${medals.length} medalla${medals.length !== 1 ? 's' : ''} obtenida${medals.length !== 1 ? 's' : ''}`
+      : (showLocked ? 'Completa selecciones para ganar medallas' : 'Sin medallas aún')
+  }
+
+  // Render
+  renderMedallero(container, medals, showLocked)
+
+  // Toggle colapsar/expandir
+  if (toggle && body) {
+    toggle.addEventListener('click', () => {
+      const open = body.style.display !== 'none'
+      body.style.display = open ? 'none' : ''
+      toggle.textContent = open ? '▼' : '▲'
+      toggle.setAttribute('aria-expanded', !open)
+    })
+  }
+
+  section.style.display = ''
+}
+
+// ── Render: zona de amistad ───────────────────────
+function renderFriendZone(level) {
+  const zone = document.getElementById('friend-zone')
+  if (!zone) return
+
+  // Propio perfil o anónimo sin relación → no mostrar nada
+  if (level === 'own' || level === 0) { zone.style.display = 'none'; return }
+
+  zone.style.display = 'flex'
+  const f = _friendship
+
+  // Sin relación previa
+  if (!f) {
+    zone.innerHTML = `
+      <span class="friend-status-label">Coleccionista</span>
+      <button class="friend-btn primary" id="btn-add">➕ Agregar amigo</button>`
+    document.getElementById('btn-add').addEventListener('click', handleAdd)
+    return
+  }
+
+  // Solicitud enviada por mí
+  if (f.status === 'pending' && f.sender_id === _currentUser.id) {
+    zone.innerHTML = `
+      <span class="friend-status-label">Solicitud enviada</span>
+      <button class="friend-btn pending" id="btn-cancel">⏳ Pendiente · Cancelar</button>`
+    document.getElementById('btn-cancel').addEventListener('click', handleRemove)
+    return
+  }
+
+  // Solicitud recibida de este usuario
+  if (f.status === 'pending' && f.receiver_id === _currentUser.id) {
+    zone.innerHTML = `
+      <span class="friend-status-label">Te envió una solicitud</span>
+      <div class="friend-actions-row">
+        <button class="friend-btn primary" id="btn-accept">✅ Aceptar</button>
+        <button class="friend-btn danger"   id="btn-reject">✗ Rechazar</button>
+      </div>`
+    document.getElementById('btn-accept').addEventListener('click', handleAccept)
+    document.getElementById('btn-reject').addEventListener('click', handleRemove)
+    return
+  }
+
+  // Amigos confirmados
+  if (f.status === 'accepted') {
+    zone.innerHTML = `
+      <span class="friend-status-label">✓ Son amigos</span>
+      <button class="friend-btn confirmed" id="btn-remove">✓ Amigos · Eliminar</button>`
+    document.getElementById('btn-remove').addEventListener('click', handleRemove)
+    return
+  }
+}
+
+// ── Handlers de amistad ───────────────────────────
+async function handleAdd() {
+  const btn = document.getElementById('btn-add')
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando...' }
+  try {
+    _friendship = await sendFriendRequest(_profileData.id)
+    showToast('✅ Solicitud enviada')
+    renderFriendZone(1)
+  } catch (err) {
+    console.error(err)
+    showToast('⚠️ Error al enviar la solicitud')
+    if (btn) { btn.disabled = false; btn.textContent = '➕ Agregar amigo' }
+  }
+}
+
+async function handleAccept() {
+  const btn = document.getElementById('btn-accept')
+  if (btn) { btn.disabled = true; btn.textContent = 'Aceptando...' }
+  try {
+    _friendship = await acceptFriendRequest(_friendship.id)
+    showToast('🎉 ¡Ahora son amigos!')
+    renderFriendZone(2)
+    // Recargar el álbum completo ahora que son amigos
+    const { data: albumRow } = await supabase
+      .from('album_progress')
+      .select('progress')
+      .eq('user_id', _profileData.id)
+      .eq('album_id', 'wc2026')
+      .maybeSingle()
+    renderFullAlbumSection(_profileData, albumRow?.progress || {})
+  } catch (err) {
+    console.error(err)
+    showToast('⚠️ Error al aceptar')
+  }
+}
+
+async function handleRemove() {
+  if (!_friendship) return
+  const confirmed = window.confirm('¿Confirmar? Se eliminará la solicitud o amistad.')
+  if (!confirmed) return
+  try {
+    await removeFriendship(_friendship.id)
+    _friendship = null
+    showToast('Amistad eliminada')
+    renderFriendZone(1)
+    // Volver a bloquear el álbum
+    const pct = await getPublicPct(_profileData.id)
+    renderLockedAlbumSection(1, pct)
+  } catch (err) {
+    console.error(err)
+    showToast('⚠️ Error al eliminar')
+  }
+}
+
+// ── Render: álbum bloqueado (nivel 0 y 1) ────────
+function renderLockedAlbumSection(level, pct) {
+  const section = document.getElementById('album-section')
+  if (!section) return
+
+  const pctHtml = pct !== null
+    ? `<div class="album-pct-preview">
+        <span class="album-pct-val">${pct}%</span>
+        <span class="album-pct-label">Completado</span>
+       </div>`
+    : ''
+
+  const msg = level === 0
+    ? 'Iniciá sesión y agregalo como amigo para ver su álbum completo con estados de cada figurita.'
+    : 'Agregalo como amigo para desbloquear su álbum completo con todos los estados.'
+
+  const cta = level === 0
+    ? `<a href="https://albumpanini26digital.vercel.app" class="friend-btn primary" style="display:inline-flex;margin-top:8px">
+        🔑 Iniciar sesión
+       </a>`
+    : ''
+
+  section.innerHTML = `
+    <div class="album-section" style="margin-top:20px">
+      <div class="album-section-header">
+        <div class="album-section-eyebrow">Colección · Mundial 2026</div>
+        <div class="album-section-title">ÁLBUM DE ${esc(((_profileData.full_name || _profileData.username).toUpperCase().split(' ')[0]))}</div>
+      </div>
+      <div class="album-locked">
+        <div class="album-locked-icon">🔒</div>
+        <div class="album-locked-title">Álbum privado</div>
+        <div class="album-locked-sub">${msg}</div>
+        ${pctHtml}
+        ${cta}
+      </div>
+    </div>`
+}
+
+// ── Render: álbum completo (nivel 2 / propio) ────
+function renderFullAlbumSection(profile, progress) {
+  _progress = progress
+  const section = document.getElementById('album-section')
+  if (!section) return
+
+  // Calcular stats
+  let total=0, tengo=0, falta=0, rep=0, res=0
+  const allCountries = ['INTRO', ...Object.keys(albumData)]
+  allCountries.forEach(country => {
+    const stickers = country === 'INTRO' ? INTRO_DATA : albumData[country]
+    stickers.forEach((_, idx) => {
+      total++
+      const k   = country + '::' + idx
+      const st  = progress[k] || 'none'
+      const sub = progress[k + '::sub'] || null
+      if (st === 'tengo') tengo++
+      else if (st === 'falta') falta++
+      if (sub === 'repetida') rep++
+      if (sub === 'reserva')  res++
+    })
+  })
+  const pct = total > 0 ? Math.round((tengo/total)*100) + '%' : '0%'
+
+  section.innerHTML = `
+    <div class="album-section" style="margin-top:20px">
+      <div class="album-section-header-row" id="album-toggle-header" style="cursor:pointer" tabindex="0" role="button" aria-expanded="false">
+        <div>
+          <div class="album-section-eyebrow">Colección · Mundial 2026</div>
+          <div class="album-section-title" id="album-section-title">ÁLBUM DE ${esc((profile.full_name || profile.username).toUpperCase().split(' ')[0])}</div>
+        </div>
+        <button class="album-toggle-btn" id="album-toggle-btn" aria-expanded="false">📋 Ver álbum</button>
+      </div>
+      <div id="album-collapsible" style="display:none">
+        <div class="album-stats">
+          <div class="album-stat" style="--a-accent:#f5c518"><span class="album-stat-v" id="as-total">${total}</span><span class="album-stat-l">Total</span></div>
+          <div class="album-stat" style="--a-accent:#22c55e"><span class="album-stat-v" id="as-tengo">${tengo}</span><span class="album-stat-l">Tengo</span></div>
+          <div class="album-stat" style="--a-accent:#f43f5e"><span class="album-stat-v" id="as-falta">${falta}</span><span class="album-stat-l">Faltan</span></div>
+          <div class="album-stat" style="--a-accent:#f59e0b"><span class="album-stat-v" id="as-rep">${rep}</span><span class="album-stat-l">🔄 Repet.</span></div>
+          <div class="album-stat" style="--a-accent:#818cf8"><span class="album-stat-v" id="as-res">${res}</span><span class="album-stat-l">📌 Reserv.</span></div>
+        </div>
+        <div class="album-tabs">
+          <button class="atab active" data-filter="all">Todos · ${pct}</button>
+          <button class="atab" data-filter="tengo">✅ Tengo</button>
+          <button class="atab" data-filter="falta">❌ Faltan</button>
+          <button class="atab" data-filter="repetida">🔄 Repetidas</button>
+          <button class="atab" data-filter="reserva">📌 Reservadas</button>
+        </div>
+        <div class="album-body" id="album-body"></div>
+      </div>
+    </div>`
+
+  // Toggle accordion
+  const toggleHeader = section.querySelector('#album-toggle-header')
+  const toggleBtn    = section.querySelector('#album-toggle-btn')
+  const collapsible  = section.querySelector('#album-collapsible')
+  function toggleAlbum(e) {
+    if (e.target.closest('#album-collapsible')) return
+    const isOpen = collapsible.style.display !== 'none'
+    collapsible.style.display = isOpen ? 'none' : ''
+    toggleBtn.textContent = isOpen ? '📋 Ver álbum' : '📋 Cerrar álbum'
+    toggleBtn.setAttribute('aria-expanded', String(!isOpen))
+    toggleHeader.setAttribute('aria-expanded', String(!isOpen))
+  }
+  toggleHeader.addEventListener('click', toggleAlbum)
+  toggleHeader.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleAlbum(e) } })
+
+  // Tab listeners
+  section.querySelectorAll('.atab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      section.querySelectorAll('.atab').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      _filter = btn.dataset.filter
+      renderGroups()
+    })
+  })
+
+  renderGroups()
+}
+
+// ── Render grupos de figuritas ────────────────────
+function renderGroups() {
+  const body = document.getElementById('album-body')
+  if (!body) return
+  const html = []
+
+  const allEntries = [
+    { letter: '🌍', countries: ['INTRO'], color: '#f5c518', label: 'Introducción' },
+    ...Object.entries(GROUPS).map(([l, countries]) => ({
+      letter: l, countries, color: GROUP_COLORS[l], label: 'Grupo ' + l
+    }))
+  ]
+
+  for (const { letter, countries, color, label } of allEntries) {
+    let groupHtml = ''
+    let gTotal=0, gTengo=0, hasVisible=false
+
+    for (const country of countries) {
+      const stickers = country === 'INTRO' ? INTRO_DATA : albumData[country]
+      const countryStickers = []
+
+      stickers.forEach((name, idx) => {
+        const k   = country + '::' + idx
+        const st  = _progress[k] || 'none'
+        const sub = _progress[k + '::sub'] || null
+        gTotal++
+        if (st === 'tengo') gTengo++
+
+        if (_filter === 'all') {}
+        else if (_filter === 'tengo'    && st !== 'tengo') return
+        else if (_filter === 'falta'    && st !== 'falta') return
+        else if (_filter === 'repetida' && sub !== 'repetida') return
+        else if (_filter === 'reserva'  && sub !== 'reserva') return
+
+        hasVisible = true
+        let cls = 'sc', badge = ''
+        if (st === 'tengo')      { cls += ' s-tengo';    badge = 'TENGO' }
+        else if (st === 'falta') { cls += ' s-falta';    badge = 'FALTA' }
+        if (sub === 'repetida')  { cls += ' s-repetida'; badge = '🔄' }
+        if (sub === 'reserva')   { cls += ' s-reserva';  badge = '📌' }
+
+        countryStickers.push(`
+          <div class="${cls}">
+            <span class="sc-dot"></span>
+            <span class="sc-num">${idx+1}</span>
+            <span class="sc-name">${esc(name)}</span>
+            ${badge ? `<span class="sc-badge">${badge}</span>` : ''}
+          </div>`)
+      })
+
+      if (countryStickers.length > 0) {
+        const countryLabel = country === 'INTRO' ? 'Introducción Panini' : country
+        groupHtml += `
+          <div style="padding:4px 10px 2px;font-family:'Barlow Condensed',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border-top:1px solid var(--border);margin-top:4px">
+            ${esc(countryLabel)}
+          </div>
+          <div class="sticker-grid">${countryStickers.join('')}</div>`
+      }
+    }
+
+    if (_filter !== 'all' && !hasVisible) continue
+
+    const pct = gTotal > 0 ? Math.round((gTengo/gTotal)*100) : 0
+    html.push(`
+      <div class="sgroup open">
+        <div class="sgroup-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="sgroup-letter" style="background:${color}">${esc(letter)}</div>
+          <div class="sgroup-name">${esc(label)}</div>
+          <div class="sgroup-prog">
+            <div class="sgroup-track">
+              <div class="sgroup-fill" style="width:${pct}%;background:${color}"></div>
+            </div>
+            <span class="sgroup-pct">${pct}%</span>
+          </div>
+          <span class="sgroup-chev">▼</span>
+        </div>
+        <div class="sgroup-body">${groupHtml || '<div style="padding:14px 16px;color:var(--muted);font-size:.82rem;font-family:Barlow Condensed,sans-serif">Sin cromos en este filtro</div>'}</div>
+      </div>`)
+  }
+
+  if (html.length === 0) {
+    body.innerHTML = `<div class="album-empty">
+      <div class="album-empty-icon">😕</div>
+      <div class="album-empty-title">Sin cromos en este filtro</div>
+      <div class="album-empty-sub">Este coleccionista no tiene cromos marcados aquí todavía</div>
+    </div>`
+  } else {
+    body.innerHTML = html.join('')
+  }
+}
+
+// ── Helpers ───────────────────────────────────────
+function showError(msg) {
+  document.getElementById('state-loading').style.display = 'none'
+  document.getElementById('error-msg').textContent = msg
+  document.getElementById('state-error').style.display = ''
+}
+
+function showToast(msg) {
+  const t = document.getElementById('pf-toast')
+  if (!t) return
+  t.textContent = msg
+  t.classList.add('visible')
+  clearTimeout(t._timer)
+  t._timer = setTimeout(() => t.classList.remove('visible'), 3000)
+}
+
+function esc(str) {
+  return String(str || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+}
+
+
+// ── Panel de accesibilidad completo ──
+(function(){
+  const KEY = 'album_panini_2026_accessibility';
+  let prefs = {textSize:'normal',theme:'dark',reduceMotion:false};
+
+  function load(){ try{ const r=localStorage.getItem(KEY); if(r) prefs={...prefs,...JSON.parse(r)}; }catch(e){} }
+  function save(){ try{ const existing=JSON.parse(localStorage.getItem(KEY)||'{}'); localStorage.setItem(KEY,JSON.stringify({...existing,...prefs})); }catch(e){} }
+  function apply(){
+    const html=document.documentElement;
+    const scaleMap={small:.94,normal:1,large:1.1,xlarge:1.2};
+    html.style.setProperty('--font-scale', scaleMap[prefs.textSize]||1);
+    html.setAttribute('data-theme', prefs.theme||'dark');
+    html.classList.toggle('reduce-motion', !!prefs.reduceMotion);
+    // sync button active states
+    document.querySelectorAll('.a11y-font-btn').forEach(b=>b.classList.toggle('active',b.dataset.size===prefs.textSize));
+    document.querySelectorAll('.a11y-mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===prefs.theme));
+    const motionEl=document.getElementById('p-toggle-motion');
+    if(motionEl){ motionEl.checked=!!prefs.reduceMotion; motionEl.setAttribute('aria-checked',!!prefs.reduceMotion?'true':'false'); }
+  }
+
+  load(); apply();
+
+  const fab=document.getElementById('a11y-fab');
+  const panel=document.getElementById('a11y-panel');
+  const closeBtn=document.getElementById('a11y-close');
+
+  if(fab&&panel){
+    fab.addEventListener('click',()=>{ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); });
+  }
+  if(closeBtn&&panel){
+    closeBtn.addEventListener('click',()=>{ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); });
+  }
+  document.querySelectorAll('.a11y-font-btn').forEach(b=>{
+    b.addEventListener('click',()=>{ prefs.textSize=b.dataset.size; save(); apply(); });
+  });
+  document.querySelectorAll('.a11y-mode-btn').forEach(b=>{
+    b.addEventListener('click',()=>{ prefs.theme=b.dataset.mode; save(); apply(); });
+  });
+  const motionEl=document.getElementById('p-toggle-motion');
+  if(motionEl){ motionEl.addEventListener('change',()=>{ prefs.reduceMotion=motionEl.checked; save(); apply(); }); }
+})();
+
+</script>
 
 <!-- Panel de accesibilidad -->
-<div id="a11y-panel" role="dialog" aria-modal="true" aria-label="Opciones de accesibilidad">
+<div id="a11y-panel" role="dialog" aria-label="Panel de accesibilidad" aria-hidden="true">
   <div class="a11y-header">
-    <span class="a11y-title">♿ ACCESIBILIDAD</span>
-    <button class="a11y-close" id="a11y-close" aria-label="Cerrar">✕</button>
+    <span class="a11y-title">♿ Accesibilidad</span>
+    <button class="a11y-close" id="a11y-close" aria-label="Cerrar panel">✕</button>
   </div>
   <div class="a11y-group">
-    <div class="a11y-group-label">TAMAÑO DE TEXTO</div>
+    <div class="a11y-group-label">Tamaño de texto</div>
     <div class="a11y-font-btns">
       <button class="a11y-font-btn" data-size="small">A</button>
       <button class="a11y-font-btn active" data-size="normal">A</button>
@@ -170,25 +1410,25 @@
     </div>
   </div>
   <div class="a11y-group">
-    <div class="a11y-group-label">MODO VISUAL</div>
+    <div class="a11y-group-label">Modo visual</div>
     <div class="a11y-mode-btns">
-      <button class="a11y-mode-btn active" data-theme="dark">🌙 Oscuro</button>
-      <button class="a11y-mode-btn"        data-theme="light">🌤 Claro</button>
-      <button class="a11y-mode-btn"        data-theme="contrast">🔲 Contraste</button>
+      <button class="a11y-mode-btn active" data-mode="dark">🌙 Oscuro</button>
+      <button class="a11y-mode-btn" data-mode="light">☀️ Claro</button>
+      <button class="a11y-mode-btn" data-mode="contrast">⬛ Contraste</button>
     </div>
   </div>
   <div class="a11y-group">
-    <div class="a11y-group-label">REDUCIR ANIMACIONES</div>
-    <div class="a11y-toggle-row">
+    <div class="a11y-group-label">Reducir animaciones</div>
+    <label class="a11y-toggle-row" for="p-toggle-motion">
       <span class="a11y-toggle-desc">Desactiva efectos de movimiento y transiciones</span>
-      <label class="a11y-toggle-wrap">
-        <input type="checkbox" class="a11y-checkbox" id="reduce-motion">
+      <div class="a11y-toggle-wrap">
+        <input type="checkbox" id="p-toggle-motion" class="a11y-checkbox" role="switch" aria-checked="false">
         <span class="a11y-toggle-slider"></span>
-      </label>
-    </div>
+      </div>
+    </label>
   </div>
 </div>
+<button id="a11y-fab" aria-label="Abrir panel de accesibilidad" title="Accesibilidad">♿</button>
 
-<script type="module" src="perfil.js"></script>
 </body>
 </html>
