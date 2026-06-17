@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<script>
+  // Aplicar tema antes del render para evitar flash
+  try {
+    const t = localStorage.getItem('pf-theme')
+    if (t) document.documentElement.setAttribute('data-theme', t)
+  } catch(e) {}
+</script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil · Panini Digital Mundial 2026</title>
+  <meta name="description" content="Perfil de coleccionista en el Álbum Panini Digital Mundial 2026">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="perfil.css">
+</head>
+<body>
+
+<!-- Estado: cargando -->
+<div id="state-loading" style="max-width:560px;margin:80px auto;padding:40px 20px;text-align:center">
+  <div class="loading-dots"><span></span><span></span><span></span></div>
+  <div class="state-title">Cargando perfil…</div>
+  <div class="state-sub">Buscando al coleccionista</div>
+</div>
+
+<!-- Estado: error -->
+<div id="state-error" style="display:none;max-width:560px;margin:80px auto;padding:40px 20px;text-align:center">
+  <div class="state-icon">😕</div>
+  <div class="state-title">Perfil no encontrado</div>
+  <div class="state-sub">El usuario no existe o fue eliminado.</div>
+  <a href="https://albumpanini26digital.vercel.app" class="cta-btn" style="margin-top:20px;display:inline-flex">⚽ Volver al álbum</a>
+</div>
+
+<!-- Estado: contenido -->
+<div id="state-content" style="display:none">
+  <div class="page-wrap">
+
+    <!-- Barra de navegación -->
+    <div class="back-bar">
+      <button class="back-link" id="back-btn"
+        onclick="history.length > 1 ? history.back() : (location.href='https://albumpanini26digital.vercel.app')">
+        ← Volver
+      </button>
+      <a href="https://albumpanini26digital.vercel.app" class="back-home-link">⚽ Álbum Mundial 2026</a>
+    </div>
+
+    <!-- Tarjeta del perfil -->
+    <div class="profile-card">
+      <div class="card-inner">
+
+        <!-- Hero: avatar + nombre -->
+        <div class="card-hero">
+          <div class="card-hero-eyebrow">Panini Official · Colección Digital · Mundial 2026</div>
+          <div class="card-hero-main">
+            <div class="card-avatar" id="pc-avatar">
+              <img id="pc-avatar-img" alt="" hidden>
+              <span id="pc-avatar-fb">FC</span>
+            </div>
+            <div class="card-hero-info">
+              <div class="card-full-name" id="pc-fullname"></div>
+              <div class="card-username"  id="pc-username"></div>
+              <div class="card-bio"       id="pc-bio"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats: equipo / posición / estadio -->
+        <div class="card-stats">
+          <div class="card-stat">
+            <span class="card-stat-label">⚽ Selección favorita</span>
+            <span class="card-stat-val" id="pc-team"></span>
+          </div>
+          <div class="card-stat">
+            <span class="card-stat-label">🟣 Posición</span>
+            <span class="card-stat-val" id="pc-position"></span>
+          </div>
+          <div class="card-stat" style="grid-column:1 / -1">
+            <span class="card-stat-label">🏟️ Estadio / País fav.</span>
+            <span class="card-stat-val" id="pc-stadium"></span>
+          </div>
+        </div>
+
+        <!-- Jugadores favoritos -->
+        <div class="fav-players-section" id="fav-players-section" style="display:none">
+          <div class="fav-players-label">⭐ Jugadores favoritos del Mundial</div>
+          <div class="fav-players-list" id="fav-players-list"></div>
+        </div>
+
+        <!-- Botón Apoyar -->
+        <div class="apoyo-zone" id="apoyo-zone">
+          <button class="apoyo-btn" id="apoyo-btn" title="Apoyar este perfil">
+            <span class="apoyo-icon">🏆</span>
+            <span class="apoyo-label">Apoyar</span>
+            <span class="apoyo-count" id="apoyo-count">0</span>
+          </button>
+          <span class="apoyo-hint" id="apoyo-hint"></span>
+        </div>
+
+        <!-- Badge Ojeador de Talento -->
+        <div class="ojeador-zone" id="ojeador-zone" style="display:none">
+          <span class="ojeador-badge"><span>🔭</span> Ojeador de Talento</span>
+          <span class="ojeador-count-text" id="ojeador-count-text"></span>
+        </div>
+
+        <!-- Zona de amistad -->
+        <div class="friend-zone" id="friend-zone" style="display:none"></div>
+
+        <!-- Sección de creador (votos / categorías) -->
+        <div id="creator-section" style="display:none"></div>
+
+      </div><!-- /card-inner -->
+    </div><!-- /profile-card -->
+
+    <!-- ↓ FUERA DEL CARD: publicaciones del creador -->
+    <div id="creator-posts-section" style="display:none"></div>
+
+    <!-- ↓ FUERA DEL CARD: historial de apoyos (perfil propio) -->
+    <div id="apoyo-hist-section" style="display:none"></div>
+
+    <!-- Medallero -->
+    <div class="medallero-card" id="medallero-section" style="display:none">
+      <div class="medallero-header has-items" id="medallero-header">
+        <div class="medallero-title">
+          <span>🥇</span>
+          <span>MEDALLERO</span>
+          <span class="medallero-subtitle" id="medallero-subtitle"></span>
+        </div>
+        <button class="medallero-toggle-main" id="medallero-toggle" aria-expanded="false">▼</button>
+      </div>
+      <div id="medallero-body" style="display:none">
+        <div id="medallero-container" style="padding:14px 16px"></div>
+      </div>
+    </div>
+
+    <!-- Álbum -->
+    <div id="album-section"></div>
+
+    <!-- CTA para visitantes sin sesión -->
+    <div class="cta-section" id="cta-section" style="display:none">
+      <p class="cta-text">¿Quieres coleccionar tus figuritas del Mundial 2026?</p>
+      <a href="https://albumpanini26digital.vercel.app" class="cta-btn">🌍 Crear mi álbum gratis</a>
+    </div>
+
+  </div><!-- /page-wrap -->
+</div><!-- /state-content -->
+
+<!-- Toast -->
+<div id="pf-toast"></div>
+
+<!-- FAB Accesibilidad -->
+<button id="a11y-fab" aria-label="Accesibilidad">♿</button>
+
+<!-- Panel de accesibilidad -->
+<div id="a11y-panel" role="dialog" aria-modal="true" aria-label="Opciones de accesibilidad">
+  <div class="a11y-header">
+    <span class="a11y-title">♿ ACCESIBILIDAD</span>
+    <button class="a11y-close" id="a11y-close" aria-label="Cerrar">✕</button>
+  </div>
+  <div class="a11y-group">
+    <div class="a11y-group-label">TAMAÑO DE TEXTO</div>
+    <div class="a11y-font-btns">
+      <button class="a11y-font-btn" data-size="small">A</button>
+      <button class="a11y-font-btn active" data-size="normal">A</button>
+      <button class="a11y-font-btn" data-size="large">A</button>
+      <button class="a11y-font-btn" data-size="xlarge">A</button>
+    </div>
+  </div>
+  <div class="a11y-group">
+    <div class="a11y-group-label">MODO VISUAL</div>
+    <div class="a11y-mode-btns">
+      <button class="a11y-mode-btn active" data-theme="dark">🌙 Oscuro</button>
+      <button class="a11y-mode-btn"        data-theme="light">🌤 Claro</button>
+      <button class="a11y-mode-btn"        data-theme="contrast">🔲 Contraste</button>
+    </div>
+  </div>
+  <div class="a11y-group">
+    <div class="a11y-group-label">REDUCIR ANIMACIONES</div>
+    <div class="a11y-toggle-row">
+      <span class="a11y-toggle-desc">Desactiva efectos de movimiento y transiciones</span>
+      <label class="a11y-toggle-wrap">
+        <input type="checkbox" class="a11y-checkbox" id="reduce-motion">
+        <span class="a11y-toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="perfil.js"></script>
+</body>
+</html>
