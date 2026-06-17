@@ -284,7 +284,7 @@ async function renderCreatorPosts(profileId) {
     : (cp.proposed_categories || [])
 
   const { data: allPosts } = await supabase
-    .from('posts').select('id, content, category, created_at, media_url')
+    .from('posts').select('id, content, category, created_at, media_url, media_position')
     .eq('user_id', profileId)
     .order('created_at', { ascending: false })
     .limit(200)
@@ -354,7 +354,7 @@ async function renderCreatorPosts(profileId) {
         ? `<img src="${profile.avatar_url}" alt="" class="fp-avatar-img">`
         : `<span class="fp-avatar-fb">${initials}</span>`
       const mediaHtml = p.media_url
-        ? `<div class="fp-media"><img src="${p.media_url}" alt="" class="fp-img" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
+        ? `<div class="fp-media"><img src="${p.media_url}" alt="" class="fp-img" loading="lazy" style="object-position:${p.media_position === 'top' ? 'center top' : p.media_position === 'bottom' ? 'center bottom' : 'center center'}" onerror="this.parentElement.style.display='none'"></div>`
         : ''
       return `
         <article class="feed-post" data-post-id="${p.id}">
