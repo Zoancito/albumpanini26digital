@@ -316,12 +316,16 @@ async function renderCreatorPosts(profileId) {
     // Conteos de reacciones y comentarios
     const counts = {}, commentCounts = {}
     await Promise.all(pagePosts.map(async p => {
-      const [{ count: rc }, { count: cc }] = await Promise.all([
-        supabase.from('post_reactions').select('*',{count:'exact',head:true}).eq('post_id', p.id),
-        supabase.from('post_comments').select('*',{count:'exact',head:true}).eq('post_id', p.id).catch(()=>({count:0})),
-      ])
-      counts[p.id] = rc || 0
-      commentCounts[p.id] = cc || 0
+      try {
+        const { count: rc } = await supabase.from('post_reactions')
+          .select('*', { count:'exact', head:true }).eq('post_id', p.id)
+        counts[p.id] = rc || 0
+      } catch (e) { counts[p.id] = 0 }
+      try {
+        const { count: cc } = await supabase.from('post_comments')
+          .select('*', { count:'exact', head:true }).eq('post_id', p.id)
+        commentCounts[p.id] = cc || 0
+      } catch (e) { commentCounts[p.id] = 0 } // tabla puede no existir aún
     }))
 
     // ── Barra de filtros ──
