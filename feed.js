@@ -281,6 +281,7 @@ function renderPost(p) {
 
       ${p.media_url ? `<div class="fp-media">
         <img src="${p.media_url}" alt="Imagen del post" class="fp-img" loading="lazy"
+          style="object-position:${_posToCss(p.media_position)}"
           onerror="this.parentElement.style.display='none'">
       </div>` : ''}
 
@@ -466,16 +467,35 @@ function openEditModal(post, card) {
       </div>
       <textarea class="compose-textarea" id="edit-text"
         maxlength="500">${esc(post.content)}</textarea>
+      <div class="compose-media-row" style="margin-top:6px">
+        <input type="url" class="compose-img-url" id="edit-img-url"
+          placeholder="URL de imagen (opcional)"
+          value="${post.media_url || ''}">
+      </div>
+      <div class="compose-position-row">
+        <span class="compose-position-label">Posición</span>
+        <div class="compose-position-btns">
+          <button class="compose-pos-btn${post.media_position === 'top' ? ' active' : ''}" data-pos="top" type="button">⬆️ Arriba</button>
+          <button class="compose-pos-btn${!post.media_position || post.media_position === 'center' ? ' active' : ''}" data-pos="center" type="button">⏺️ Centro</button>
+          <button class="compose-pos-btn${post.media_position === 'bottom' ? ' active' : ''}" data-pos="bottom" type="button">⬇️ Abajo</button>
+        </div>
+      </div>
       <div class="compose-footer">
         <div class="compose-char-count"><span id="edit-chars">${post.content.length}</span>/500</div>
         <div class="compose-actions">
-          <input type="url" class="compose-img-url" id="edit-img-url"
-            placeholder="URL de imagen (opcional)"
-            value="${post.media_url || ''}">
           <button class="compose-submit" id="edit-submit">Guardar cambios</button>
         </div>
       </div>
     </div>`
+
+  let editPosition = post.media_position || 'center'
+  modal.querySelectorAll('.compose-pos-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      modal.querySelectorAll('.compose-pos-btn').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      editPosition = btn.dataset.pos
+    })
+  })
 
   const closeModal = () => {
     modal.classList.add('compose-hiding')
@@ -495,6 +515,7 @@ function openEditModal(post, card) {
   modal.querySelector('#edit-submit').addEventListener('click', async () => {
     const content   = modal.querySelector('#edit-text').value.trim()
     const media_url = modal.querySelector('#edit-img-url').value.trim() || null
+    const media_position = editPosition
     if (!content) return
 
     const btn = modal.querySelector('#edit-submit')
@@ -503,7 +524,7 @@ function openEditModal(post, card) {
     try {
       const { error } = await supabase
         .from('posts')
-        .update({ content, media_url })
+        .update({ content, media_url, media_position })
         .eq('id', post.id)
         .eq('user_id', _userId)
 
@@ -516,6 +537,7 @@ function openEditModal(post, card) {
       const mediaEl = card.querySelector('.fp-media')
       if (media_url && mediaEl) {
         mediaEl.innerHTML = `<img src="${media_url}" alt="Imagen del post" class="fp-img" loading="lazy"
+          style="object-position:${_posToCss(media_position)}"
           onerror="this.parentElement.style.display='none'">`
         mediaEl.style.display = ''
       } else if (!media_url && mediaEl) {
@@ -539,6 +561,138 @@ function openEditModal(post, card) {
   const textarea = modal.querySelector('#edit-text')
   textarea.focus()
   textarea.setSelectionRange(textarea.value.length, textarea.value.length)
+}
+
+// ── Recortador de imagen (drag + zoom) ─────────────
+const CROP_OUTPUT_W = 1280
+const CROP_OUTPUT_H = 800 // 16:10
+
+function openCropper(file) {
+  return new Promise((resolve) => {
+    document.getElementById('cropper-modal')?.remove()
+
+    const objectUrl = URL.createObjectURL(file)
+    const modal = document.createElement('div')
+    modal.id = 'cropper-modal'
+    modal.className = 'cropper-backdrop'
+    modal.innerHTML = `
+      <div class="cropper-box">
+        <div class="cropper-title">✂️ Ajusta tu imagen</div>
+        <div class="cropper-frame" id="cropper-frame">
+          <img id="cropper-img" src="${objectUrl}" alt="">
+        </div>
+        <div class="cropper-controls">
+          <span class="cropper-zoom-label">🔍</span>
+          <input type="range" class="cropper-zoom-slider" id="cropper-zoom" min="100" max="250" value="100">
+        </div>
+        <div class="cropper-hint">Arrastra para mover · usa el control para acercar</div>
+        <div class="cropper-actions">
+          <button class="cropper-btn" id="cropper-cancel">Cancelar</button>
+          <button class="cropper-btn primary" id="cropper-confirm">Usar esta imagen</button>
+        </div>
+      </div>`
+    document.body.appendChild(modal)
+
+    const frame = modal.querySelector('#cropper-frame')
+    const img   = modal.querySelector('#cropper-img')
+    const zoomSlider = modal.querySelector('#cropper-zoom')
+
+    let naturalW = 0, naturalH = 0, frameW = 0, frameH = 0
+    let minScale = 1, scale = 1
+    let offsetX = 0, offsetY = 0
+    let dragging = false, startX = 0, startY = 0, startOffX = 0, startOffY = 0
+
+    function clampOffsets() {
+      const dispW = naturalW * scale, dispH = naturalH * scale
+      const minX = Math.min(0, frameW - dispW), maxX = 0
+      const minY = Math.min(0, frameH - dispH), maxY = 0
+      offsetX = Math.min(maxX, Math.max(minX, offsetX))
+      offsetY = Math.min(maxY, Math.max(minY, offsetY))
+    }
+
+    function applyTransform() {
+      const dispW = naturalW * scale, dispH = naturalH * scale
+      img.style.width  = dispW + 'px'
+      img.style.height = dispH + 'px'
+      img.style.left   = offsetX + 'px'
+      img.style.top    = offsetY + 'px'
+    }
+
+    function recompute(zoomPercent) {
+      const rect = frame.getBoundingClientRect()
+      frameW = rect.width; frameH = rect.height
+      minScale = Math.max(frameW / naturalW, frameH / naturalH)
+      scale = minScale * (zoomPercent / 100)
+      clampOffsets()
+      applyTransform()
+    }
+
+    img.onload = () => {
+      naturalW = img.naturalWidth; naturalH = img.naturalHeight
+      const rect = frame.getBoundingClientRect()
+      frameW = rect.width; frameH = rect.height
+      minScale = Math.max(frameW / naturalW, frameH / naturalH)
+      scale = minScale
+      offsetX = (frameW - naturalW * scale) / 2
+      offsetY = (frameH - naturalH * scale) / 2
+      clampOffsets()
+      applyTransform()
+    }
+
+    zoomSlider.addEventListener('input', () => recompute(parseFloat(zoomSlider.value)))
+
+    function startDrag(x, y) {
+      dragging = true; startX = x; startY = y; startOffX = offsetX; startOffY = offsetY
+    }
+    function moveDrag(x, y) {
+      if (!dragging) return
+      offsetX = startOffX + (x - startX)
+      offsetY = startOffY + (y - startY)
+      clampOffsets()
+      applyTransform()
+    }
+    function endDrag() { dragging = false }
+
+    frame.addEventListener('mousedown', e => startDrag(e.clientX, e.clientY))
+    window.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY))
+    window.addEventListener('mouseup', endDrag)
+    frame.addEventListener('touchstart', e => {
+      const t = e.touches[0]; startDrag(t.clientX, t.clientY)
+    }, { passive: true })
+    frame.addEventListener('touchmove', e => {
+      const t = e.touches[0]; moveDrag(t.clientX, t.clientY)
+    }, { passive: true })
+    frame.addEventListener('touchend', endDrag)
+
+    function cleanup() {
+      URL.revokeObjectURL(objectUrl)
+      modal.remove()
+    }
+
+    modal.querySelector('#cropper-cancel').addEventListener('click', () => { cleanup(); resolve(null) })
+    modal.addEventListener('click', e => { if (e.target === modal) { cleanup(); resolve(null) } })
+
+    modal.querySelector('#cropper-confirm').addEventListener('click', () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = CROP_OUTPUT_W; canvas.height = CROP_OUTPUT_H
+      const ctx = canvas.getContext('2d')
+      const outScale = CROP_OUTPUT_W / frameW
+      const drawX = offsetX * outScale, drawY = offsetY * outScale
+      const drawW = naturalW * scale * outScale, drawH = naturalH * scale * outScale
+      ctx.drawImage(img, drawX, drawY, drawW, drawH)
+      canvas.toBlob(blob => { cleanup(); resolve(blob) }, 'image/jpeg', 0.88)
+    })
+  })
+}
+
+async function uploadPostImage(userId, blob) {
+  const filename = `${userId}/${Date.now()}.jpg`
+  const { error } = await supabase.storage.from('post-images').upload(filename, blob, {
+    contentType: 'image/jpeg', cacheControl: '3600', upsert: false,
+  })
+  if (error) throw error
+  const { data } = supabase.storage.from('post-images').getPublicUrl(filename)
+  return data.publicUrl
 }
 
 // ── Crear post ────────────────────────────────────
@@ -581,19 +735,49 @@ export async function openComposeModal(userId) {
       </div>
       <textarea class="compose-textarea" id="compose-text"
         placeholder="¿Qué está pasando en el fútbol?" maxlength="500"></textarea>
+
+      <div class="compose-media-row">
+        <div class="compose-media-tabs">
+          <button class="compose-media-tab active" data-mediatab="file" type="button">📁 Subir foto</button>
+          <button class="compose-media-tab" data-mediatab="url" type="button">🔗 URL</button>
+        </div>
+      </div>
+
+      <div id="compose-media-file" class="compose-media-row" style="margin-top:6px">
+        <label class="compose-file-btn">
+          📷 Elegir imagen
+          <input type="file" id="compose-file-input" class="compose-file-input" accept="image/*">
+        </label>
+        <span class="compose-media-preview-name" id="compose-file-name"></span>
+        <button class="compose-media-clear" id="compose-file-clear" style="display:none" type="button">✕</button>
+      </div>
+
+      <div id="compose-media-url" class="compose-media-row" style="margin-top:6px;display:none">
+        <input type="url" class="compose-img-url" id="compose-img-url"
+          placeholder="URL de imagen (opcional)">
+      </div>
+      <div id="compose-position-row" class="compose-position-row" style="display:none">
+        <span class="compose-position-label">Posición</span>
+        <div class="compose-position-btns">
+          <button class="compose-pos-btn" data-pos="top" type="button">⬆️ Arriba</button>
+          <button class="compose-pos-btn active" data-pos="center" type="button">⏺️ Centro</button>
+          <button class="compose-pos-btn" data-pos="bottom" type="button">⬇️ Abajo</button>
+        </div>
+      </div>
+
       <div class="compose-footer">
         <div class="compose-char-count"><span id="compose-chars">0</span>/500</div>
         <div class="compose-actions">
-          <input type="url" class="compose-img-url" id="compose-img-url"
-            placeholder="URL de imagen (opcional)">
           <button class="compose-submit" id="compose-submit" disabled>Publicar</button>
         </div>
       </div>
     </div>`
 
-  let selectedCat = _activeFilters[0] || null
+  let selectedCat   = _activeFilters[0] || null
+  let activeTab     = 'file'   // 'file' | 'url'
+  let uploadedUrl   = null     // resultado del recorte ya subido a storage
+  let mediaPosition = 'center'
 
-  // Select first cat if prefiltered
   const updateSubmit = () => {
     const text = modal.querySelector('#compose-text').value.trim()
     modal.querySelector('#compose-submit').disabled = !text || !selectedCat
@@ -614,17 +798,82 @@ export async function openComposeModal(userId) {
     updateSubmit()
   })
 
+  // ── Tabs subir foto / URL ──
+  const fileSection = modal.querySelector('#compose-media-file')
+  const urlSection  = modal.querySelector('#compose-media-url')
+  const posRow      = modal.querySelector('#compose-position-row')
+  modal.querySelectorAll('.compose-media-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      modal.querySelectorAll('.compose-media-tab').forEach(t => t.classList.remove('active'))
+      tab.classList.add('active')
+      activeTab = tab.dataset.mediatab
+      fileSection.style.display = activeTab === 'file' ? '' : 'none'
+      urlSection.style.display  = activeTab === 'url'  ? '' : 'none'
+      posRow.style.display      = activeTab === 'url'  ? '' : 'none'
+    })
+  })
+
+  // ── Selector de posición (solo aplica a imágenes por URL) ──
+  modal.querySelectorAll('.compose-pos-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      modal.querySelectorAll('.compose-pos-btn').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      mediaPosition = btn.dataset.pos
+    })
+  })
+
+  // ── Subir imagen + recortar ──
+  const fileInput  = modal.querySelector('#compose-file-input')
+  const fileNameEl = modal.querySelector('#compose-file-name')
+  const fileClear  = modal.querySelector('#compose-file-clear')
+
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) { showFeedToast('Selecciona un archivo de imagen'); return }
+    if (file.size > 12 * 1024 * 1024) { showFeedToast('La imagen es muy pesada (máx 12MB)'); return }
+
+    const blob = await openCropper(file)
+    fileInput.value = ''
+    if (!blob) return
+
+    fileNameEl.textContent = '⏳ Subiendo…'
+    fileClear.style.display = ''
+    try {
+      uploadedUrl = await uploadPostImage(userId, blob)
+      fileNameEl.textContent = '✅ Imagen lista'
+    } catch (e) {
+      console.error('[feed] upload error:', e)
+      uploadedUrl = null
+      fileNameEl.textContent = '❌ Error al subir'
+    }
+  })
+
+  fileClear.addEventListener('click', () => {
+    uploadedUrl = null
+    fileNameEl.textContent = ''
+    fileClear.style.display = 'none'
+  })
+
   modal.querySelector('#compose-submit').addEventListener('click', async () => {
-    const content   = modal.querySelector('#compose-text').value.trim()
-    const media_url = modal.querySelector('#compose-img-url').value.trim() || null
+    const content = modal.querySelector('#compose-text').value.trim()
     if (!content || !selectedCat) return
+
+    let media_url = null
+    let media_position = 'center'
+    if (activeTab === 'file' && uploadedUrl) {
+      media_url = uploadedUrl
+    } else if (activeTab === 'url') {
+      const urlVal = modal.querySelector('#compose-img-url').value.trim()
+      if (urlVal) { media_url = urlVal; media_position = mediaPosition }
+    }
 
     const btn = modal.querySelector('#compose-submit')
     btn.disabled = true; btn.textContent = 'Publicando…'
 
     try {
       const { data, error } = await supabase.from('posts')
-        .insert({ user_id: userId, content, category: selectedCat, media_url })
+        .insert({ user_id: userId, content, category: selectedCat, media_url, media_position })
         .select().single()
       if (error) throw error
 
@@ -664,6 +913,10 @@ export async function openComposeModal(userId) {
 }
 
 // ── Utils ─────────────────────────────────────────
+function _posToCss(pos) {
+  return pos === 'top' ? 'center top' : pos === 'bottom' ? 'center bottom' : 'center center'
+}
+
 function esc(str) {
   return String(str || '')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')

@@ -183,6 +183,118 @@ export async function getCreatorStats(userId) {
   } catch (e) { return { totalPosts: 0, totalApoyos: 0, avgApoyosPerPost: 0 } }
 }
 
+// ── Serie de actividad (posts + reacciones por semana) ─
+export async function getActivityTimeSeries(userId, weeks = 10) {
+  const now   = new Date()
+  const start = new Date(now)
+  start.setDate(start.getDate() - weeks * 7)
+
+  const [{ data: posts }, { data: reactions }] = await Promise.all([
+    supabase.from('posts').select('created_at')
+      .eq('user_id', userId).gte('created_at', start.toISOString()),
+    supabase.from('post_reactions')
+      .select('created_at, posts!inner(user_id)')
+      .eq('posts.user_id', userId).gte('created_at', start.toISOString()),
+  ])
+
+  const buckets = []
+  for (let i = weeks - 1; i >= 0; i--) {
+    const bucketEnd   = new Date(now); bucketEnd.setDate(bucketEnd.getDate() - i * 7)
+    const bucketStart = new Date(bucketEnd); bucketStart.setDate(bucketStart.getDate() - 7)
+    buckets.push({ start: bucketStart, end: bucketEnd, posts: 0, reactions: 0 })
+  }
+  function findBucket(dateStr) {
+    const d = new Date(dateStr)
+    return buckets.find(b => d >= b.start && d < b.end)
+  }
+  ;(posts || []).forEach(p => { const b = findBucket(p.created_at); if (b) b.posts++ })
+  ;(reactions || []).forEach(r => { const b = findBucket(r.created_at); if (b) b.reactions++ })
+
+  return buckets
+}
+
+// ── Gráfica SVG de actividad ──────────────────────────
+export function renderActivityChart(container, buckets) {
+  if (!container) return
+  const totalPosts = buckets.reduce((s,b) => s + b.posts, 0)
+  const totalReact = buckets.reduce((s,b) => s + b.reactions, 0)
+  const n = buckets.length
+
+  if (totalPosts === 0 && totalReact === 0) {
+    container.innerHTML = `
+      <div class="creator-activity-section">
+        <div class="creator-activity-header"><span class="creator-activity-title">📊 Actividad reciente</span></div>
+        <div class="creator-activity-empty">Aún no hay actividad registrada en las últimas ${n} semanas.</div>
+      </div>`
+    return
+  }
+
+  const maxPosts = Math.max(1, ...buckets.map(b => b.posts))
+  const maxReact = Math.max(1, ...buckets.map(b => b.reactions))
+  const W = 600, H = 160, padBottom = 22, padTop = 10
+  const gap  = W / n
+  const barW = gap * 0.5
+
+  const barsHtml = buckets.map((b, i) => {
+    const x = i * gap + (gap - barW) / 2
+    const barH = (b.posts / maxPosts) * (H - padTop - padBottom)
+    const y = H - padBottom - barH
+    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(barH,0).toFixed(1)}"
+      rx="3" fill="var(--gold)" opacity="0.85"><title>${b.posts} post${b.posts!==1?'s':''}</title></rect>`
+  }).join('')
+
+  const linePoints = buckets.map((b, i) => {
+    const x = i * gap + gap / 2
+    const y = H - padBottom - (b.reactions / maxReact) * (H - padTop - padBottom)
+    return `${x.toFixed(1)},${y.toFixed(1)}`
+  }).join(' ')
+
+  const dotsHtml = buckets.map((b, i) => {
+    const x = i * gap + gap / 2
+    const y = H - padBottom - (b.reactions / maxReact) * (H - padTop - padBottom)
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="#818cf8"><title>${b.reactions} reacción${b.reactions!==1?'es':''}</title></circle>`
+  }).join('')
+
+  const labelEvery = Math.max(1, Math.ceil(n / 5))
+  const labelsHtml = buckets.map((b, i) => {
+    if (i % labelEvery !== 0 && i !== n - 1) return ''
+    const x = i * gap + gap / 2
+    const label = b.start.toLocaleDateString('es-CL', { day:'numeric', month:'short' })
+    return `<text x="${x.toFixed(1)}" y="${H - 4}" font-size="9" fill="var(--dim)" text-anchor="middle" font-family="Barlow Condensed, sans-serif">${label}</text>`
+  }).join('')
+
+  container.innerHTML = `
+    <div class="creator-activity-section">
+      <div class="creator-activity-header">
+        <span class="creator-activity-title">📊 Actividad reciente</span>
+        <div class="creator-activity-legend">
+          <span class="creator-activity-legend-item"><span class="creator-activity-dot" style="background:var(--gold)"></span> Posts</span>
+          <span class="creator-activity-legend-item"><span class="creator-activity-dot" style="background:#818cf8"></span> Reacciones</span>
+        </div>
+      </div>
+      <svg class="creator-activity-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        ${barsHtml}
+        <polyline points="${linePoints}" fill="none" stroke="#818cf8" stroke-width="2"/>
+        ${dotsHtml}
+        ${labelsHtml}
+      </svg>
+      <div class="creator-activity-stats">
+        <div class="creator-activity-stat">
+          <span class="creator-activity-stat-val">${totalPosts}</span>
+          <span class="creator-activity-stat-label">Posts (${n}sem)</span>
+        </div>
+        <div class="creator-activity-stat">
+          <span class="creator-activity-stat-val">${totalReact}</span>
+          <span class="creator-activity-stat-label">Reacciones</span>
+        </div>
+        <div class="creator-activity-stat">
+          <span class="creator-activity-stat-val">${totalPosts ? (totalReact/totalPosts).toFixed(1) : '0'}</span>
+          <span class="creator-activity-stat-label">Reac./Post</span>
+        </div>
+      </div>
+    </div>`
+}
+
 // ── Renderizar sección de creador en perfil público ─
 export async function renderCreatorSection(container, profileId, currentUserId) {
   if (!container) return
@@ -240,7 +352,17 @@ export async function renderCreatorSection(container, profileId, currentUserId) 
           ⚙️ Gestionar categorías
         </button>` : ''}
     </div>
+    <div id="activity-chart-slot"></div>
     <div id="early-sup-slot"></div>`
+
+  // Gráfica de actividad — solo visible en tu propio perfil de creador
+  if (isOwn) {
+    const chartSlot = container.querySelector('#activity-chart-slot')
+    if (chartSlot) {
+      const series = await getActivityTimeSeries(profileId, 10)
+      renderActivityChart(chartSlot, series)
+    }
+  }
 
   // Cargar primeros 10 Ojeadores si el creador ya cruzó 1.000
   const apoyo_count = profile?.apoyo_count || 0
