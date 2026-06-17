@@ -326,3 +326,19 @@ html[data-theme="contrast"] #a11y-panel{background:#000;border-left:2px solid #f
   .friend-zone{flex-direction:column;align-items:stretch}
   .friend-btn{justify-content:center}
 }
+
+/* ── Filtro y paginación de posts del creador ── */
+.creator-filter-bar{display:flex;flex-wrap:wrap;gap:8px;padding:14px 0 6px}
+.creator-filter-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.05em;cursor:pointer;transition:all .18s;white-space:nowrap}
+.creator-filter-btn:hover{background:var(--card2);color:var(--text);border-color:#334a6e}
+.creator-filter-btn.active{background:var(--gold);color:#0a0f1e;border-color:var(--gold)}
+.creator-filter-count{font-family:'Bebas Neue',sans-serif;font-size:.85rem;opacity:.75}
+html[data-theme="light"] .creator-filter-btn{background:var(--card2)}
+html[data-theme="light"] .creator-filter-btn.active{background:var(--gold);color:#0a0f1e}
+
+.creator-posts-pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0 4px}
+.cpag-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.05em;cursor:pointer;transition:all .18s}
+.cpag-btn:hover:not(:disabled){background:var(--card2);color:var(--text);border-color:#334a6e}
+.cpag-btn:disabled{opacity:.35;cursor:not-allowed}
+.cpag-info{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:var(--dim);text-align:center;flex:1}
+html[data-theme="light"] .cpag-btn{background:var(--card2)}

@@ -257,7 +257,9 @@ function renderOjeadorZone(p) {
   }
 }
 
-// ══ Posts del creador (tarjetas estilo feed) ══════════
+// ══ Posts del creador (tarjetas estilo feed + filtro + paginación) ════════
+const POSTS_PER_PAGE = 10
+
 function _timeAgo(iso) {
   const d = Math.floor((Date.now() - new Date(iso)) / 1000)
   if (d < 60)     return 'hace un momento'
@@ -272,128 +274,177 @@ async function renderCreatorPosts(profileId) {
   if (!section) return
 
   const { data: cp } = await supabase
-    .from('creator_profiles').select('is_active').eq('user_id', profileId).maybeSingle()
+    .from('creator_profiles')
+    .select('is_active, validated_categories, proposed_categories')
+    .eq('user_id', profileId).maybeSingle()
   if (!cp?.is_active) return
 
-  const { data: posts } = await supabase
+  const cats = cp.validated_categories?.length
+    ? cp.validated_categories
+    : (cp.proposed_categories || [])
+
+  const { data: allPosts } = await supabase
     .from('posts').select('id, content, category, created_at, media_url')
-    .eq('user_id', profileId).order('created_at', { ascending: false }).limit(20)
-  if (!posts?.length) return
+    .eq('user_id', profileId)
+    .order('created_at', { ascending: false })
+    .limit(200)
+  if (!allPosts?.length) return
 
-  let myReacts = new Set()
-  if (_currentUser) {
-    const { data: rr } = await supabase.from('post_reactions').select('post_id')
-      .eq('user_id', _currentUser.id).in('post_id', posts.map(p => p.id))
-    ;(rr || []).forEach(r => myReacts.add(r.post_id))
-  }
+  section.style.display = ''
 
-  const counts = {}
-  await Promise.all(posts.map(async p => {
-    const { count } = await supabase.from('post_reactions')
-      .select('*', { count:'exact', head:true }).eq('post_id', p.id)
-    counts[p.id] = count || 0
-  }))
-
-  // Conteo de comentarios
-  const commentCounts = {}
-  await Promise.all(posts.map(async p => {
-    const { count } = await supabase.from('post_comments')
-      .select('*', { count:'exact', head:true }).eq('post_id', p.id)
-    commentCounts[p.id] = count || 0
-  })).catch(() => {}) // tabla puede no existir aún
+  let _activeCat = 'all'
+  let _page      = 0
 
   const profile  = _profileData
   const initials = (profile.full_name || profile.username || '?')
     .trim().split(/\s+/).slice(0,2).map(x => x[0]).join('').toUpperCase()
 
-  section.style.display = ''
-  section.innerHTML = `
-    <div class="creator-posts-outer">
-      <div class="creator-posts-wrap">
-        <div class="creator-posts-header">
-          <span class="creator-posts-title">📰 Publicaciones del creador</span>
-          <span class="creator-posts-count">${posts.length} post${posts.length !== 1 ? 's' : ''}</span>
-        </div>
-        ${posts.map(p => {
-          const cat     = PERFIL_CAT_MAP[p.category] || { icon:'📌', label:p.category, color:'#888' }
-          const reacted = myReacts.has(p.id)
-          const nComments = commentCounts[p.id] || 0
-          return `
-            <article class="feed-post" data-post-id="${p.id}">
-              <div class="fp-header">
-                <div class="fp-avatar">
-                  ${profile.avatar_url
-                    ? `<img src="${profile.avatar_url}" alt="" class="fp-avatar-img">`
-                    : `<span class="fp-avatar-fb">${initials}</span>`}
-                </div>
-                <div class="fp-meta">
-                  <div class="fp-author">${esc(profile.full_name || profile.username || 'Usuario')} <span class="fp-creator-badge">🎙️</span></div>
-                  <div class="fp-sub">
-                    <span class="fp-username">@${esc(profile.username || '?')}</span>
-                    <span class="fp-dot">·</span>
-                    <span class="fp-time">${_timeAgo(p.created_at)}</span>
-                  </div>
-                </div>
-                <span class="fp-cat-badge" style="--cat-color:${cat.color}">${cat.icon} ${cat.label}</span>
-              </div>
-              <div class="fp-content">${esc(p.content)}</div>
-              ${p.media_url ? `<div class="fp-media"><img src="${p.media_url}" alt="" class="fp-img" loading="lazy" onerror="this.parentElement.style.display='none'"></div>` : ''}
-              <div class="fp-actions">
-                <button class="fp-apoyo-btn${reacted ? ' active' : ''} perfil-react-btn"
-                  data-post="${p.id}" ${!_currentUser ? 'disabled title="Inicia sesión para reaccionar"' : ''}>
-                  <span class="fp-apoyo-icon">🏆</span>
-                  <span class="fp-apoyo-count">${counts[p.id]}</span>
-                </button>
-                <button class="comment-toggle-btn" data-post="${p.id}">
-                  💬 <span class="comment-count-label">${nComments > 0 ? nComments : ''}</span> Comentar
-                </button>
-                <button class="fp-share-btn perfil-share-btn" data-post="${p.id}">🔗 Compartir</button>
-              </div>
-              <div class="post-comments-section" id="comments-${p.id}" style="display:none"></div>
-            </article>`
+  async function renderSection() {
+    const filtered   = _activeCat === 'all' ? allPosts : allPosts.filter(p => p.category === _activeCat)
+    const totalPages = Math.max(1, Math.ceil(filtered.length / POSTS_PER_PAGE))
+    if (_page >= totalPages) _page = 0
+    const pagePosts  = filtered.slice(_page * POSTS_PER_PAGE, (_page + 1) * POSTS_PER_PAGE)
+
+    // Reacciones del usuario en esta página
+    let myReacts = new Set()
+    if (_currentUser && pagePosts.length) {
+      const { data: rr } = await supabase.from('post_reactions').select('post_id')
+        .eq('user_id', _currentUser.id).in('post_id', pagePosts.map(p => p.id))
+      ;(rr || []).forEach(r => myReacts.add(r.post_id))
+    }
+
+    // Conteos de reacciones y comentarios
+    const counts = {}, commentCounts = {}
+    await Promise.all(pagePosts.map(async p => {
+      const [{ count: rc }, { count: cc }] = await Promise.all([
+        supabase.from('post_reactions').select('*',{count:'exact',head:true}).eq('post_id', p.id),
+        supabase.from('post_comments').select('*',{count:'exact',head:true}).eq('post_id', p.id).catch(()=>({count:0})),
+      ])
+      counts[p.id] = rc || 0
+      commentCounts[p.id] = cc || 0
+    }))
+
+    // ── Barra de filtros ──
+    const filterBar = `
+      <div class="creator-filter-bar">
+        <button class="creator-filter-btn ${_activeCat === 'all' ? 'active' : ''}" data-cat="all">
+          📋 Todos <span class="creator-filter-count">${allPosts.length}</span>
+        </button>
+        ${cats.map(catId => {
+          const cat = PERFIL_CAT_MAP[catId] || { icon: '📌', label: catId, color: '#888' }
+          const n   = allPosts.filter(p => p.category === catId).length
+          if (!n) return ''
+          return `<button class="creator-filter-btn ${_activeCat === catId ? 'active' : ''}"
+            data-cat="${catId}" style="--cat-color:${cat.color}">
+            ${cat.icon} ${cat.label} <span class="creator-filter-count">${n}</span>
+          </button>`
         }).join('')}
-      </div>
-    </div>`
+      </div>`
 
-  // Bind reacciones
-  section.querySelectorAll('.perfil-react-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      if (!_currentUser) { showToast('Inicia sesión para reaccionar'); return }
-      const postId  = btn.dataset.post
-      const reacted = btn.classList.contains('active')
-      const countEl = btn.querySelector('.fp-apoyo-count')
-      btn.disabled = true
-      try {
-        if (reacted) {
-          await supabase.from('post_reactions').delete().eq('post_id', postId).eq('user_id', _currentUser.id)
-          btn.classList.remove('active')
-          if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1)
-        } else {
-          await supabase.from('post_reactions').insert({ post_id: postId, user_id: _currentUser.id })
-          btn.classList.add('active')
-          if (countEl) countEl.textContent = parseInt(countEl.textContent) + 1
-        }
-      } catch (e) { console.error('[react]', e) }
-      finally { btn.disabled = false }
-    })
-  })
+    // ── Tarjetas de posts ──
+    const postCards = pagePosts.map(p => {
+      const cat     = PERFIL_CAT_MAP[p.category] || { icon:'📌', label:p.category, color:'#888' }
+      const reacted = myReacts.has(p.id)
+      const nCom    = commentCounts[p.id] || 0
+      const avatarHtml = profile.avatar_url
+        ? `<img src="${profile.avatar_url}" alt="" class="fp-avatar-img">`
+        : `<span class="fp-avatar-fb">${initials}</span>`
+      const mediaHtml = p.media_url
+        ? `<div class="fp-media"><img src="${p.media_url}" alt="" class="fp-img" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
+        : ''
+      return `
+        <article class="feed-post" data-post-id="${p.id}">
+          <div class="fp-header">
+            <div class="fp-avatar">${avatarHtml}</div>
+            <div class="fp-meta">
+              <div class="fp-author">${esc(profile.full_name || profile.username || 'Usuario')} <span class="fp-creator-badge">🎙️</span></div>
+              <div class="fp-sub">
+                <span class="fp-username">@${esc(profile.username || '?')}</span>
+                <span class="fp-dot">·</span>
+                <span class="fp-time">${_timeAgo(p.created_at)}</span>
+              </div>
+            </div>
+            <span class="fp-cat-badge" style="--cat-color:${cat.color}">${cat.icon} ${cat.label}</span>
+          </div>
+          <div class="fp-content">${esc(p.content)}</div>
+          ${mediaHtml}
+          <div class="fp-actions">
+            <button class="fp-apoyo-btn ${reacted ? 'active' : ''} perfil-react-btn"
+              data-post="${p.id}" ${!_currentUser ? 'disabled' : ''}>
+              <span class="fp-apoyo-icon">🏆</span>
+              <span class="fp-apoyo-count">${counts[p.id]}</span>
+            </button>
+            <button class="comment-toggle-btn" data-post="${p.id}">
+              💬 ${nCom > 0 ? nCom + ' ' : ''}Comentar
+            </button>
+            <button class="fp-share-btn perfil-share-btn" data-post="${p.id}">🔗 Compartir</button>
+          </div>
+          <div class="post-comments-section" id="comments-${p.id}" style="display:none"></div>
+        </article>`
+    }).join('')
 
-  // Bind compartir
-  section.querySelectorAll('.perfil-share-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const url = `${location.origin}/perfil/${encodeURIComponent(profile.username || '')}`
-      navigator.clipboard?.writeText(url).then(() => {
-        btn.textContent = '✅ Copiado'
-        setTimeout(() => { btn.innerHTML = '🔗 Compartir' }, 2000)
+    // ── Paginación ──
+    const pagination = totalPages > 1 ? `
+      <div class="creator-posts-pagination">
+        <button class="cpag-btn" id="cpag-prev" ${_page === 0 ? 'disabled' : ''}>← Anteriores</button>
+        <span class="cpag-info">Página ${_page + 1} de ${totalPages} · ${filtered.length} posts</span>
+        <button class="cpag-btn" id="cpag-next" ${_page >= totalPages - 1 ? 'disabled' : ''}>Más recientes →</button>
+      </div>` : ''
+
+    section.innerHTML = filterBar + postCards + pagination
+
+    // ── Event listeners ──
+    section.querySelectorAll('.creator-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        _activeCat = btn.dataset.cat
+        _page = 0
+        renderSection()
       })
     })
-  })
 
-  // Bind comentarios
-  section.querySelectorAll('.comment-toggle-btn').forEach(btn => {
-    btn.addEventListener('click', () => toggleComments(btn.dataset.post))
-  })
+    section.querySelector('#cpag-prev')?.addEventListener('click', () => { _page--; renderSection() })
+    section.querySelector('#cpag-next')?.addEventListener('click', () => { _page++; renderSection() })
+
+    section.querySelectorAll('.perfil-react-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!_currentUser) { showToast('Inicia sesión para reaccionar'); return }
+        const postId  = btn.dataset.post
+        const reacted = btn.classList.contains('active')
+        const countEl = btn.querySelector('.fp-apoyo-count')
+        btn.disabled = true
+        try {
+          if (reacted) {
+            await supabase.from('post_reactions').delete().eq('post_id', postId).eq('user_id', _currentUser.id)
+            btn.classList.remove('active')
+            if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1)
+          } else {
+            await supabase.from('post_reactions').insert({ post_id: postId, user_id: _currentUser.id })
+            btn.classList.add('active')
+            if (countEl) countEl.textContent = parseInt(countEl.textContent) + 1
+          }
+        } catch (e) { console.error('[react]', e) }
+        finally { btn.disabled = false }
+      })
+    })
+
+    section.querySelectorAll('.perfil-share-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const url = `${location.origin}/perfil/${encodeURIComponent(profile.username || '')}`
+        navigator.clipboard?.writeText(url).then(() => {
+          btn.textContent = '✅ Copiado'
+          setTimeout(() => { btn.innerHTML = '🔗 Compartir' }, 2000)
+        })
+      })
+    })
+
+    section.querySelectorAll('.comment-toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => toggleComments(btn.dataset.post))
+    })
+  }
+
+  await renderSection()
 }
+
 
 // ══ Comentarios ═══════════════════════════════════════
 async function toggleComments(postId) {
