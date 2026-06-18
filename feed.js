@@ -3,7 +3,7 @@
 //  Sistema de feed social con filtros por categoría
 // ═══════════════════════════════════════════════════
 import { supabase } from './supabase.js'
-import { getCatDef as getCreatorCatDef } from './creadores.js'
+import { getCatDef as getCreatorCatDef, loadTalentosOcultos } from './creadores.js'
 
 // ── Categorías disponibles ────────────────────────
 export const FEED_CATEGORIES = [
@@ -28,6 +28,25 @@ let _profilesCache   = {}   // { userId: {username, avatar_url, full_name} }
 let _creatorCache    = {}   // { userId: true/false }
 let _page          = 0
 const PAGE_SIZE    = 15
+
+// ── Anti-burbuja (mezcla creadores pequeños) ──────
+// Cálculo en cliente: reutiliza loadTalentosOcultos() de creadores.js (ya trae
+// la calidad reacciones/post). Se cachea con TTL para no recalcular en cada
+// scroll/página — si el feed crece mucho, esto debería migrar a una vista
+// materializada en Postgres recalculada por cron, pero hoy no hay backend
+// propio más allá de Postgres+RLS, así que el cliente es la opción pragmática.
+let _discoveryPool   = []
+let _discoveryPoolAt = 0
+const DISCOVERY_TTL   = 5 * 60000   // 5 min
+const DISCOVERY_RATIO = 0.12        // ~12% del feed normal
+
+// ── Modo "Sorpréndeme" ─────────────────────────────
+let _surpriseMode    = false
+let _surpriseReason  = null   // { topCategory, suggestedCategory }
+let _surprisePool    = []
+let _surprisePoolAt  = 0
+const SURPRISE_TTL    = 5 * 60000
+const SURPRISE_RATIO  = 0.25        // más notorio: el usuario lo activó a propósito
 
 // ── Init ──────────────────────────────────────────
 export async function initFeed(userId) {
@@ -110,9 +129,9 @@ async function loadMutes() {
   } catch (e) { _mutes = {} }
 }
 
-export async function muteCategory(category, hours = 24) {
+export async function muteCategory(category, duration = 'today') {
   if (!_userId) return
-  const until = new Date(Date.now() + hours * 3600000).toISOString()
+  const until = computeMuteUntil(duration)
   _mutes[category] = until
   // Quitar del filtro activo si estaba
   _activeFilters = _activeFilters.filter(f => f !== category)
@@ -124,15 +143,43 @@ export async function muteCategory(category, hours = 24) {
   await loadFeed()
 }
 
+// duration: 'today' (hasta medianoche local) | 'week' (7 días)
+// Compat: también acepta un número (horas), como en la versión anterior de
+// muteCategory, por si quedara algún otro archivo (notifications.js, etc.)
+// invocándola con ese formato — si encuentras una llamada así, avísame para
+// migrarla al nuevo formato.
+function computeMuteUntil(duration) {
+  const now = new Date()
+  if (typeof duration === 'number') {
+    return new Date(now.getTime() + duration * 3600000).toISOString()
+  }
+  if (duration === 'week') {
+    return new Date(now.getTime() + 7 * 24 * 3600000).toISOString()
+  }
+  // 'today' → próxima medianoche local
+  const midnight = new Date(now)
+  midnight.setHours(24, 0, 0, 0)
+  return midnight.toISOString()
+}
+
 // ── Cargar posts ──────────────────────────────────
+// append=false puede significar dos cosas muy distintas:
+//  - "carga en frío" (no hay nada renderizado todavía) → se muestra spinner y
+//    se reconstruye el contenedor completo, no hay nada que preservar.
+//  - "refresh por cambio de filtro/mute/sorpréndeme" (ya había posts visibles)
+//    → se reconcilia el DOM existente (mover/insertar/quitar nodos puntuales)
+//    en vez de vaciar el contenedor, así no hay parpadeo ni salto de scroll.
 export async function loadFeed(append = false) {
   const container = document.getElementById('feed-posts')
   if (!container) return
 
+  const isColdStart = !append && _posts.length === 0
   if (!append) {
     _page = 0
-    _posts = []
-    container.innerHTML = '<div class="feed-loading">Cargando…</div>'
+    if (isColdStart) {
+      _posts = []
+      container.innerHTML = '<div class="feed-loading">Cargando…</div>'
+    }
   }
 
   try {
@@ -144,7 +191,7 @@ export async function loadFeed(append = false) {
     let query = supabase
       .from('posts')
       .select(`
-        id, content, category, media_url, created_at, user_id,
+        id, content, category, media_url, media_position, created_at, user_id,
         post_reactions(count)
       `)
       .order('created_at', { ascending: false })
@@ -157,7 +204,7 @@ export async function loadFeed(append = false) {
     const { data, error } = await query
     if (error) throw error
 
-    // Cargar perfiles de autores no cacheados
+    // Cargar perfiles de autores no cacheados (de la consulta principal)
     const unknownIds = [...new Set((data || []).map(p => p.user_id))]
       .filter(id => !_profilesCache[id])
     if (unknownIds.length) {
@@ -169,37 +216,70 @@ export async function loadFeed(append = false) {
       ;(creators || []).forEach(c => { _creatorCache[c.user_id] = true })
     }
 
-    // Cargar mis reacciones en este lote
-    let myReactions = new Set()
-    if (_userId && data?.length) {
-      const ids = data.map(p => p.id)
-      const { data: rcts } = await supabase
-        .from('post_reactions')
-        .select('post_id')
-        .eq('user_id', _userId)
-        .in('post_id', ids)
-      myReactions = new Set((rcts || []).map(r => r.post_id))
+    let combined = (data || []).map(p => ({ ...p, reactCount: p.post_reactions?.[0]?.count || 0 }))
+
+    // ── Mezcla anti-burbuja + Sorpréndeme — solo en cargas no paginadas.
+    // (En "Ver más" no se mezcla: evita recomputar/repetir candidatos por
+    // página y mantiene la paginación principal predecible).
+    if (!append) {
+      const excludeIds = new Set(combined.map(p => p.id))
+      await getDiscoveryPool()
+      combined = mixIntoFeed(combined, _discoveryPool, DISCOVERY_RATIO, excludeIds,
+        p => ({ ...p, _discovery: true }))
+
+      if (_surpriseMode) {
+        await ensureSurprisePool()
+        combined = mixIntoFeed(combined, _surprisePool, SURPRISE_RATIO, excludeIds,
+          p => ({ ...p, _surpriseCategory: p.category, _surpriseFrom: _surpriseReason?.topCategory || null }))
+      }
     }
 
-    const newPosts = (data || []).map(p => ({
+    // Mis reacciones + conteo de comentarios para TODO el set ya combinado
+    // (posts principales + mezclas), así no quedan desincronizados
+    let myReactions = new Set()
+    if (_userId && combined.length) {
+      try {
+        const ids = combined.map(p => p.id)
+        const { data: rcts } = await supabase
+          .from('post_reactions')
+          .select('post_id')
+          .eq('user_id', _userId)
+          .in('post_id', ids)
+        myReactions = new Set((rcts || []).map(r => r.post_id))
+      } catch (e) { /* no bloquea el feed */ }
+    }
+
+    // Conteo de comentarios (consulta separada y protegida — la tabla post_comments
+    // puede no existir aún en algunos despliegues, no debe romper el feed entero)
+    let commentCounts = {}
+    if (combined.length) {
+      try {
+        const ids = combined.map(p => p.id)
+        const { data: cms } = await supabase
+          .from('post_comments').select('post_id').in('post_id', ids)
+        ;(cms || []).forEach(c => { commentCounts[c.post_id] = (commentCounts[c.post_id] || 0) + 1 })
+      } catch (e) { /* tabla no disponible aún, counts quedan en 0 */ }
+    }
+
+    const newPosts = combined.map(p => ({
       ...p,
-      reactCount: p.post_reactions?.[0]?.count || 0,
       iApoyé: myReactions.has(p.id),
+      commentCount: commentCounts[p.id] || 0,
     }))
 
-    if (!append) {
+    if (append) {
+      _posts = [..._posts, ...newPosts]
+      newPosts.forEach(p => {
+        const el = document.createElement('div')
+        el.innerHTML = renderPost(p)
+        const card = el.firstElementChild
+        container.appendChild(card)
+        bindPost(card, p)
+      })
+    } else if (isColdStart) {
       _posts = newPosts
       container.innerHTML = ''
-    } else {
-      _posts = [..._posts, ...newPosts]
-    }
-
-    if (!_posts.length) {
-      container.innerHTML = renderEmptyState()
-      return
-    }
-
-    if (append) {
+      if (!_posts.length) { container.innerHTML = renderEmptyState(); return }
       newPosts.forEach(p => {
         const el = document.createElement('div')
         el.innerHTML = renderPost(p)
@@ -208,16 +288,12 @@ export async function loadFeed(append = false) {
         bindPost(card, p)
       })
     } else {
-      newPosts.forEach(p => {
-        const el = document.createElement('div')
-        el.innerHTML = renderPost(p)
-        const card = el.firstElementChild
-        container.appendChild(card)
-        bindPost(card, p)
-      })
+      reconcileFeedDOM(container, newPosts)
+      _posts = newPosts
     }
 
-    // Botón de más
+    // Botón de más — basado en el tamaño real de la consulta principal
+    // (las mezclas no cuentan para decidir si hay más páginas)
     document.getElementById('feed-load-more')?.remove()
     if ((data?.length || 0) === PAGE_SIZE) {
       const btn = document.createElement('button')
@@ -229,8 +305,229 @@ export async function loadFeed(append = false) {
     }
   } catch (e) {
     console.error('[feed] loadFeed error:', e)
-    container.innerHTML = '<div class="feed-error">Error cargando el feed. Intenta de nuevo.</div>'
+    if (isColdStart) {
+      container.innerHTML = '<div class="feed-error">Error cargando el feed. Intenta de nuevo.</div>'
+    } else {
+      showFeedToast('No se pudo actualizar el feed')
+    }
   }
+}
+
+// ── Reconciliar DOM existente con el nuevo set de posts ───
+// Mueve/inserta/quita nodos puntuales en vez de vaciar el contenedor:
+// sin parpadeo y sin saltos de scroll bruscos al cambiar filtros.
+function reconcileFeedDOM(container, newPosts) {
+  document.getElementById('feed-load-more')?.remove()
+  container.querySelector('.feed-empty, .feed-error, .feed-loading')?.remove()
+
+  const existingNodes = {}
+  container.querySelectorAll('.feed-post').forEach(node => {
+    existingNodes[node.dataset.postId] = node
+  })
+
+  let cursor = null
+  newPosts.forEach(p => {
+    const id = String(p.id)
+    let node = existingNodes[id]
+    if (node) {
+      delete existingNodes[id]
+      const wantedNext = cursor ? cursor.nextSibling : container.firstChild
+      if (wantedNext !== node) container.insertBefore(node, wantedNext)
+    } else {
+      const wrap = document.createElement('div')
+      wrap.innerHTML = renderPost(p)
+      node = wrap.firstElementChild
+      container.insertBefore(node, cursor ? cursor.nextSibling : container.firstChild)
+      bindPost(node, p)
+      node.classList.add('fp-new')
+    }
+    cursor = node
+  })
+
+  // Lo que sobró ya no aplica a los filtros nuevos
+  Object.values(existingNodes).forEach(node => {
+    node.classList.add('fp-fade-out')
+    setTimeout(() => node.remove(), 350)
+  })
+
+  if (!newPosts.length) container.innerHTML = renderEmptyState()
+}
+
+// ── Mezclar un pool extra dentro del feed principal ────────
+function mixIntoFeed(basePosts, pool, ratio, excludeIds, decorate) {
+  if (!pool.length || !basePosts.length) return basePosts
+  const nSlots = Math.round(basePosts.length * ratio)
+  if (!nSlots) return basePosts
+
+  const candidates = pool.filter(p => !excludeIds.has(p.id))
+  if (!candidates.length) return basePosts
+
+  const picked = []
+  const shuffled = [...candidates]
+  while (picked.length < nSlots && shuffled.length) {
+    const idx = Math.floor(Math.random() * shuffled.length)
+    picked.push(shuffled.splice(idx, 1)[0])
+  }
+  picked.forEach(p => excludeIds.add(p.id))
+
+  const result = [...basePosts]
+  const gap = Math.max(2, Math.floor(result.length / (picked.length + 1)))
+  picked.forEach((p, i) => {
+    const pos = Math.min(result.length, gap * (i + 1) + i)
+    result.splice(pos, 0, decorate(p))
+  })
+  return result
+}
+
+// ── Pool anti-burbuja: posts recientes de creadores pequeños ──
+// Reutiliza loadTalentosOcultos() de creadores.js, que ya calcula la calidad
+// (reacciones/post) de creadores activos con <1000 apoyos. Se cachea con TTL
+// para no recalcular esa lista costosa en cada carga del feed.
+async function getDiscoveryPool() {
+  if (Date.now() - _discoveryPoolAt < DISCOVERY_TTL && _discoveryPool.length) return _discoveryPool
+  try {
+    const talentos = await loadTalentosOcultos(40)
+    const ids = talentos.map(t => t.id).filter(Boolean)
+    if (!ids.length) { _discoveryPool = []; _discoveryPoolAt = Date.now(); return _discoveryPool }
+
+    const { data } = await supabase
+      .from('posts')
+      .select('id, content, category, media_url, media_position, created_at, user_id, post_reactions(count)')
+      .in('user_id', ids)
+      .order('created_at', { ascending: false })
+      .limit(40)
+
+    // Los perfiles ya vienen en loadTalentosOcultos, evitamos refetchearlos
+    talentos.forEach(t => {
+      _profilesCache[t.id] = { id: t.id, username: t.username, full_name: t.full_name, avatar_url: t.avatar_url }
+      _creatorCache[t.id] = true
+    })
+
+    _discoveryPool = (data || []).map(p => ({ ...p, reactCount: p.post_reactions?.[0]?.count || 0 }))
+    _discoveryPoolAt = Date.now()
+  } catch (e) {
+    console.warn('[feed] discoveryPool error:', e)
+    _discoveryPool = []
+  }
+  return _discoveryPool
+}
+
+// ── Sorpréndeme: detectar afinidad y categoría sugerida ────
+// Heurística simple (sin backend propio): mira las categorías que el usuario
+// más apoyó (su "categoría top"), busca otros usuarios que también apoyaron
+// esa categoría, y ve qué OTRAS categorías reaccionan esos usuarios afines.
+// Es la categoría más sugerida la que se usa para "Sorpréndeme", y es la base
+// de la etiqueta explicativa (no es caja negra: el usuario ve el motivo).
+async function computeSurpriseRecommendation() {
+  if (!_userId) return null
+  try {
+    const { data: mine } = await supabase
+      .from('post_reactions')
+      .select('posts(category)')
+      .eq('user_id', _userId)
+      .limit(200)
+
+    const myCatCounts = {}
+    ;(mine || []).forEach(r => {
+      const c = r.posts?.category
+      if (c) myCatCounts[c] = (myCatCounts[c] || 0) + 1
+    })
+    const topCategory = Object.entries(myCatCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || null
+    if (!topCategory) return { topCategory: null, suggestedCategory: null }
+
+    const { data: peers } = await supabase
+      .from('post_reactions')
+      .select('user_id, posts!inner(category)')
+      .eq('posts.category', topCategory)
+      .neq('user_id', _userId)
+      .limit(300)
+
+    const peerIds = [...new Set((peers || []).map(p => p.user_id))].slice(0, 80)
+    if (!peerIds.length) return { topCategory, suggestedCategory: null }
+
+    const { data: peerReactions } = await supabase
+      .from('post_reactions')
+      .select('posts(category)')
+      .in('user_id', peerIds)
+      .limit(500)
+
+    const otherCatCounts = {}
+    ;(peerReactions || []).forEach(r => {
+      const c = r.posts?.category
+      if (c && c !== topCategory) otherCatCounts[c] = (otherCatCounts[c] || 0) + 1
+    })
+    const suggestedCategory = Object.entries(otherCatCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || null
+    return { topCategory, suggestedCategory }
+  } catch (e) {
+    console.warn('[feed] surprise recommendation error:', e)
+    return null
+  }
+}
+
+async function ensureSurprisePool(force = false) {
+  if (!force && Date.now() - _surprisePoolAt < SURPRISE_TTL && _surprisePool.length) return
+  _surpriseReason = await computeSurpriseRecommendation()
+
+  let targetCat = _surpriseReason?.suggestedCategory
+  if (!targetCat) {
+    // Sin historial suficiente para personalizar: cualquier categoría fuera
+    // de los filtros activos y no silenciada
+    const candidates = FEED_CATEGORIES.map(c => c.id)
+      .filter(id => !_activeFilters.includes(id) && !_mutes[id])
+    targetCat = candidates[Math.floor(Math.random() * candidates.length)] || null
+  }
+  if (!targetCat) { _surprisePool = []; _surprisePoolAt = Date.now(); return }
+
+  try {
+    const { data } = await supabase
+      .from('posts')
+      .select('id, content, category, media_url, media_position, created_at, user_id, post_reactions(count)')
+      .eq('category', targetCat)
+      .order('created_at', { ascending: false })
+      .limit(30)
+
+    const unknownIds = [...new Set((data || []).map(p => p.user_id))].filter(id => !_profilesCache[id])
+    if (unknownIds.length) {
+      const { data: profiles } = await supabase
+        .from('profiles').select('id, username, full_name, avatar_url').in('id', unknownIds)
+      ;(profiles || []).forEach(p => { _profilesCache[p.id] = p })
+    }
+
+    _surprisePool = (data || []).map(p => ({ ...p, reactCount: p.post_reactions?.[0]?.count || 0 }))
+    _surprisePoolAt = Date.now()
+  } catch (e) {
+    console.warn('[feed] surprisePool error:', e)
+    _surprisePool = []
+  }
+}
+
+export async function toggleSurpriseMode() {
+  _surpriseMode = !_surpriseMode
+  if (_surpriseMode) {
+    await ensureSurprisePool(true)
+    showFeedToast('🎲 ¡Sorpréndeme activado!')
+  } else {
+    showFeedToast('Modo Sorpréndeme desactivado')
+  }
+  renderCategorySelector()
+  await loadFeed()
+}
+
+// ── Etiqueta explicativa (Sorpréndeme / anti-burbuja) ──
+// El usuario debe entender por qué ve cada post fuera de sus filtros
+// habituales — nunca es una caja negra.
+function renderReasonBanner(p) {
+  if (p._surpriseCategory) {
+    const fromLabel = p._surpriseFrom ? (CAT_MAP[p._surpriseFrom]?.label || p._surpriseFrom) : null
+    const text = fromLabel
+      ? `Te mostramos esto porque sueles apoyar contenido de ${fromLabel}`
+      : `Te mostramos esto fuera de tus categorías habituales`
+    return `<div class="fp-reason-banner fp-reason-surprise">🎲 ${text}</div>`
+  }
+  if (p._discovery) {
+    return `<div class="fp-reason-banner fp-reason-discovery">🌱 Creador emergente con buena calidad — pocos apoyos todavía</div>`
+  }
+  return ''
 }
 
 // ── Renderizar post ───────────────────────────────
@@ -266,9 +563,13 @@ function renderPost(p) {
         <div class="fp-menu-wrap">
           <button class="fp-menu-btn" aria-label="Opciones" data-post="${p.id}">⋯</button>
           <div class="fp-menu" id="menu-${p.id}" style="display:none">
-            <button class="fp-menu-item fp-mute-btn" data-cat="${p.category}">
-              ⏳ No quiero ver ${cat.label || p.category} ahora
-            </button>
+            <div class="fp-menu-item fp-mute-group">
+              <span class="fp-mute-label">⏳ No quiero ver ${cat.label || p.category}</span>
+              <div class="fp-mute-opts">
+                <button class="fp-mute-btn" data-cat="${p.category}" data-dur="today">Hoy</button>
+                <button class="fp-mute-btn" data-cat="${p.category}" data-dur="week">Esta semana</button>
+              </div>
+            </div>
             ${p.user_id === _userId
               ? `<button class="fp-menu-item fp-edit-btn" data-post="${p.id}">✏️ Editar</button>
                <button class="fp-menu-item fp-delete-btn" data-post="${p.id}">🗑️ Eliminar</button>`
@@ -277,6 +578,7 @@ function renderPost(p) {
         </div>
       </div>
 
+      ${renderReasonBanner(p)}
       <div class="fp-content">${esc(p.content)}</div>
 
       ${p.media_url ? `<div class="fp-media">
@@ -290,10 +592,14 @@ function renderPost(p) {
           <span class="fp-apoyo-icon">🏆</span>
           <span class="fp-apoyo-count">${p.reactCount}</span>
         </button>
+        <button class="comment-toggle-btn" data-post="${p.id}">
+          💬 ${p.commentCount > 0 ? p.commentCount + ' ' : ''}Comentar
+        </button>
         <button class="fp-share-btn" data-post="${p.id}" aria-label="Compartir">
           <span>🔗</span> Compartir
         </button>
       </div>
+      <div class="post-comments-section" id="feed-comments-${p.id}" style="display:none"></div>
     </article>`
 }
 
@@ -317,6 +623,11 @@ function bindPost(card, p) {
     await toggleApoyo(p, card)
   })
 
+  // Comentarios
+  card.querySelector('.comment-toggle-btn')?.addEventListener('click', () => {
+    toggleFeedComments(p.id)
+  })
+
   // Menú
   const menuBtn = card.querySelector('.fp-menu-btn')
   const menu    = card.querySelector(`#menu-${p.id}`)
@@ -326,13 +637,17 @@ function bindPost(card, p) {
   })
   document.addEventListener('click', () => { if (menu) menu.style.display = 'none' }, { once: false })
 
-  // No ahora
-  card.querySelector('.fp-mute-btn')?.addEventListener('click', async () => {
-    const cat = card.querySelector('.fp-mute-btn').dataset.cat
-    await muteCategory(cat, 24)
-    card.classList.add('fp-fade-out')
-    setTimeout(() => card.remove(), 350)
-    showFeedToast(`⏳ No verás más "${CAT_MAP[cat]?.label || cat}" por 24 horas`)
+  // No ahora — con ventana configurable (Hoy / Esta semana)
+  card.querySelectorAll('.fp-mute-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const cat = btn.dataset.cat
+      const dur = btn.dataset.dur // 'today' | 'week'
+      await muteCategory(cat, dur)
+      card.classList.add('fp-fade-out')
+      setTimeout(() => card.remove(), 350)
+      const label = dur === 'week' ? 'esta semana' : 'hoy'
+      showFeedToast(`⏳ No verás más "${CAT_MAP[cat]?.label || cat}" ${label}`)
+    })
   })
 
   // Editar
@@ -354,6 +669,129 @@ function bindPost(card, p) {
       .then(() => showFeedToast('🔗 Enlace copiado'))
       .catch(() => {})
   })
+}
+
+// ── Comentarios ────────────────────────────────────
+async function toggleFeedComments(postId) {
+  const section = document.getElementById('feed-comments-' + postId)
+  if (!section) return
+  if (section.style.display !== 'none') { section.style.display = 'none'; return }
+  section.style.display = ''
+  section.innerHTML = `<div style="padding:10px 16px;color:var(--dim);font-size:.85rem">Cargando comentarios…</div>`
+  await loadFeedComments(postId, section)
+}
+
+async function loadFeedComments(postId, section) {
+  try {
+    const { data: comments } = await supabase
+      .from('post_comments')
+      .select('id, content, created_at, user_id, profiles:user_id(username, full_name, avatar_url)')
+      .eq('post_id', postId)
+      .order('created_at', { ascending: true })
+      .limit(50)
+
+    const listHtml = (comments || []).map(c => {
+      const u   = c.profiles || {}
+      const ini = (u.full_name || u.username || '?').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()
+      const isOwn = _userId === c.user_id
+      return `<div class="comment-item" data-comment-id="${c.id}">
+        ${u.avatar_url
+          ? `<img src="${u.avatar_url}" class="comment-avatar" alt="">`
+          : `<div class="comment-avatar-fb">${ini}</div>`}
+        <div class="comment-body">
+          <div class="comment-author">${esc(u.full_name || u.username || 'Usuario')}${isOwn ? ` <button class="comment-delete-btn" data-id="${c.id}" style="float:right;font-size:.68rem;background:none;border:none;color:var(--muted);cursor:pointer" title="Eliminar">✕</button>` : ''}</div>
+          <div class="comment-text">${esc(c.content)}</div>
+          <div class="comment-time">${formatRelTime(c.created_at)}</div>
+        </div>
+      </div>`
+    }).join('')
+
+    const canComment = !!_userId
+    section.innerHTML = `
+      <div class="comment-list" id="feed-comment-list-${postId}">${listHtml || '<div style="color:var(--dim);font-size:.82rem;padding:4px 0">Sé el primero en comentar</div>'}</div>
+      ${canComment ? `
+        <div class="comment-form">
+          <input class="comment-input" id="feed-comment-input-${postId}" placeholder="Escribe un comentario…" maxlength="300">
+          <button class="comment-submit" id="feed-comment-submit-${postId}">Publicar</button>
+        </div>` : `<div style="font-size:.8rem;color:var(--dim);padding:6px 0">Inicia sesión para comentar</div>`}`
+
+    if (canComment) {
+      const input  = document.getElementById('feed-comment-input-' + postId)
+      const submit = document.getElementById('feed-comment-submit-' + postId)
+      submit.addEventListener('click', () => submitFeedComment(postId, input))
+      input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitFeedComment(postId, input) } })
+    }
+
+    section.querySelectorAll('.comment-delete-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!_userId) return
+        const cid = btn.dataset.id
+        await supabase.from('post_comments').delete().eq('id', cid).eq('user_id', _userId)
+        btn.closest('.comment-item')?.remove()
+        _bumpCommentCount(postId, -1)
+      })
+    })
+  } catch (e) {
+    section.innerHTML = `<div style="padding:10px 16px;color:var(--dim);font-size:.82rem">Comentarios no disponibles aún.</div>`
+  }
+}
+
+async function submitFeedComment(postId, input) {
+  const content = input.value.trim()
+  if (!content || !_userId) return
+  input.disabled = true
+  try {
+    const { data: comment, error } = await supabase
+      .from('post_comments')
+      .insert({ post_id: postId, user_id: _userId, content })
+      .select('id, content, created_at, user_id, profiles:user_id(username, full_name, avatar_url)')
+      .single()
+    if (error) throw error
+    input.value = ''
+    const list = document.getElementById('feed-comment-list-' + postId)
+    if (list) {
+      const u   = comment.profiles || {}
+      const ini = (u.full_name || u.username || '?').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()
+      const el  = document.createElement('div')
+      el.className = 'comment-item'
+      el.dataset.commentId = comment.id
+      el.innerHTML = `
+        ${u.avatar_url ? `<img src="${u.avatar_url}" class="comment-avatar" alt="">` : `<div class="comment-avatar-fb">${ini}</div>`}
+        <div class="comment-body">
+          <div class="comment-author">${esc(u.full_name || u.username || 'Usuario')}
+            <button class="comment-delete-btn" data-id="${comment.id}" style="float:right;font-size:.68rem;background:none;border:none;color:var(--muted);cursor:pointer" title="Eliminar">✕</button>
+          </div>
+          <div class="comment-text">${esc(comment.content)}</div>
+          <div class="comment-time">hace un momento</div>
+        </div>`
+      el.querySelector('.comment-delete-btn').addEventListener('click', async () => {
+        await supabase.from('post_comments').delete().eq('id', comment.id).eq('user_id', _userId)
+        el.remove()
+        _bumpCommentCount(postId, -1)
+      })
+      // Quitar el placeholder "Sé el primero…" si existía
+      if (list.children.length === 1 && list.children[0].tagName === 'DIV' && !list.children[0].classList.contains('comment-item')) {
+        list.innerHTML = ''
+      }
+      list.appendChild(el)
+      list.scrollTop = list.scrollHeight
+      _bumpCommentCount(postId, 1)
+    }
+  } catch (e) {
+    console.error('[feed comment]', e)
+    showFeedToast('Error al publicar comentario')
+  } finally {
+    input.disabled = false; input.focus()
+  }
+}
+
+function _bumpCommentCount(postId, delta) {
+  const btn = document.querySelector(`.feed-post[data-post-id="${postId}"] .comment-toggle-btn`)
+  if (!btn) return
+  const match = btn.textContent.match(/\d+/)
+  const current = match ? parseInt(match[0]) : 0
+  const next = Math.max(0, current + delta)
+  btn.innerHTML = `💬 ${next > 0 ? next + ' ' : ''}Comentar`
 }
 
 // ── Apoyo en posts ────────────────────────────────
@@ -430,16 +868,13 @@ function renderCategorySelector() {
     })
   })
 
-  // Sorpréndeme
+  // Sorpréndeme — toggle real: mezcla contenido fuera de los filtros
+  // habituales (no los reemplaza ni los limpia)
   const srp = document.getElementById('feed-surprise-btn')
   if (srp) {
-    srp.onclick = async () => {
-      _activeFilters = []
-      renderCategorySelector()
-      await savePreferences()
-      await loadFeed()
-      showFeedToast('🎲 ¡Sorpréndeme activado!')
-    }
+    srp.classList.toggle('active', _surpriseMode)
+    srp.textContent = _surpriseMode ? '🎲 Sorpréndeme ✓' : '🎲 Sorpréndeme'
+    srp.onclick = toggleSurpriseMode
   }
 }
 
@@ -883,7 +1318,7 @@ export async function openComposeModal(userId) {
       const container = document.getElementById('feed-posts')
       if (container) {
         const profile = _profilesCache[userId]
-        const newP = { ...data, reactCount: 0, iApoyé: false }
+        const newP = { ...data, reactCount: 0, iApoyé: false, commentCount: 0 }
         const el = document.createElement('div')
         el.innerHTML = renderPost(newP)
         const card = el.firstElementChild
