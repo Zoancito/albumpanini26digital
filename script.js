@@ -19,7 +19,7 @@ import { syncExchangeOffers, findMatches, notifyNewMatches, openIntercambiosModa
 import { initNotificaciones, destroyNotificaciones, getUnreadCount, getAllNotifs, markRead, markAllRead, deleteNotificacion, renderNotifPanel } from './notificaciones.js'
 import { initFeed, openComposeModal, showFeedToast, FEED_CATEGORIES } from './feed.js'
 import { openTalentosOcultosModal } from './creadores.js'
-console.log('Supabase conectado')
+console.log('Supabase conectado:', supabase)
 
 const authScreen = document.getElementById('auth-screen');
 const loginButton = document.getElementById('google-login');
@@ -42,8 +42,6 @@ function showAuthScreen() {
   clearTimeout(cloudSyncTimer);
   authScreen?.classList.remove('off');
   document.getElementById('ws')?.classList.remove('off');
-  document.getElementById('compose-fab')?.style.setProperty('display', 'none');
-  hideGuestReadonlyNotice();
   renderUserProfile(null);
 }
 
@@ -52,7 +50,6 @@ function enterAlbumShell(mode, user = null) {
   currentUser = mode === 'google' ? user : null;
   window._currentUserId = currentUser?.id || null;
   authScreen?.classList.add('off');
-  hideGuestReadonlyNotice();
   renderUserProfile(user);
   if (currentUser) {
     syncCloudState(currentUser);
@@ -68,35 +65,7 @@ function enterAlbumShell(mode, user = null) {
     setTimeout(() => scheduleExchangeSync(), 3000);
   } else {
     destroyNotificaciones();
-    initFeed(null).catch(console.error);
-    document.getElementById('compose-fab')?.style.setProperty('display', 'none');
-    showGuestReadonlyNotice();
   }
-}
-
-async function signInWithGoogle() {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: window.location.href }
-  });
-
-  if (error) {
-    console.error('Error login:', error);
-  }
-}
-
-function showGuestReadonlyNotice() {
-  const modal = document.getElementById('guest-readonly-modal');
-  if (!modal) return;
-  modal.classList.add('visible');
-  modal.setAttribute('aria-hidden', 'false');
-}
-
-function hideGuestReadonlyNotice() {
-  const modal = document.getElementById('guest-readonly-modal');
-  if (!modal) return;
-  modal.classList.remove('visible');
-  modal.setAttribute('aria-hidden', 'true');
 }
 
 // Inicializar botón de perfil y amigos al cargar
@@ -162,14 +131,20 @@ function getProfileStatus() {
   return userProfile?.querySelector('.profile-status')?.textContent || '';
 }
 
-loginButton?.addEventListener('click', signInWithGoogle);
+loginButton?.addEventListener('click', async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.href }
+  });
+
+  if (error) {
+    console.error('Error login:', error);
+  }
+});
 
 guestButton?.addEventListener('click', () => {
   enterAlbumShell('guest');
 });
-
-document.getElementById('guest-readonly-close')?.addEventListener('click', hideGuestReadonlyNotice);
-document.getElementById('guest-readonly-login')?.addEventListener('click', signInWithGoogle);
 
 logoutButton?.addEventListener('click', async () => {
   const { error } = await supabase.auth.signOut();

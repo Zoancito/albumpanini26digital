@@ -640,7 +640,6 @@ function bindPost(card, p) {
   // No ahora — con ventana configurable (Hoy / Esta semana)
   card.querySelectorAll('.fp-mute-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!_userId) { showFeedToast('Inicia sesión para personalizar tu feed'); return }
       const cat = btn.dataset.cat
       const dur = btn.dataset.dur // 'today' | 'week'
       await muteCategory(cat, dur)
