@@ -160,18 +160,19 @@ export function initAmigos() {
   })
 }
 
-// ── Inyectar botón en #controls ───────────────────
+// ── Inyectar botón en #header-nav (fallback si no está en el HTML) ───
 function injectButton() {
-  const controls = document.getElementById('controls')
-  if (!controls || document.getElementById('btn-amigos')) return
+  if (document.getElementById('btn-amigos')) return
+  const nav = document.getElementById('header-nav')
+  if (!nav) return
   const btn = document.createElement('button')
   btn.className = 'action-btn'
   btn.id = 'btn-amigos'
   btn.setAttribute('aria-label', 'Buscar amigos coleccionistas')
   btn.innerHTML = '🔎 <span class="btn-label">Amigos</span>'
-  const resetBtn = document.getElementById('btn-reset')
-  if (resetBtn) controls.insertBefore(btn, resetBtn)
-  else controls.appendChild(btn)
+  const mundiales = document.getElementById('btn-mundiales-header')
+  if (mundiales) nav.insertBefore(btn, mundiales)
+  else nav.appendChild(btn)
 }
 
 // ── Inyectar overlay ──────────────────────────────
