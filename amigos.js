@@ -655,7 +655,7 @@ async function handleCardClick(e) {
   const addBtn = e.target.closest('.amigos-add-btn')
   if (addBtn) {
     e.stopPropagation()
-    if (!_currentUser) { window.location.href = 'https://albumpanini26digital.vercel.app'; return }
+    if (!_currentUser) { window.location.href = 'https://lagrada.vercel.app'; return }
     const profileId = addBtn.dataset.profileId
     if (!profileId) return
     addBtn.disabled = true; addBtn.textContent = '⏳'
