@@ -41,7 +41,6 @@ function showAuthScreen() {
   currentUser = null;
   clearTimeout(cloudSyncTimer);
   authScreen?.classList.remove('off');
-  document.getElementById('ws')?.classList.remove('off');
   renderUserProfile(null);
 }
 
@@ -51,6 +50,12 @@ function enterAlbumShell(mode, user = null) {
   window._currentUserId = currentUser?.id || null;
   authScreen?.classList.add('off');
   renderUserProfile(user);
+
+  // Feed social — Grada es la página principal, así que el feed se inicializa
+  // siempre. En modo invitado, initFeed(null) entra en solo lectura (apoyar,
+  // comentar y silenciar categorías quedan bloqueados desde feed.js).
+  initFeed(currentUser?.id || null).catch(console.error);
+
   if (currentUser) {
     syncCloudState(currentUser);
     refreshFriendsPanel(currentUser).catch(console.error);
@@ -58,8 +63,6 @@ function enterAlbumShell(mode, user = null) {
 
     // Notificaciones + intercambios
     initNotificaciones(currentUser.id, (notifs) => updateNotifBell(notifs)).catch(console.error);
-    // Feed social
-    initFeed(currentUser.id).catch(console.error);
     document.getElementById('compose-fab')?.style.removeProperty('display');
     // Sync inicial de ofertas de intercambio
     setTimeout(() => scheduleExchangeSync(), 3000);
@@ -2258,46 +2261,18 @@ if(_origShowPdfModal){
   };
 }
 
-// Start album remains global
+// Abre el overlay de Coleccionismo (antes mostraba el álbum como pantalla
+// principal; ahora Grada/el feed es la página de entrada y esto es secundario)
 function startAlbum(){
-  document.getElementById('ws')?.classList.add('off');
+  document.getElementById('coleccionismo-overlay')?.classList.add('visible');
   const video = document.getElementById('bg-video');
   if(video){
     video.muted = true;   // muteado por defecto; el slider lo controla
     video.play().catch(() => {});
   }
   applyMasterVolume();
-  // Inject in-app buttons after album opens
-  _injectInAppBtns();
 }
 window.startAlbum = startAlbum;
-
-function _injectInAppBtns(){
-  const controls = document.getElementById('controls');
-  if (!controls || document.getElementById('btn-portada')) return;
-  // Mundiales button
-  const bMun = document.createElement('button');
-  bMun.className = 'action-btn'; bMun.id = 'btn-mundiales-inapp';
-  bMun.setAttribute('aria-label','Ver historia de los mundiales');
-  bMun.innerHTML = '🌍 <span class="btn-label">Mundiales</span>';
-  bMun.addEventListener('click', () => { if(window.openMundiales) window.openMundiales(); });
-  // Portada button
-  const bPort = document.createElement('button');
-  bPort.className = 'action-btn'; bPort.id = 'btn-portada';
-  bPort.setAttribute('aria-label','Volver a la portada');
-  bPort.innerHTML = '🏠 <span class="btn-label">Portada</span>';
-  bPort.addEventListener('click', () => {
-    // Stop radio if playing
-    const radioStop = document.getElementById('radio-stop');
-    if(radioStop) radioStop.click();
-    document.getElementById('ws')?.classList.remove('off');
-    const video = document.getElementById('bg-video');
-    if(video){ video.muted = true; }
-  });
-  const resetBtn = document.getElementById('btn-reset');
-  if(resetBtn){ controls.insertBefore(bPort, resetBtn); controls.insertBefore(bMun, bPort); }
-  else { controls.appendChild(bMun); controls.appendChild(bPort); }
-}
 
 loadA11yPrefs();
 setupA11yUI();
@@ -2367,20 +2342,12 @@ document.addEventListener('click', e => {
   }
 });
 
-// ── Feed panel ─────────────────────────────────────
-document.getElementById('btn-feed')?.addEventListener('click', () => {
-  const panel = document.getElementById('feed-panel');
-  if (!panel) return;
-  const isOpen = panel.style.display !== 'none';
-  panel.style.display = isOpen ? 'none' : '';
-  if (!isOpen && !currentUser) {
-    // Cargar feed anónimo (solo lectura)
-    import('./feed.js').then(({ initFeed }) => initFeed(null));
-  }
-});
-
-document.getElementById('feed-close')?.addEventListener('click', () => {
-  document.getElementById('feed-panel').style.display = 'none';
+// ── Coleccionismo overlay ──────────────────────────
+document.getElementById('coleccionismo-close')?.addEventListener('click', () => {
+  // Detener la radio si estaba sonando al salir del álbum
+  const radioStop = document.getElementById('radio-stop');
+  if (radioStop) radioStop.click();
+  document.getElementById('coleccionismo-overlay')?.classList.remove('visible');
 });
 
 document.getElementById('compose-fab')?.addEventListener('click', () => {

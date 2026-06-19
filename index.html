@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Álbum Mundial 2026 — Panini</title>
+<title>Grada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -39,25 +39,13 @@
     </div>
   </div>
 </div>
-<div id="ws">
-  <div class="wc">
-    <div class="wc-ey">Experiencia Virtual Panini</div>
-    <div class="wc-t1">ÁLBUM MUNDIAL <span>2026</span></div>
-    <div class="wc-t2">CANADA · MÉXICO · USA</div>
-    <p class="wc-d">Marca tus cromos, sigue tu progreso por grupo y selección, y exporta tu colección en PDF.</p>
-    <div class="wc-btns">
-      <button class="wc-b" onclick="startAlbum()">⚽ INICIAR ÁLBUM</button>
-      <button class="wc-b wc-b-sec" onclick="openMundiales()">🌍 HISTORIA MUNDIAL</button>
-      <button class="wc-b wc-b-ter" onclick="openCalendar()">📅 CALENDARIO 2026</button>
-    </div>
-  </div>
-</div>
+
 
 <!-- MUNDIALES OVERLAY -->
 <div id="mundiales-overlay" role="dialog" aria-modal="true" aria-label="Historia de los Mundiales">
   <div id="mun-gallery-view">
     <div class="mun-header">
-      <button class="mun-back-home" id="mun-close" aria-label="Volver al álbum">← Volver</button>
+      <button class="mun-back-home" id="mun-close" aria-label="Volver a Grada">← Volver</button>
       <div class="mun-header-titles">
         <div class="mun-eyebrow">Panini · Experiencia Histórica</div>
         <h2 class="mun-title">HISTORIA DE LOS <span>MUNDIALES</span></h2>
@@ -171,9 +159,14 @@
 </div>
  
 <div id="app-header">
-  <div class="header-eyebrow">Panini Official — Colección Digital</div>
-  <h1>ÁLBUM MUNDIAL <span>2026</span></h1>
-  <p class="header-sub">Haz clic en cualquier cromo para marcar TENGO / FALTA · Se guarda automáticamente</p>
+  <div class="header-eyebrow">Panini Official · Mundial 2026</div>
+  <h1>GRADA</h1>
+  <p class="header-sub">Lo que se vive en la cancha, se comenta en la Grada</p>
+  <div id="header-nav">
+    <button class="action-btn" id="btn-coleccionismo" aria-label="Abrir álbum de cromos" onclick="startAlbum()">🗂️ <span class="btn-label">Coleccionismo</span></button>
+    <button class="action-btn" id="btn-mundiales-header" aria-label="Ver historia de los mundiales" onclick="openMundiales()">🌍 <span class="btn-label">Mundiales</span></button>
+    <button class="action-btn" id="btn-calendario-header" aria-label="Ver calendario de partidos" onclick="openCalendar()">📅 <span class="btn-label">Calendario</span></button>
+  </div>
   <div id="user-profile" class="user-profile" hidden>
     <div class="profile-avatar" aria-hidden="true">
       <img id="profile-avatar-img" alt="" hidden>
@@ -220,43 +213,26 @@
     </div>
   </aside>
 
-  <main class="album-main" aria-label="Álbum digital">
-<div id="stats-bar">
-  <div class="stat-card" style="--accent:#f5c518"><span class="stat-value" id="s-total">0</span><span class="stat-label">Total Cromos</span></div>
-  <div class="stat-card" style="--accent:#22c55e"><span class="stat-value" id="s-tengo">0</span><span class="stat-label">Tengo</span></div>
-  <div class="stat-card" style="--accent:#f43f5e"><span class="stat-value" id="s-falta">0</span><span class="stat-label">Faltan</span></div>
-  <div class="stat-card" style="--accent:#38bdf8"><span class="stat-value" id="s-pct">0%</span><span class="stat-label">Progreso</span></div>
-  <div class="stat-card" style="--accent:#f59e0b"><span class="stat-value" id="s-rep">0</span><span class="stat-label">🔄 Repetidas</span></div>
-  <div class="stat-card" style="--accent:#818cf8"><span class="stat-value" id="s-res">0</span><span class="stat-label">📌 Reservadas</span></div>
-</div>
- 
-<div id="vol-bar">
-  <span class="vol-icon" id="vol-mute-btn" title="Silenciar/activar" aria-label="Silenciar o activar volumen">🔊</span>
-  <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="60" style="--pct:60%" aria-label="Control de volumen">
-  <span class="vol-label" id="vol-label">60%</span>
-</div>
- 
-<div id="controls">
-  <input type="text" id="search" placeholder="🔍  Buscar jugador o selección..." aria-label="Buscar jugador o selección">
-  <button class="action-btn primary" id="btn-pdf" aria-label="Exportar PDF">📄 <span class="btn-label">Exportar PDF</span></button>
-  <button class="action-btn feed-action-btn" id="btn-feed" aria-label="Feed social">📣 <span class="btn-label">Feed</span></button>
-  <button class="action-btn" id="btn-talentos" aria-label="Talentos Ocultos">🌟 <span class="btn-label">Talentos</span></button>
-  <button class="action-btn" id="btn-intercambios" aria-label="Intercambio de cromos">🔄 <span class="btn-label">Intercambios</span></button>
-  <button class="action-btn" id="btn-radio" aria-label="Activar radio">📻 <span class="btn-label">Radio</span></button>
-  <button class="action-btn" id="btn-calendario" aria-label="Ver calendario de partidos" onclick="openCalendar()">📅 <span class="btn-label">Calendario</span></button>
-  <button class="action-btn" id="btn-reset" style="border-color:#e50914;color:#e57373" aria-label="Reiniciar álbum">🗑 <span class="btn-label">Reiniciar</span></button>
-</div>
- 
-<div id="status-tabs" role="tablist" aria-label="Filtrar por estado">
-  <button class="stab active" data-status="all" role="tab" aria-selected="true">Todos</button>
-  <button class="stab" data-status="tengo" role="tab" aria-selected="false">✅ <span class="btn-label">Tengo</span></button>
-  <button class="stab" data-status="falta" role="tab" aria-selected="false">❌ <span class="btn-label">Faltan</span></button>
-  <button class="stab" data-status="repetida" style="--stab-active:#f59e0b" role="tab" aria-selected="false">🔄 <span class="btn-label">Repetidas</span></button>
-  <button class="stab" data-status="reserva" style="--stab-active:#818cf8" role="tab" aria-selected="false">📌 <span class="btn-label">Reservadas</span></button>
-</div>
- 
-<div id="group-tabs" role="tablist" aria-label="Filtrar por grupo"></div>
-<div id="groups-container"></div>
+  <main class="album-main" aria-label="Feed de Grada">
+    <!-- Banner de modo invitado: se muestra/oculta desde feed.js según haya sesión -->
+    <div class="feed-guest-banner" id="feed-guest-banner" style="display:none">
+      👀 Estás viendo Grada como invitado. Puedes explorar el feed, pero para apoyar, comentar o publicar necesitas iniciar sesión.
+    </div>
+
+    <!-- Selector de categorías -->
+    <div class="feed-cats-wrap">
+      <div class="feed-cats-top">
+        <span class="feed-cats-label">¿Qué quieres ver ahora?</span>
+        <button class="feed-surprise-btn" id="feed-surprise-btn" title="Ver todo al azar">🎲 Sorpréndeme</button>
+      </div>
+      <div class="feed-cat-selector" id="feed-cat-selector"></div>
+      <div class="feed-cats-hint">Elige hasta 3 categorías · Toca una silenciada para desactivarla</div>
+    </div>
+
+    <!-- Posts -->
+    <div class="feed-posts" id="feed-posts">
+      <div class="feed-loading">Cargando…</div>
+    </div>
   </main>
 
   <aside class="social-panel chat-panel" aria-label="Chat">
@@ -568,28 +544,52 @@
   </div>
 </div>
 
-<!-- ═══ FEED PANEL ═══ -->
-<div id="feed-panel" class="feed-panel" style="display:none" role="dialog" aria-label="Feed social">
-  <div class="feed-panel-inner">
-    <div class="feed-panel-header">
-      <h2 class="feed-panel-title">📣 Feed</h2>
-      <button class="feed-panel-close" id="feed-close" aria-label="Cerrar feed">✕</button>
+<!-- ═══ COLECCIONISMO OVERLAY ═══ -->
+<div id="coleccionismo-overlay" role="dialog" aria-modal="true" aria-label="Álbum de cromos">
+  <div class="coleccionismo-header">
+    <button class="coleccionismo-back-home" id="coleccionismo-close" aria-label="Volver a Grada">← Volver</button>
+    <div class="coleccionismo-header-titles">
+      <div class="coleccionismo-eyebrow">Panini Official — Colección Digital</div>
+      <h2 class="coleccionismo-title">ÁLBUM MUNDIAL <span>2026</span></h2>
+      <p class="coleccionismo-sub">Haz clic en cualquier cromo para marcar TENGO / FALTA · Se guarda automáticamente</p>
+    </div>
+  </div>
+  <div class="coleccionismo-body">
+    <div id="stats-bar">
+      <div class="stat-card" style="--accent:#f5c518"><span class="stat-value" id="s-total">0</span><span class="stat-label">Total Cromos</span></div>
+      <div class="stat-card" style="--accent:#22c55e"><span class="stat-value" id="s-tengo">0</span><span class="stat-label">Tengo</span></div>
+      <div class="stat-card" style="--accent:#f43f5e"><span class="stat-value" id="s-falta">0</span><span class="stat-label">Faltan</span></div>
+      <div class="stat-card" style="--accent:#38bdf8"><span class="stat-value" id="s-pct">0%</span><span class="stat-label">Progreso</span></div>
+      <div class="stat-card" style="--accent:#f59e0b"><span class="stat-value" id="s-rep">0</span><span class="stat-label">🔄 Repetidas</span></div>
+      <div class="stat-card" style="--accent:#818cf8"><span class="stat-value" id="s-res">0</span><span class="stat-label">📌 Reservadas</span></div>
     </div>
 
-    <!-- Selector de categorías -->
-    <div class="feed-cats-wrap">
-      <div class="feed-cats-top">
-        <span class="feed-cats-label">¿Qué quieres ver ahora?</span>
-        <button class="feed-surprise-btn" id="feed-surprise-btn" title="Ver todo al azar">🎲 Sorpréndeme</button>
-      </div>
-      <div class="feed-cat-selector" id="feed-cat-selector"></div>
-      <div class="feed-cats-hint">Elige hasta 3 categorías · Toca una silenciada para desactivarla</div>
+    <div id="vol-bar">
+      <span class="vol-icon" id="vol-mute-btn" title="Silenciar/activar" aria-label="Silenciar o activar volumen">🔊</span>
+      <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="60" style="--pct:60%" aria-label="Control de volumen">
+      <span class="vol-label" id="vol-label">60%</span>
     </div>
 
-    <!-- Posts -->
-    <div class="feed-posts" id="feed-posts">
-      <div class="feed-loading">Cargando…</div>
+    <div id="controls">
+      <input type="text" id="search" placeholder="🔍  Buscar jugador o selección..." aria-label="Buscar jugador o selección">
+      <button class="action-btn primary" id="btn-pdf" aria-label="Exportar PDF">📄 <span class="btn-label">Exportar PDF</span></button>
+      <button class="action-btn" id="btn-talentos" aria-label="Talentos Ocultos">🌟 <span class="btn-label">Talentos</span></button>
+      <button class="action-btn" id="btn-intercambios" aria-label="Intercambio de cromos">🔄 <span class="btn-label">Intercambios</span></button>
+      <button class="action-btn" id="btn-radio" aria-label="Activar radio">📻 <span class="btn-label">Radio</span></button>
+      <button class="action-btn" id="btn-calendario" aria-label="Ver calendario de partidos" onclick="openCalendar()">📅 <span class="btn-label">Calendario</span></button>
+      <button class="action-btn" id="btn-reset" style="border-color:#e50914;color:#e57373" aria-label="Reiniciar álbum">🗑 <span class="btn-label">Reiniciar</span></button>
     </div>
+
+    <div id="status-tabs" role="tablist" aria-label="Filtrar por estado">
+      <button class="stab active" data-status="all" role="tab" aria-selected="true">Todos</button>
+      <button class="stab" data-status="tengo" role="tab" aria-selected="false">✅ <span class="btn-label">Tengo</span></button>
+      <button class="stab" data-status="falta" role="tab" aria-selected="false">❌ <span class="btn-label">Faltan</span></button>
+      <button class="stab" data-status="repetida" style="--stab-active:#f59e0b" role="tab" aria-selected="false">🔄 <span class="btn-label">Repetidas</span></button>
+      <button class="stab" data-status="reserva" style="--stab-active:#818cf8" role="tab" aria-selected="false">📌 <span class="btn-label">Reservadas</span></button>
+    </div>
+
+    <div id="group-tabs" role="tablist" aria-label="Filtrar por grupo"></div>
+    <div id="groups-container"></div>
   </div>
 </div>
 

@@ -51,6 +51,16 @@ const SURPRISE_RATIO  = 0.25        // más notorio: el usuario lo activó a pro
 // ── Init ──────────────────────────────────────────
 export async function initFeed(userId) {
   _userId = userId
+
+  // Banner de modo invitado — visible si no hay sesión
+  const guestBanner = document.getElementById('feed-guest-banner')
+  const composeFab  = document.getElementById('compose-fab')
+  if (guestBanner) guestBanner.style.display = _userId ? 'none' : 'block'
+  // El compose-fab solo se muestra si hay sesión (script.js ya lo gestiona
+  // en enterAlbumShell para usuarios logueados, pero lo ocultamos explícitamente
+  // aquí para invitados por si acaso quedara visible)
+  if (composeFab && !_userId) composeFab.style.display = 'none'
+
   await Promise.all([loadPreferences(), loadMutes()])
   renderCategorySelector()
   await loadFeed()
