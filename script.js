@@ -2344,9 +2344,6 @@ document.addEventListener('click', e => {
 
 // ── Coleccionismo overlay ──────────────────────────
 document.getElementById('coleccionismo-close')?.addEventListener('click', () => {
-  // Detener la radio si estaba sonando al salir del álbum
-  const radioStop = document.getElementById('radio-stop');
-  if (radioStop) radioStop.click();
   document.getElementById('coleccionismo-overlay')?.classList.remove('visible');
 });
 
