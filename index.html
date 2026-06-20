@@ -177,19 +177,27 @@
     <button class="action-btn" id="btn-talentos" aria-label="Talentos Ocultos">🌟 <span class="btn-label">Talentos</span></button>
     <button class="action-btn" id="btn-radio" aria-label="Activar radio">📻 <span class="btn-label">Radio</span></button>
   </div>
+  <!-- Floating profile avatar (top-left) -->
   <div id="user-profile" class="user-profile" hidden>
-    <div class="profile-avatar" aria-hidden="true">
+    <!-- El avatar flotante actúa como toggle del popover -->
+    <button id="profile-fab" class="profile-fab" aria-label="Mi perfil" aria-expanded="false" type="button">
       <img id="profile-avatar-img" alt="" hidden>
       <span id="profile-avatar-fallback">FC</span>
+    </button>
+    <!-- Popover con info y acciones -->
+    <div id="profile-popover" class="profile-popover" hidden>
+      <div class="profile-popover-info">
+        <span class="profile-kicker">Perfil Futbolero</span>
+        <strong id="profile-name">Usuario</strong>
+        <span id="profile-username" class="profile-username"></span>
+        <!-- profile-status se mantiene pero oculto; JS lo usa para sync interno -->
+        <span class="profile-status" style="display:none"></span>
+      </div>
+      <div class="profile-popover-actions">
+        <button id="profile-view-btn" class="profile-view-btn" type="button" title="Ver mi perfil" hidden>👤 Mi Perfil</button>
+        <button id="logout-btn" class="profile-logout profile-logout--red" type="button">🏟️→ Cerrar sesión</button>
+      </div>
     </div>
-    <div class="profile-copy">
-      <span class="profile-kicker">Perfil Futbolero</span>
-      <strong id="profile-name">Usuario</strong>
-      <span id="profile-username" class="profile-username"></span>
-      <span class="profile-status">Conectado</span>
-    </div>
-    <button id="profile-view-btn" class="profile-view-btn" type="button" title="Ver mi perfil" hidden>👤 Mi Perfil</button>
-    <button id="logout-btn" class="profile-logout" type="button">Cerrar sesión</button>
   </div>
 
 <!-- Campana de notificaciones -->

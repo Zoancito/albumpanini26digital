@@ -30,6 +30,36 @@ const profileAvatarImg = document.getElementById('profile-avatar-img');
 const profileAvatarFallback = document.getElementById('profile-avatar-fallback');
 const logoutButton = document.getElementById('logout-btn');
 
+// ── Floating profile fab toggle ──
+(function initProfileFab() {
+  const fab = document.getElementById('profile-fab');
+  const popover = document.getElementById('profile-popover');
+  if (!fab || !popover) return;
+
+  fab.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = !popover.hidden;
+    popover.hidden = isOpen;
+    fab.setAttribute('aria-expanded', String(!isOpen));
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!popover.hidden && !userProfile?.contains(e.target)) {
+      popover.hidden = true;
+      fab.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !popover.hidden) {
+      popover.hidden = true;
+      fab.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
+
 let accessMode = null;
 let currentUser = null;
 let cloudSyncTimer = null;
@@ -2390,66 +2420,7 @@ document.getElementById('btn-talentos')?.addEventListener('click', () => {
   openTalentosOcultosModal();
 });
 
-// ════════════ COUNTDOWN INAUGURAL ════════════
-(function initCountdown() {
-  const TARGET = new Date('2026-06-11T19:00:00Z');
-
-  const el = document.createElement('div');
-  el.id = 'countdown-bar';
-  el.setAttribute('aria-label', 'Cuenta regresiva al partido inaugural México vs Sudáfrica');
-  el.innerHTML = `
-    <div class="cd-deco" aria-hidden="true">
-      <div class="cd-lines">
-        <span class="cd-dash"></span>
-        <span class="cd-dash"></span>
-        <span class="cd-dash"></span>
-      </div>
-      <span class="cd-ball">⚽</span>
-    </div>
-    <div class="cd-inner">
-      <div class="cd-label">MÉXICO vs SUDÁFRICA &nbsp;·&nbsp; PITAZO INICIAL</div>
-      <div class="cd-units">
-        <div class="cd-unit"><span class="cd-n" id="cd-d">--</span><span class="cd-l">DÍAS</span></div>
-        <div class="cd-sep">:</div>
-        <div class="cd-unit"><span class="cd-n" id="cd-h">--</span><span class="cd-l">HRS</span></div>
-        <div class="cd-sep">:</div>
-        <div class="cd-unit"><span class="cd-n" id="cd-m">--</span><span class="cd-l">MIN</span></div>
-        <div class="cd-sep">:</div>
-        <div class="cd-unit"><span class="cd-n" id="cd-s">--</span><span class="cd-l">SEG</span></div>
-      </div>
-      <div class="cd-sub">11 Jun 2026 · 13:00 h CST · Estadio Azteca · Ciudad de México</div>
-    </div>
-    <div class="cd-deco cd-deco-r" aria-hidden="true">
-      <span class="cd-ball">⚽</span>
-      <div class="cd-lines">
-        <span class="cd-dash"></span>
-        <span class="cd-dash"></span>
-        <span class="cd-dash"></span>
-      </div>
-    </div>
-  `;
-
-  const header = document.getElementById('app-header');
-  if (header) header.appendChild(el);
-
-  function tick() {
-    const diff = TARGET - new Date();
-    if (diff <= 0) {
-      const units = el.querySelector('.cd-units');
-      if (units) units.innerHTML = '<div class="cd-started">¡EL MUNDIAL HA COMENZADO! ⚽</div>';
-      return;
-    }
-    const pad = n => String(n).padStart(2, '0');
-    const cdD = document.getElementById('cd-d');
-    if (!cdD) return;
-    cdD.textContent                              = pad(Math.floor(diff / 86400000));
-    document.getElementById('cd-h').textContent = pad(Math.floor((diff % 86400000) / 3600000));
-    document.getElementById('cd-m').textContent = pad(Math.floor((diff % 3600000) / 60000));
-    document.getElementById('cd-s').textContent = pad(Math.floor((diff % 60000) / 1000));
-  }
-  tick();
-  setInterval(tick, 1000);
-})();
+// COUNTDOWN INAUGURAL eliminado — evento pasado (11 Jun 2026)
 
 // ════════════ CÓDIGOS PANINI ════════════
 (function initPaniniCodes() {
