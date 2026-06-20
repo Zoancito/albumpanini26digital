@@ -283,6 +283,74 @@ const WORLD_CUPS = [
 ];
 
 // ── Audio state ──────────────────────────────────────
+// ════════════════════════════════════════════════════
+//  Competiciones — Historia ya no es solo Mundiales.
+//  Por ahora solo "mundial" tiene contenido real; el resto
+//  muestra el aviso de "en construcción" hasta que se cargue
+//  su data (mismo patrón que WORLD_CUPS más arriba).
+// ════════════════════════════════════════════════════
+const COMPETITIONS = [
+  { id: 'mundial',            label: 'Mundial',             icon: '🌍' },
+  { id: 'champions',          label: 'Champions League',    icon: '⭐' },
+  { id: 'libertadores',       label: 'Libertadores',        icon: '🏆' },
+  { id: 'eurocopa',           label: 'Eurocopa',            icon: '🇪🇺' },
+  { id: 'copa-america',       label: 'Copa América',        icon: '🌎' },
+  { id: 'asia',               label: 'Copa Asiática',       icon: '🌏' },
+  { id: 'africa',             label: 'Copa Africana',       icon: '🦁' },
+  { id: 'sudamericana',       label: 'Sudamericana',        icon: '🥈' },
+  { id: 'confederaciones',    label: 'Confederaciones',     icon: '🕓' },
+  { id: 'europa-league',      label: 'Europa League',       icon: '🟠' },
+  { id: 'conference-league',  label: 'Conference League',   icon: '🟢' },
+  { id: 'nations-league',     label: 'Nations League',      icon: '🔷' },
+];
+let _activeCompetition = 'mundial';
+
+function renderCompTabs() {
+  const wrap = document.getElementById('mun-comp-tabs');
+  if (!wrap) return;
+  wrap.innerHTML = COMPETITIONS.map(c => `
+    <button class="mun-comp-tab${c.id === _activeCompetition ? ' active' : ''}" data-comp="${c.id}" role="tab" aria-selected="${c.id === _activeCompetition}">
+      ${c.icon} <span class="mun-comp-tab-label">${c.label}</span>
+    </button>
+  `).join('');
+  wrap.querySelectorAll('.mun-comp-tab').forEach(btn => {
+    btn.addEventListener('click', () => selectCompetition(btn.dataset.comp));
+  });
+}
+
+function selectCompetition(id) {
+  _activeCompetition = id;
+  renderCompTabs();
+
+  const grid         = document.getElementById('mun-grid');
+  const construction  = document.getElementById('mun-construction');
+  const eyebrow       = document.getElementById('mun-eyebrow');
+  const title         = document.getElementById('mun-title');
+  const sub           = document.getElementById('mun-sub');
+  const comp          = COMPETITIONS.find(c => c.id === id);
+
+  // La vista de detalle (podio, hito, contexto…) es específica del Mundial
+  const dv = document.getElementById('mun-detail-view');
+  if (dv?.classList.contains('visible')) {
+    munStopAudio();
+    dv.classList.remove('visible');
+    dv.setAttribute('aria-hidden', 'true');
+  }
+
+  if (id === 'mundial') {
+    if (grid) grid.style.display = '';
+    if (construction) construction.style.display = 'none';
+    if (title) title.innerHTML = 'HISTORIA DE LOS <span>MUNDIALES</span>';
+    if (sub) sub.textContent = 'Pasa el cursor sobre cada edición para descubrirla · Haz clic para explorarla';
+  } else {
+    if (grid) grid.style.display = 'none';
+    if (construction) construction.style.display = '';
+    if (title) title.innerHTML = `HISTORIA — <span>${comp?.label || ''}</span>`;
+    if (sub) sub.textContent = 'Pronto vas a poder explorar esta competición igual que el Mundial';
+  }
+  if (eyebrow) eyebrow.textContent = 'Panini · Experiencia Histórica';
+}
+
 let munAudio   = null;
 let munPlaying = false;
 let munCurrentWC = null;
@@ -518,13 +586,10 @@ window.openMundiales = function () {
   const overlay = document.getElementById('mundiales-overlay');
   if (!overlay) return;
   munStopAudio();
-  // If called from welcome screen, hide ws temporarily
-  const ws = document.getElementById('ws');
-  const fromWelcome = ws && !ws.classList.contains('off');
-  if (fromWelcome) ws.style.opacity = '0';
   overlay.classList.add('visible');
-  overlay.dataset.fromWelcome = fromWelcome ? '1' : '0';
   document.body.style.overflow = 'hidden';
+  renderCompTabs();
+  selectCompetition(_activeCompetition);
   renderMundialesGallery();
 };
 
@@ -532,17 +597,13 @@ function closeMundiales() {
   const overlay = document.getElementById('mundiales-overlay');
   if (!overlay) return;
   munStopAudio();
-  const fromWelcome = overlay.dataset.fromWelcome === '1';
   overlay.classList.remove('visible');
   document.body.style.overflow = '';
   // Reset detail view
   const dv = document.getElementById('mun-detail-view');
   if (dv) { dv.classList.remove('visible'); dv.setAttribute('aria-hidden','true'); }
-  // Restore welcome screen if that's where we came from
-  if (fromWelcome) {
-    const ws = document.getElementById('ws');
-    if (ws) ws.style.opacity = '';
-  }
+  // La próxima vez que se abra, empieza de nuevo en Mundial
+  _activeCompetition = 'mundial';
 }
 
 document.addEventListener('DOMContentLoaded', () => {

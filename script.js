@@ -2050,7 +2050,7 @@ let a11yPrefs = {
   textSize: 'normal',
   theme: 'dark',
   touchUI: false,
-  labels: false,
+  labels: true,
   visualRadio: false,
   reduceMotion: false,
   keyboardNav: false
@@ -2077,6 +2077,10 @@ function applyA11yPrefs(){
 
   document.querySelectorAll('.a11y-font-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.size === a11yPrefs.textSize));
   document.querySelectorAll('.a11y-mode-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === a11yPrefs.theme));
+
+  // El tamaño de letra y las etiquetas de texto pueden cambiar la altura del
+  // header sticky; se reajusta tras el repintado.
+  requestAnimationFrame(() => { if (typeof syncHeaderHeightVar === 'function') syncHeaderHeightVar(); });
 
   const setChecked = (id,val) => {
     const el = document.getElementById(id);
@@ -2345,6 +2349,30 @@ document.addEventListener('click', e => {
 // ── Coleccionismo overlay ──────────────────────────
 document.getElementById('coleccionismo-close')?.addEventListener('click', () => {
   document.getElementById('coleccionismo-overlay')?.classList.remove('visible');
+});
+
+// ── Navegación: header siempre visible ─────────────
+// Vuelve a Grada (feed) cerrando cualquier overlay de sección que esté abierto
+function goHome() {
+  document.getElementById('coleccionismo-overlay')?.classList.remove('visible');
+  document.getElementById('mundiales-overlay')?.classList.remove('visible');
+  document.getElementById('calendar-overlay')?.classList.remove('visible');
+  window.scrollTo({ top: 0, behavior: a11yPrefs.reduceMotion ? 'auto' : 'smooth' });
+}
+window.goHome = goHome;
+document.getElementById('btn-home')?.addEventListener('click', goHome);
+
+// El header es sticky; los overlays necesitan saber su altura real (varía por
+// viewport vía clamp()) para no quedar tapados debajo de él.
+function syncHeaderHeightVar() {
+  const header = document.getElementById('app-header');
+  if (!header) return;
+  document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
+}
+syncHeaderHeightVar();
+window.addEventListener('resize', () => {
+  clearTimeout(window._headerHResizeT);
+  window._headerHResizeT = setTimeout(syncHeaderHeightVar, 150);
 });
 
 document.getElementById('compose-fab')?.addEventListener('click', () => {

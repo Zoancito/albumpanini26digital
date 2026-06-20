@@ -42,17 +42,23 @@
 
 
 <!-- MUNDIALES OVERLAY -->
-<div id="mundiales-overlay" role="dialog" aria-modal="true" aria-label="Historia de los Mundiales">
+<div id="mundiales-overlay" role="dialog" aria-modal="true" aria-label="Historia del fútbol">
   <div id="mun-gallery-view">
     <div class="mun-header">
       <button class="mun-back-home" id="mun-close" aria-label="Volver a Grada">← Volver</button>
       <div class="mun-header-titles">
-        <div class="mun-eyebrow">Panini · Experiencia Histórica</div>
-        <h2 class="mun-title">HISTORIA DE LOS <span>MUNDIALES</span></h2>
-        <p class="mun-sub">Pasa el cursor sobre cada edición para descubrirla · Haz clic para explorarla</p>
+        <div class="mun-eyebrow" id="mun-eyebrow">Panini · Experiencia Histórica</div>
+        <h2 class="mun-title" id="mun-title">HISTORIA DE LOS <span>MUNDIALES</span></h2>
+        <p class="mun-sub" id="mun-sub">Pasa el cursor sobre cada edición para descubrirla · Haz clic para explorarla</p>
       </div>
     </div>
+    <div class="mun-comp-tabs" id="mun-comp-tabs" role="tablist" aria-label="Elegir competición"></div>
     <div class="mun-grid" id="mun-grid"></div>
+    <div class="mun-construction" id="mun-construction" style="display:none">
+      <span class="mun-construction-icon" aria-hidden="true">🚧</span>
+      <p class="mun-construction-text">Esta competición está en construcción por ahora</p>
+      <p class="mun-construction-sub">Estamos armando su historia, ediciones y datos — vuelve pronto.</p>
+    </div>
   </div>
   <div id="mun-detail-view" aria-hidden="true">
     <div class="mun-detail-inner" id="mun-detail-inner"></div>
@@ -163,9 +169,10 @@
   <h1>GRADA</h1>
   <p class="header-sub">Lo que se vive en la cancha, se comenta en la Grada</p>
   <div id="header-nav">
+    <button class="action-btn nav-brand-btn" id="btn-home" aria-label="Ir a Grada, inicio">🏟️ <span class="btn-label">Grada</span></button>
     <button class="action-btn" id="btn-coleccionismo" aria-label="Abrir álbum de cromos" onclick="startAlbum()">🗂️ <span class="btn-label">Coleccionismo</span></button>
     <button class="action-btn" id="btn-amigos" aria-label="Buscar amigos coleccionistas">🔎 <span class="btn-label">Amigos</span></button>
-    <button class="action-btn" id="btn-mundiales-header" aria-label="Ver historia de los mundiales" onclick="openMundiales()">🌍 <span class="btn-label">Mundiales</span></button>
+    <button class="action-btn" id="btn-mundiales-header" aria-label="Ver historia de los torneos" onclick="openMundiales()">📜 <span class="btn-label">Historia</span></button>
     <button class="action-btn" id="btn-calendario-header" aria-label="Ver calendario de partidos" onclick="openCalendar()">📅 <span class="btn-label">Calendario</span></button>
     <button class="action-btn" id="btn-talentos" aria-label="Talentos Ocultos">🌟 <span class="btn-label">Talentos</span></button>
     <button class="action-btn" id="btn-radio" aria-label="Activar radio">📻 <span class="btn-label">Radio</span></button>
@@ -320,6 +327,11 @@
     <button class="radio-btn play-btn" id="radio-play" aria-label="Reproducir o pausar">▶</button>
     <button class="radio-btn" id="radio-next" aria-label="Siguiente canción">⏭</button>
     <button class="radio-btn stop-btn" id="radio-stop" aria-label="Detener radio y cerrar">⏹</button>
+  </div>
+  <div id="vol-bar">
+    <span class="vol-icon" id="vol-mute-btn" title="Silenciar/activar" aria-label="Silenciar o activar volumen">🔊</span>
+    <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="60" style="--pct:60%" aria-label="Control de volumen">
+    <span class="vol-label" id="vol-label">60%</span>
   </div>
   <div class="radio-stream-links">
     <a class="radio-stream-btn spotify" href="https://open.spotify.com/playlist/18y8kfuN7fvFbdd8M0I9Qi?si=ci2QGbwVR4egCwDlY6RNEg" target="_blank" rel="noopener" title="Playlist oficial en Spotify">
@@ -567,17 +579,10 @@
       <div class="stat-card" style="--accent:#818cf8"><span class="stat-value" id="s-res">0</span><span class="stat-label">📌 Reservadas</span></div>
     </div>
 
-    <div id="vol-bar">
-      <span class="vol-icon" id="vol-mute-btn" title="Silenciar/activar" aria-label="Silenciar o activar volumen">🔊</span>
-      <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="60" style="--pct:60%" aria-label="Control de volumen">
-      <span class="vol-label" id="vol-label">60%</span>
-    </div>
-
     <div id="controls">
       <input type="text" id="search" placeholder="🔍  Buscar jugador o selección..." aria-label="Buscar jugador o selección">
       <button class="action-btn primary" id="btn-pdf" aria-label="Exportar PDF">📄 <span class="btn-label">Exportar PDF</span></button>
       <button class="action-btn" id="btn-intercambios" aria-label="Intercambio de cromos">🔄 <span class="btn-label">Intercambios</span></button>
-      <button class="action-btn" id="btn-calendario" aria-label="Ver calendario de partidos" onclick="openCalendar()">📅 <span class="btn-label">Calendario</span></button>
       <button class="action-btn" id="btn-reset" style="border-color:#e50914;color:#e57373" aria-label="Reiniciar álbum">🗑 <span class="btn-label">Reiniciar</span></button>
     </div>
 

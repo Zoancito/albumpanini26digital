@@ -60,7 +60,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
 .chat-send{width:42px;border-radius:10px;border:1px solid var(--gold);background:var(--gold);color:#111;font-family:'Barlow Condensed',sans-serif;font-weight:700;cursor:pointer}
 .chat-send:disabled{opacity:.55;cursor:not-allowed}
 .chat-note{padding:10px 12px;color:var(--dim);font-size:.76rem;text-align:center;border-top:1px solid var(--border)}
-#app-header{background:linear-gradient(135deg,#0a0f1e 0%,#0e1628 50%,#0a0f1e 100%);border-bottom:1px solid #1e2f4a;padding:24px 20px 18px;text-align:center;position:relative;overflow:hidden}
+#app-header{background:linear-gradient(135deg,#0a0f1e 0%,#0e1628 50%,#0a0f1e 100%);border-bottom:1px solid #1e2f4a;padding:24px 20px 18px;text-align:center;position:sticky;top:0;z-index:10200;overflow:hidden}
 #app-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(245,197,24,.07) 0%,transparent 70%);pointer-events:none}
 .header-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.25em;color:var(--gold);text-transform:uppercase;margin-bottom:8px}
 #app-header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,6vw,3.5rem);letter-spacing:.04em;color:#fff;line-height:1}
@@ -263,7 +263,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
 .vol-label{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:600;color:var(--dim);min-width:34px;text-align:right}
 
 /* ── RADIO PLAYER (fixed bottom) ── */
-#radio-bar{position:fixed;bottom:0;left:0;right:0;z-index:800;background:rgba(7,11,20,.96);backdrop-filter:blur(18px);border-top:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:14px;transform:translateY(100%);transition:transform .4s cubic-bezier(.32,.72,0,1)}
+#radio-bar{position:fixed;bottom:0;left:0;right:0;z-index:10200;background:rgba(7,11,20,.96);backdrop-filter:blur(18px);border-top:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:14px;transform:translateY(100%);transition:transform .4s cubic-bezier(.32,.72,0,1)}
 #radio-bar.visible{transform:translateY(0)}
 #radio-bar .radio-icon{font-size:1.4rem;flex-shrink:0}
 .radio-info{flex:1;min-width:0}
@@ -662,7 +662,7 @@ html[data-theme="contrast"] .codes-warn{background:#1a0000;border-color:#ff4444;
    ═══════════════════════════════════════════════════ */
 
 /* ── Overlay principal ── */
-#mundiales-overlay{position:fixed;inset:0;z-index:10000;background:var(--bg);display:none;flex-direction:column;overflow:hidden}
+#mundiales-overlay{position:fixed;inset:0;z-index:10000;background:var(--bg);display:none;flex-direction:column;overflow:hidden;padding-top:var(--header-h,150px)}
 #mundiales-overlay.visible{display:flex}
 
 /* ── Gallery view ── */
@@ -829,7 +829,7 @@ html[data-theme="contrast"] .mun-card-song-badge{background:rgba(0,0,0,.8);borde
 
 #calendar-overlay{
   position:fixed;inset:0;z-index:10000;background:var(--bg);
-  display:none;flex-direction:column;overflow:hidden;
+  display:none;flex-direction:column;overflow:hidden;padding-top:var(--header-h,150px);
 }
 #calendar-overlay.visible{display:flex}
 
@@ -2588,7 +2588,7 @@ html[data-theme="light"] .fp-menu{box-shadow:0 8px 24px rgba(0,0,0,.12)}
 
 /* ── Coleccionismo overlay — mismo patrón que #mundiales-overlay ── */
 #coleccionismo-overlay{position:fixed;inset:0;z-index:10000;background:var(--bg);
-  display:none;flex-direction:column;overflow:hidden}
+  display:none;flex-direction:column;overflow:hidden;padding-top:var(--header-h,150px)}
 #coleccionismo-overlay.visible{display:flex}
 
 .coleccionismo-header{display:flex;align-items:flex-start;gap:20px;
@@ -2625,3 +2625,45 @@ html[data-theme="light"] #coleccionismo-overlay{background:var(--bg)}
   #header-nav .action-btn{padding:8px 14px}
   .coleccionismo-header{padding:16px}
 }
+
+/* ══════════════════════════════════════════════
+   GRADA — Header siempre visible + radio persistente
+   ══════════════════════════════════════════════ */
+
+/* ── Botón de marca / inicio en header-nav ── */
+.nav-brand-btn{border-color:rgba(245,197,24,.4);font-weight:700}
+.nav-brand-btn:hover{background:rgba(245,197,24,.15);border-color:var(--gold);color:var(--gold)}
+
+/* ── Control de volumen reubicado dentro de la barra de radio ── */
+#radio-bar #vol-bar{max-width:none;margin:0;padding:0;gap:6px;flex-shrink:0}
+#radio-bar .vol-slider{flex:none;width:64px}
+#radio-bar .vol-label{min-width:30px;font-size:.68rem}
+@media(max-width:480px){
+  #radio-bar #vol-bar{display:none}
+}
+
+/* ── Evitar que compose-fab choque con la barra de radio activa ── */
+body.radio-active .compose-fab{bottom:84px}
+
+/* ── Accesibilidad / temas para el botón de marca ── */
+html[data-theme="contrast"] .nav-brand-btn{border-color:#ffde00;color:#ffde00}
+
+/* ══════════════════════════════════════════════
+   GRADA — Historia: selector de competiciones
+   ══════════════════════════════════════════════ */
+.mun-comp-tabs{display:flex;gap:8px;padding:14px 32px;overflow-x:auto;border-bottom:1px solid var(--border);flex-shrink:0;scrollbar-width:thin}
+.mun-comp-tab{flex-shrink:0;padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.mun-comp-tab:hover{background:var(--card2);color:var(--text);border-color:#334a6e}
+.mun-comp-tab.active{background:var(--gold);color:#111;border-color:var(--gold)}
+
+.mun-construction{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px;gap:10px}
+.mun-construction-icon{font-size:3rem;line-height:1}
+.mun-construction-text{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);margin:0}
+.mun-construction-sub{font-size:.85rem;color:var(--dim);margin:0;max-width:42ch}
+
+@media(max-width:600px){
+  .mun-comp-tab-label{display:none}
+  .mun-comp-tab{padding:8px 12px}
+}
+
+html[data-theme="contrast"] .mun-comp-tab.active{background:#ffde00;color:#000;border-color:#ffde00}
