@@ -437,7 +437,7 @@ export function updateHeaderProfile(profile) {
   if (usernameEl) usernameEl.textContent = '@' + profile.username
 
   const link = document.getElementById('profile-public-link')
-  if (link) { link.href = `https://albumpanini26digital.vercel.app/perfil/${profile.username}`; link.hidden = false }
+  if (link) { link.href = `https://lagrada.vercel.app/perfil/${profile.username}`; link.hidden = false }
 
   const viewBtn = document.getElementById('profile-view-btn')
   if (viewBtn) viewBtn.hidden = false
@@ -492,7 +492,7 @@ export function openProfileViewModal() {
       : '<span class="pview-empty">No seleccionados aún</span>'
   }
 
-  const pubUrl = `https://albumpanini26digital.vercel.app/perfil/${p.username}`
+  const pubUrl = `https://lagrada.vercel.app/perfil/${p.username}`
   const linkEl = document.getElementById('pview-public-link')
   if (linkEl) { linkEl.href = pubUrl; linkEl.textContent = pubUrl }
 
