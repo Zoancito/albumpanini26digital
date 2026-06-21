@@ -246,22 +246,26 @@
     display: inline-flex;
   }
 
-  /* FABs suben sobre la tab bar */
-  .compose-fab {
-    bottom: calc(var(--mob-tab-h) + env(safe-area-inset-bottom) + 16px) !important;
-  }
-
+  /* FABs separados para que no se solapsen:
+     a11y (♿) queda pegado a la tab bar,
+     compose (✏️ publicar) sube 64px más */
   #a11y-fab {
     bottom: calc(var(--mob-tab-h) + env(safe-area-inset-bottom) + 16px);
+    right: 16px;
   }
 
-  /* Cuando la radio está abierta, los FABs suben más */
-  body.mob-radio-open .compose-fab {
+  .compose-fab {
     bottom: calc(var(--mob-tab-h) + env(safe-area-inset-bottom) + 80px) !important;
+    right: 16px !important;
   }
 
+  /* Con radio abierta, ambos suben la altura de la radio bar (~64px) */
   body.mob-radio-open #a11y-fab {
-    bottom: calc(var(--mob-tab-h) + env(safe-area-inset-bottom) + 80px);
+    bottom: calc(var(--mob-tab-h) + env(safe-area-inset-bottom) + 16px + 64px);
+  }
+
+  body.mob-radio-open .compose-fab {
+    bottom: calc(var(--mob-tab-h) + env(safe-area-inset-bottom) + 80px + 64px) !important;
   }
 }
 
@@ -403,7 +407,7 @@ html[data-theme="contrast"] #mob-backdrop   { background: rgba(0,0,0,.85); }
     border: 1px solid var(--border);
     border-bottom: none;
     border-radius: var(--mob-radius) var(--mob-radius) 0 0;
-    padding: 0 16px 20px;
+    padding: 0 14px 16px;
     transform: translateY(110%);
     transition: transform var(--mob-t);
     box-shadow: 0 -8px 40px rgba(0,0,0,.5);
@@ -414,32 +418,32 @@ html[data-theme="contrast"] #mob-backdrop   { background: rgba(0,0,0,.85); }
   }
 
   #mob-more-handle {
-    width: 40px;
+    width: 36px;
     height: 4px;
     border-radius: 2px;
     background: var(--muted, #4b5563);
-    margin: 12px auto 16px;
+    margin: 10px auto 12px;
     opacity: .5;
   }
 
   #mob-more-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    gap: 8px;
   }
 
   .mob-more-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 14px 8px;
+    gap: 4px;
+    padding: 10px 6px;
     background: var(--bg, #0b1122);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 12px;
     color: var(--text, #f1f5f9);
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: .75rem;
+    font-size: .72rem;
     font-weight: 600;
     letter-spacing: .04em;
     text-transform: uppercase;
@@ -454,7 +458,7 @@ html[data-theme="contrast"] #mob-backdrop   { background: rgba(0,0,0,.85); }
   }
 
   .mob-more-icon {
-    font-size: 1.6rem;
+    font-size: 1.35rem;   /* antes 1.6rem — más compacto */
     line-height: 1;
   }
 }
@@ -480,4 +484,21 @@ html[data-theme="contrast"] .mob-more-item {
   background: #111;
   border-color: #fff;
   color: #fff;
+}
+
+
+/* ══════════════════════════════════════════════
+   7. BANNER VISUAL DE RADIO — baja bajo el header
+   ══════════════════════════════════════════════ */
+@media (max-width: 860px) {
+  #radio-visual-banner {
+    /* Usa --header-h que script.js actualiza en resize */
+    top: calc(var(--header-h, 64px) + 8px);
+    font-size: .8rem;
+    padding: 7px 14px;
+    max-width: calc(100vw - 32px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
