@@ -499,14 +499,13 @@ html.reduce-motion *,html.reduce-motion *::before,html.reduce-motion *::after{
 }
 @media(max-width:1180px){
   .album-shell{grid-template-columns:minmax(220px,260px) minmax(0,1fr);padding-inline:14px}
+  /* chat-panel se oculta en tablet; responsive.css lo convierte en bottom sheet en móvil */
   .chat-panel{display:none}
 }
+/* ── 860px: el layout de columna lo maneja responsive.css
+   Solo conservamos aquí lo que responsive.css NO sobreescribe ── */
 @media(max-width:860px){
-  .album-shell{display:flex;flex-direction:column;padding-inline:0}
-  .social-panel{position:relative;top:auto;width:calc(100% - 28px);margin:0 auto}
-  .chat-panel{display:flex;min-height:420px}
   .album-main{width:100%}
-  .social-panel-body{max-height:none}
 }
 @media(max-width:700px){
   #stats-bar{grid-template-columns:repeat(2,1fr)!important}
@@ -2671,7 +2670,7 @@ html[data-theme="light"] #coleccionismo-overlay{background:var(--bg)}
   #radio-bar #vol-bar{display:none}
 }
 
-/* ── Evitar que compose-fab choque con la barra de radio activa ── */
+/* compose-fab con radio activo — responsive.css añade el offset de la tab bar en móvil */
 body.radio-active .compose-fab{bottom:84px}
 
 /* ── Accesibilidad / temas para el botón de marca ── */
