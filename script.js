@@ -105,6 +105,44 @@ function enterAlbumShell(mode, user = null) {
 setupProfileViewButton();
 initAmigos();
 
+// Convertir amigos-overlay en panel flotante: envolver contenido en .amigos-shell
+// y cerrar al hacer click en el backdrop
+(function wrapAmigosShell() {
+  function setupShellWrapper(overlay) {
+    // Close on backdrop click (click outside the inner card)
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) goHome();
+    });
+
+    function doWrap() {
+      if (overlay.children.length && !overlay.querySelector('.amigos-shell')) {
+        const shell = document.createElement('div');
+        shell.className = 'amigos-shell';
+        while (overlay.firstChild) shell.appendChild(overlay.firstChild);
+        overlay.appendChild(shell);
+      }
+    }
+    doWrap();
+
+    // Re-wrap if amigos.js re-renders the content
+    new MutationObserver(doWrap).observe(overlay, { childList: true });
+  }
+
+  const existing = document.getElementById('amigos-overlay');
+  if (existing) {
+    setupShellWrapper(existing);
+  } else {
+    // amigos-overlay is created dynamically — wait for it
+    new MutationObserver(function(_, obs) {
+      const overlay = document.getElementById('amigos-overlay');
+      if (overlay) {
+        obs.disconnect();
+        setupShellWrapper(overlay);
+      }
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+})();
+
 function getUserDisplayName(user) {
   const metadata = user?.user_metadata || {};
   return metadata.name || metadata.full_name || user?.email || 'Coleccionista';
@@ -2387,6 +2425,8 @@ function goHome() {
   document.getElementById('coleccionismo-overlay')?.classList.remove('visible');
   document.getElementById('mundiales-overlay')?.classList.remove('visible');
   document.getElementById('calendar-overlay')?.classList.remove('visible');
+  document.getElementById('amigos-overlay')?.classList.remove('visible');
+  document.body.style.overflow = '';
   window.scrollTo({ top: 0, behavior: a11yPrefs.reduceMotion ? 'auto' : 'smooth' });
 }
 window.goHome = goHome;

@@ -60,12 +60,14 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
 .chat-send{width:42px;border-radius:10px;border:1px solid var(--gold);background:var(--gold);color:#111;font-family:'Barlow Condensed',sans-serif;font-weight:700;cursor:pointer}
 .chat-send:disabled{opacity:.55;cursor:not-allowed}
 .chat-note{padding:10px 12px;color:var(--dim);font-size:.76rem;text-align:center;border-top:1px solid var(--border)}
-#app-header{background:linear-gradient(135deg,#0a0f1e 0%,#0e1628 50%,#0a0f1e 100%);border-bottom:1px solid #1e2f4a;padding:24px 20px 18px;text-align:center;position:sticky;top:0;z-index:10200;overflow:hidden}
+#app-header{background:linear-gradient(135deg,#0a0f1e 0%,#0e1628 50%,#0a0f1e 100%);border-bottom:1px solid #1e2f4a;padding:8px 80px 8px;text-align:center;position:sticky;top:0;z-index:10200;overflow:hidden}
 #app-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(245,197,24,.07) 0%,transparent 70%);pointer-events:none}
-.header-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.25em;color:var(--gold);text-transform:uppercase;margin-bottom:8px}
-#app-header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,6vw,3.5rem);letter-spacing:.04em;color:#fff;line-height:1}
-#app-header h1 span{color:var(--gold)}
-.header-sub{color:var(--dim);font-size:.82rem;margin-top:6px;font-weight:300}
+.header-logo-wrap{display:flex;align-items:center;justify-content:center;margin:0 auto 2px}
+.header-logo{height:38px;width:auto;display:block;user-select:none;pointer-events:none}
+.header-logo--light{display:none}
+html[data-theme="light"] .header-logo--dark{display:none}
+html[data-theme="light"] .header-logo--light{display:block}
+.header-sub{color:var(--dim);font-size:.75rem;margin-top:2px;font-weight:300;letter-spacing:.03em}
 #stats-bar{max-width:900px;margin:16px auto;padding:0 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;position:relative;overflow:hidden}
 .stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent,var(--gold));opacity:.6}
@@ -337,11 +339,10 @@ html[data-theme="contrast"] .social-pill{color:#ff0;border-color:#ff0}
 html[data-theme="contrast"] .social-empty{border-color:#fff;color:#fff}
 html[data-theme="light"] #app-header{background:linear-gradient(135deg,#eef3fb 0%,#dde8f7 50%,#eef3fb 100%)}
 html[data-theme="contrast"] #app-header{background:#000;border-bottom:2px solid #fff}
-html[data-theme="light"] #app-header h1{color:#0b1626}
-html[data-theme="contrast"] #app-header h1,
-html[data-theme="contrast"] #app-header h1 span,
-html[data-theme="contrast"] .header-eyebrow,
+html[data-theme="light"] .header-sub{color:var(--dim)}
 html[data-theme="contrast"] .header-sub{color:#fff}
+html[data-theme="contrast"] .header-logo--dark{display:block}
+html[data-theme="contrast"] .header-logo--light{display:none}
 
 #a11y-fab{
   position:fixed;right:16px;bottom:88px;z-index:10500;width:52px;height:52px;border-radius:50%;
@@ -1612,10 +1613,24 @@ html[data-theme="contrast"] .profile-view-btn{
 
 #amigos-overlay{
   position:fixed;inset:0;z-index:9800;
-  background:var(--bg);
-  display:none;flex-direction:column;overflow:hidden;
+  background:rgba(4,9,20,.72);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  display:none;align-items:flex-start;justify-content:center;
+  padding:calc(var(--header-h,90px) + 12px) 16px 20px;
+  overflow:hidden;
 }
 #amigos-overlay.visible{display:flex}
+#amigos-overlay > .amigos-shell{
+  width:100%;max-width:680px;
+  max-height:calc(100vh - var(--header-h,90px) - 32px);
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:20px;
+  box-shadow:0 28px 64px rgba(0,0,0,.65);
+  display:flex;flex-direction:column;overflow:hidden;
+  animation:amigosPanelIn .22s cubic-bezier(.22,1,.36,1);
+}
+@keyframes amigosPanelIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
 
 /* ── Header ── */
 .amigos-header{
@@ -1771,7 +1786,8 @@ html[data-theme="light"] .amigos-card{background:#fff;border-color:#c6d3e6}
 html[data-theme="light"] .amigos-card:hover{background:#f5f8fd;border-color:rgba(212,164,0,.5)}
 html[data-theme="light"] .amigos-card-tag{background:#eef3fb;border-color:#c6d3e6}
 
-html[data-theme="contrast"] #amigos-overlay{background:#000}
+html[data-theme="contrast"] #amigos-overlay{background:rgba(0,0,0,.85)}
+html[data-theme="contrast"] #amigos-overlay > .amigos-shell{background:#000;border-color:#fff}
 html[data-theme="contrast"] .amigos-header{background:#000;border-bottom:2px solid #fff}
 html[data-theme="contrast"] .amigos-back{background:#000;border-color:#fff;color:#fff}
 html[data-theme="contrast"] .amigos-input{background:#111;border-color:#fff;color:#fff}
@@ -2128,13 +2144,13 @@ html[data-theme="light"] .trivia-box{box-shadow:0 12px 40px rgba(0,0,0,.12)}
    ══════════════════════════════════════════════ */
 
 /* ── Campana de notificaciones ── */
-#notif-wrap{position:relative;display:inline-flex;align-items:center}
+#notif-wrap{position:fixed;top:14px;right:14px;z-index:10300;display:inline-flex;align-items:center}
 .notif-bell-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;transition:all .2s}
 .notif-bell-btn:hover{background:var(--bg3);transform:scale(1.06)}
 .notif-badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:var(--red);color:#fff;font-size:.65rem;font-weight:900;display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--card);font-family:'Barlow Condensed',sans-serif;pointer-events:none}
 
 /* ── Panel de notificaciones ── */
-#notif-panel{position:absolute;top:calc(100% + 8px);right:0;width:320px;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 16px 40px rgba(0,0,0,.3);z-index:9000;display:none;flex-direction:column;overflow:hidden;animation:notifPanelIn .25s ease}
+#notif-panel{position:absolute;top:calc(100% + 8px);right:0;width:320px;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 16px 40px rgba(0,0,0,.3);z-index:10400;display:none;flex-direction:column;overflow:hidden;animation:notifPanelIn .25s ease}
 #notif-panel.open{display:flex}
 @keyframes notifPanelIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 .notif-panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
