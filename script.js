@@ -494,15 +494,24 @@ document.addEventListener('click', e => {
 
 
 // ── Navegación: header siempre visible ─────────────
-// Vuelve a Grada (feed) cerrando cualquier overlay de sección que esté abierto
-function goHome() {
+// Cierra TODOS los overlays de sección sin resetear scroll ni tab.
+// Llamar antes de abrir cualquier sección para exclusividad.
+window.closeAllOverlays = function () {
   document.getElementById('coleccionismo-overlay')?.classList.remove('visible');
-  document.getElementById('mundiales-overlay')?.classList.remove('visible');
+  if (typeof window.closeMundiales === 'function') {
+    window.closeMundiales();
+  } else {
+    document.getElementById('mundiales-overlay')?.classList.remove('visible');
+  }
   document.getElementById('calendar-overlay')?.classList.remove('visible');
   document.getElementById('amigos-overlay')?.classList.remove('visible');
   document.body.style.overflow = '';
+};
+
+// Vuelve a Grada (feed) cerrando cualquier overlay de sección que esté abierto
+function goHome() {
+  window.closeAllOverlays();
   window.scrollTo({ top: 0, behavior: a11yPrefs.reduceMotion ? 'auto' : 'smooth' });
-  // Notifica a mobile-nav.js para que resetee el tab activo a "feed"
   document.dispatchEvent(new CustomEvent('gradaGoHome'));
 }
 window.goHome = goHome;

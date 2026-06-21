@@ -180,6 +180,8 @@
   function handleMore(action) {
     closeMore();
     backdrop.classList.remove('mob-backdrop-visible');
+    // Cierra toda sección abierta antes de abrir la nueva
+    window.closeAllOverlays?.();
 
     switch (action) {
       case 'album':

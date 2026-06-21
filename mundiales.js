@@ -583,6 +583,8 @@ function renderMundialesGallery() {
 
 // ── Open / Close overlay ─────────────────────────────
 window.openMundiales = function () {
+  // Cerrar cualquier otra sección abierta antes de abrir Historia
+  window.closeAllOverlays?.();
   const overlay = document.getElementById('mundiales-overlay');
   if (!overlay) return;
   munStopAudio();
@@ -605,6 +607,8 @@ function closeMundiales() {
   // La próxima vez que se abra, empieza de nuevo en Mundial
   _activeCompetition = 'mundial';
 }
+// Exponer globalmente para que closeAllOverlays lo llame
+window.closeMundiales = closeMundiales;
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('mun-close')?.addEventListener('click', closeMundiales);
