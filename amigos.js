@@ -458,6 +458,8 @@ function openChat(friend) {
   loadChatMessages({ scroll: true })
   clearInterval(_chatRefreshTimer)
   _chatRefreshTimer = setInterval(() => loadChatMessages(), 5000)
+  // Notifica a mobile-nav.js para abrir el bottom sheet de chat en móvil
+  document.dispatchEvent(new CustomEvent('gradaChatOpened'))
 }
 
 function closeChat() {

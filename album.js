@@ -1,0 +1,1574 @@
+// ════════════════════════════════════════════════════════════════
+// ALBUM.JS — Álbum de cromos Panini Mundial 2026
+// Extraído de script.js: datos de selecciones/grupos, himnos, estado
+// de cromos, render del álbum, overlay de país, PDF, búsqueda y reset.
+//
+// Este módulo no importa nada de script.js: recibe del núcleo (auth,
+// volumen maestro, navegación) vía initAlbum(deps). Sí importa
+// directamente de radio.js (pauseRadio/isRadioPlaying/etc.) porque
+// el himno y la radio se pausan mutuamente — acoplamiento intencional
+// entre estos dos módulos "hermanos".
+// ════════════════════════════════════════════════════════════════
+import { supabase } from './supabase.js'
+import { getCurrentProfile } from './profiles.js'
+import { checkCountryMedals, checkAlbumComplete, showMedalUnlockToast } from './medals.js'
+import { openTriviaModal } from './trivia.js'
+import { openOnceIdealModal } from './once-ideal.js'
+import { syncExchangeOffers } from './intercambios.js'
+import { pauseRadio, isRadioPlaying, isRadioVisible, hasRadioAudio } from './radio.js'
+
+// Dependencias inyectadas por script.js en initAlbum() — evita que este
+// módulo tenga que importar nada del núcleo (sin ciclo con script.js).
+let _deps = {
+  getEffectiveVolume: () => 1,
+  setProfileStatus: () => {},
+  getProfileStatus: () => '',
+  getCurrentUser: () => null,
+  getAccessMode: () => null,
+  applyMasterVolume: () => {},
+  pushUiState: () => {},
+};
+
+// Llamado UNA vez por script.js, justo tras importar este módulo y antes
+// de cualquier login/interacción — por eso las funciones de abajo pueden
+// usar _deps.algo() con confianza incluso dentro de callbacks de clic.
+export function initAlbum(deps) {
+  Object.assign(_deps, deps);
+}
+
+// ════════════ DATA ════════════
+const STORAGE_KEY = 'album_panini_2026_v2';
+const CLOUD_PROGRESS_TABLE = 'album_progress';
+const CLOUD_ALBUM_ID = 'wc2026';
+const INTRO_DATA = ["WE ARE PANINI Logo","Official Emblem /1","Official Emblem /2","Official Mascots","Official Slogan","Official Ball","Host Country Emblem - CAN","Host Country Emblem - MEX","Host Country Emblem - USA"];
+const albumData = {
+  "🇲🇽 México":["Mexico Logo","Luis Malagón","Johan Vásquez","César Montes","Jesús Gallardo","Israel Reyes","Edson Álvarez","Marcel Ruiz","Hirving Lozano","Raúl Jiménez","Alexis Vega","Roberto Alvarado"],
+  "🇿🇦 Sudáfrica":["South Africa Logo","Ronwen Williams","Aubrey Modiba","Mbekezeli Mbokazi","Siyabonga Ngezana","Khuliso Mudau","Teboho Mokoena","Yaya Sithole","Bathusi Aubaas","Sipho Mbule","Lyle Foster","Oswin Appollis"],
+  "🇰🇷 República de Corea":["Korea Republic Logo","Hyeonwoo Jo","Minjae Kim","Yumin Cho","Youngwoo Seol","Jaesung Lee","Inbeom Hwang","Kangin Lee","Jens Castrop","Heungmin Son","Heechan Hwang","Hyeongyu Oh"],
+  "🇨🇿 República Checa":["Czechia Logo","Matěj Kovář","Ladislav Krejčí","Vladimír Coufal","Jaroslav Zelený","Lukáš Provod","Lukáš Červ","Tomáš Souček","Pavel Šulc","Václav Černý","Adam Hložek","Patrik Schick"],
+  "🇨🇦 Canadá":["Canada Logo","Dayne St. Clair","Alphonso Davies","Richie Laryea","Derek Cornelius","Stephen Eustáquio","Ismaël Koné","Jacob Shaffelburg","Niko Sigur","Tajon Buchanan","Cyle Larin","Jonathan David"],
+  "🇧🇦 Bosnia y Herzegovina":["Bosnia-Herzegovina Logo","Nikola Vasilj","Amar Dedić","Sead Kolašinac","Tarik Muharemović","Nikola Katić","Benjamin Tahirović","Ivan Šunjić","Ermedin Demirović","Esmir Bajraktarević","Edin Džeko","Amar Memić"],
+  "🇶🇦 Catar":["Qatar Logo","Meshaal Barsham","Sultan Albrake","Boualem Khoukhi","Pedro Miguel","Mohammed Mannai","Karim Boudiaf","Assim Madibo","Edmílson Junior","Akram Hassan Afif","Ahmed Al-Ganehi","Almoez Ali"],
+  "🇨🇭 Suiza":["Switzerland Logo","Gregor Kobel","Manuel Akanji","Ricardo Rodríguez","Nico Elvedi","Silvan Widmer","Granit Xhaka","Remo Freuler","Fabian Rieder","Breel Embolo","Rubén Vargas","Dan Ndoye"],
+  "🇧🇷 Brasil":["Brazil Logo","Alisson","Marquinhos","Éder Militão","Gabriel Magalhães","Casemiro","Bruno Guimarães","Vinícius Júnior","Rodrygo","Matheus Cunha","Raphinha","Estêvão"],
+  "🇲🇦 Marruecos":["Morocco Logo","Yassine Bounou","Achraf Hakimi","Noussair Mazraoui","Nayef Aguerd","Romain Saïss","Sofyan Amrabat","Eliesse Ben Seghir","Bilal El Khannouss","Ismael Saibari","Youssef En-Nesyri","Brahim Díaz"],
+  "🇭🇹 Haití":["Haiti Logo","Johny Placide","Carlens Arcus","Ricardo Adé","Duke Lacroix","Leverton Pierre","Danley Jean Jacques","Jean-Ricner Bellegarde","Josué Casimir","Ruben Providence","Duckens Nazon","Frantzdy Pierrot"],
+  "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia":["Scotland Logo","Angus Gunn","Aaron Hickey","Andrew Robertson","John Souttar","Grant Hanley","Scott McTominay","Lewis Ferguson","Ryan Christie","John McGinn","Ché Adams","Ben Gannon-Doak"],
+  "🇺🇸 EE. UU.":["USA Logo","Matt Freese","Chris Richards","Tim Ream","Mark McKenzie","Tyler Adams","Weston McKennie","Timothy Weah","Malik Tillman","Christian Pulisic","Brenden Aaronson","Folarin Balogun"],
+  "🇵🇾 Paraguay":["Paraguay Logo","Orlando Gill","Gustavo Gómez","Juan José Cáceres","Omar Alderete","Júnior Alonso","Diego Gómez","Andrés Cubas","Julio Enciso","Miguel Almirón","Ramón Sosa","Antonio Sanabria"],
+  "🇦🇺 Australia":["Australia Logo","Mathew Ryan","Harry Souttar","Aziz Behich","Cameron Burgess","Lewis Miller","Jackson Irvine","Riley McGree","Aiden O'Neill","Connor Metcalfe","Kusini Yengi","Nestory Irankunda"],
+  "🇹🇷 Turquía":["Turkey Logo","Uğurcan Çakır","Mert Müldür","Abdülkerim Bardakcı","Merih Demiral","Ferdi Kadıoğlu","Hakan Çalhanoğlu","Orkun Kökçü","Arda Güler","Can Uzun","Kerem Aktürkoğlu","Kenan Yıldız"],
+  "🇩🇪 Alemania":["Germany Logo","Marc-André ter Stegen","Antonio Rüdiger","Jonathan Tah","David Raum","Florian Wirtz","Joshua Kimmich","Leon Goretzka","Jamal Musiala","Serge Gnabry","Kai Havertz","Nick Woltemade"],
+  "🇨🇼 Curaçao":["Curaçao Logo","Eloy Room","Armando Obispo","Sherel Floranus","Roshon van Eijma","Shurandy Sambo","Livano Comenencia","Juninho Bacuna","Leandro Bacuna","Kenji Gorré","Jürgen Locadia","Sontje Hansen"],
+  "🇨🇮 Costa de Marfil":["Côte d'Ivoire Logo","Yahia Fofana","Ghislain Konan","Wilfried Singo","Evan Ndicka","Willy Boly","Franck Kessié","Seko Fofana","Ibrahim Sangaree","Sébastien Haller","Simon Adingra","Evann Guessand"],
+  "🇪🇨 Ecuador":["Ecuador Logo","Hernán Galíndez","Piero Hincapié","Pervis Estupiñán","Willian Pacho","Ángelo Preciado","Kendry Páez","Moisés Caicedo","Alan Franco","Pedro Vite","Gonzalo Plata","Enner Valencia"],
+  "🇳🇱 Países Bajos":["Netherlands Logo","Bart Verbruggen","Virgil van Dijk","Micky van de Ven","Denzel Dumfries","Tijjani Reijnders","Ryan Gravenberch","Frenkie de Jong","Xavi Simons","Memphis Depay","Donyell Malen","Cody Gakpo"],
+  "🇯🇵 Japón":["Japan Logo","Zion Suzuki","Tsuyoshi Watanabe","Kaishu Sano","Ao Tanaka","Daichi Kamada","Ritsu Doan","Keito Nakamura","Takumi Minamino","Takefusa Kubo","Shuto Machino","Ayase Ueda"],
+  "🇸🇪 Suecia":["Sweden Logo","Viktor Johansson","Isak Hien","Emil Holm","Victor Nilsson Lindelöf","Lucas Bergvall","Yasin Ayari","Daniel Svensson","Dejan Kulusevski","Anthony Elanga","Alexander Isak","Viktor Gyökeres"],
+  "🇹🇳 Túnez":["Tunisia Logo","Aymen Dahmen","Montassar Talbi","Yassine Meriah","Ali Abdi","Ferjani Sassi","Ellyes Skhiri","Aïssa Laïdouni","Hannibal Mejbri","Naïm Sliti","Elias Achouri","Hazem Mastouri"],
+  "🇧🇪 Bélgica":["Belgium Logo","Thibaut Courtois","Arthur Theate","Timothy Castagne","Maxim De Cuyper","Youri Tielemans","Kevin De Bruyne","Amadou Onana","Jérémy Doku","Charles De Ketelaere","Leandro Trossard","Romelu Lukaku"],
+  "🇪🇬 Egipto":["Egypt Logo","Mohamed Elshenawy","Mohamed Hany","Yasser Ibrahim","Ramy Rabia","Marwan Attia","Zizo","Hamdy Fathy","Omar Marmoush","Mohamed Salah","Mostafa Mohamed","Trezeguet"],
+  "🇮🇷 RI de Irán":["IR Iran Logo","Alireza Beiranvand","Shojae Khalilzadeh","Milad Mohammadi","Ramin Rezaeian","Hossein Kanaani","Saeed Ezatolahi","Saman Ghoddos","Mohammad Mohebi","Mehdi Taremi","Sardar Azmoun","Alireza Jahanbakhsh"],
+  "🇳🇿 Nueva Zelanda":["New Zealand Logo","Max Crocombe","Michael Boxall","Liberato Cacace","Tim Payne","Finn Surman","Marko Stamenić","Joe Bell","Sarpreet Singh","Matthew Garbett","Chris Wood","Elijah Just"],
+  "🇪🇸 España":["Spain Logo","Unai Simón","Robin Le Normand","Dean Huijsen","Marc Cucurella","Rodri","Martín Zubimendi","Pedri","Fabián Ruiz","Lamine Yamal","Nico Williams","Mikel Oyarzabal"],
+  "🇨🇻 Cabo Verde":["Cabo Verde Logo","Vozinha","Logan Costa","Pico","Steven Moreira","João Paulo","Kevin Pina","Jamiro Monteiro","Yannick Semedo","Ryan Mendes","Jovane Cabral","Dailon Livramento"],
+  "🇸🇦 Arabia Saudí":["Saudi Arabia Logo","Nawaf Alaqidi","Hassan Altambakti","Jehad Thikri","Saud Abdulhamid","Nasser Aldawsari","Abdullah Alkhaibari","Musab Aljuwayr","Feras Albrikan","Salem Aldawsari","Saleh Abu Alshamat","Saleh Alshehri"],
+  "🇺🇾 Uruguay":["Uruguay Logo","Sergio Rochet","José María Giménez","Ronald Araújo","Sebastián Cáceres","Mathías Olivera","Nahitan Nández","Federico Valverde","Rodrigo Bentancur","Manuel Ugarte","Facundo Pellistri","Darwin Núñez"],
+  "🇫🇷 Francia":["France Logo","Mike Maignan","William Saliba","Jules Koundé","Théo Hernández","Aurélien Tchouaméni","Eduardo Camavinga","Ousmane Dembélé","Kylian Mbappé","Bradley Barcola","Désiré Doué","Hugo Ekitiké"],
+  "🇸🇳 Senegal":["Senegal Logo","Édouard Mendy","Kalidou Koulibaly","Moussa Niakhaté","El Hadji Malick Diouf","Idrissa Gana Gueye","Pape Matar Sarr","Sadio Mané","Iliman Ndiaye","Krépin Diatta","Ismaïla Sarr","Nicolas Jackson"],
+  "🇮🇶 Irak":["Iraq Logo","Jalal Hassan","Hussein Ali","Akam Hashem","Merchas Doski","Zaid Tahseen","Zidane Iqbal","Amir Al-Ammari","Ibrahim Bayesh","Ali Jasim","Aimar Sher","Mohanad Ali"],
+  "🇳🇴 Noruega":["Norway Logo","Ørjan Nyland","Julian Ryerson","Kristoffer Vassbakk Ajer","David Møller Wolfe","Martin Ødegaard","Sander Berge","Patrick Berg","Erling Haaland","Antonio Nusa","Oscar Bobb","Alexander Sørloth"],
+  "🇦🇷 Argentina":["Argentina Logo","Emiliano Martínez","Nahuel Molina","Cristian Romero","Nicolás Otamendi","Enzo Fernández","Alexis Mac Allister","Rodrigo De Paul","Julián Alvarez","Lionel Messi","Giuliano Simeone","Lautaro Martínez"],
+  "🇩🇿 Argelia":["Algeria Logo","Alexis Guendouz","Rayan Aït-Nouri","Ramy Bensebaini","Youcef Atal","Aïssa Mandi","Nabil Bentaleb","Riyad Mahrez","Saïd Benrahma","Amine Gouiri","Mohamed Amoura","Baghdad Bounedjah"],
+  "🇦🇹 Austria":["Austria Logo","Alexander Schlager","David Alaba","Kevin Danso","Philipp Lienhart","Konrad Laimer","Nicolas Seiwald","Marcel Sabitzer","Florian Grillitsch","Marko Arnautović","Christoph Baumgartner","Michael Gregoritsch"],
+  "🇯🇴 Jordania":["Jordan Logo","Yazeed Abulaila","Mohammad Abu Hashish","Yazan Al-Arab","Abdallah Nasib","Ibrahim Saadeh","Nizar Al-Rashdan","Noor Al-Rawabdeh","Yazan Al-Naimat","Mousa Al-Taamari","Mahmoud Al-Mardi","Ali Olwan"],
+  "🇵🇹 Portugal":["Portugal Logo","Diogo Costa","Rúben Dias","Nuno Mendes","Vitinha","Bernardo Silva","Bruno Fernandes","Rúben Neves","Cristiano Ronaldo","João Félix","Pedro Neto","Rafael Leão"],
+  "🇨🇩 República Democrática del Congo":["Congo DR Logo","Lionel Mpasi","Aaron Wan-Bissaka","Axel Tuanzebe","Arthur Masuaku","Chancel Mbemba","Ngal'ayel Mukau","Samuel Moutoussamy","Noah Sadiki","Théo Bongonda","Yoane Wissa","Cédric Bakambu"],
+  "🇺🇿 Uzbekistán":["Uzbekistan Logo","Utkir Yusupov","Abdukodir Khusanov","Farrukh Sayfiev","Sherzod Nasrullaev","Husniddin Aliqulov","Rustam Ashurmatov","Khojiakbar Alijonov","Odiljon Hamrobekov","Otabek Shukurov","Eldor Shomurodov","Abbosbek Fayzullaev"],
+  "🇨🇴 Colombia":["Colombia Logo","Camilo Vargas","Dávinson Sánchez","Yerry Mina","Daniel Muñoz","James Rodríguez","Jefferson Lerma","Richard Ríos","Juan Fernando Quintero","Luis Díaz","Jhon Arias","Luis Suárez"],
+  "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra":["England Logo","Jordan Pickford","Reece James","John Stones","Jude Bellingham","Declan Rice","Jordan Henderson","Phil Foden","Harry Kane","Bukayo Saka","Cole Palmer","Marcus Rashford"],
+  "🇭🇷 Croacia":["Croatia Logo","Dominik Livaković","Duje Ćaleta-Car","Joško Gvardiol","Josip Stanišić","Ivan Perišić","Luka Modrić","Mateo Kovačić","Lovro Majer","Mario Pašalić","Ante Budimir","Andrej Kramarić"],
+  "🇬🇭 Ghana":["Ghana Logo","Lawrence Ati Zigi","Alidu Seidu","Alexander Djiku","Gideon Mensah","Caleb Yirenkyi","Thomas Partey","Abdul Issahaku Fatawu","Mohammed Kudus","Kamaldeen Sulemana","Jordan Ayew","Antoine Semenyo"],
+  "🇵🇦 Panamá":["Panama Logo","Orlando Mosquera","Michael Amir Murillo","Andrés Andrade","Fidel Escobar","Aníbal Godoy","Cristian Martínez","Adalberto Carrasquilla","Édgar Bárcenas","José Fajardo","Ismael Díaz","José Luis Rodríguez"]
+};
+const GROUPS = {
+  A:['🇲🇽 México','🇿🇦 Sudáfrica','🇰🇷 República de Corea','🇨🇿 República Checa'],
+  B:['🇨🇦 Canadá','🇧🇦 Bosnia y Herzegovina','🇶🇦 Catar','🇨🇭 Suiza'],
+  C:['🇧🇷 Brasil','🇲🇦 Marruecos','🇭🇹 Haití','🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia'],
+  D:['🇺🇸 EE. UU.','🇵🇾 Paraguay','🇦🇺 Australia','🇹🇷 Turquía'],
+  E:['🇩🇪 Alemania','🇨🇼 Curaçao','🇨🇮 Costa de Marfil','🇪🇨 Ecuador'],
+  F:['🇳🇱 Países Bajos','🇯🇵 Japón','🇸🇪 Suecia','🇹🇳 Túnez'],
+  G:['🇧🇪 Bélgica','🇪🇬 Egipto','🇮🇷 RI de Irán','🇳🇿 Nueva Zelanda'],
+  H:['🇪🇸 España','🇨🇻 Cabo Verde','🇸🇦 Arabia Saudí','🇺🇾 Uruguay'],
+  I:['🇫🇷 Francia','🇸🇳 Senegal','🇮🇶 Irak','🇳🇴 Noruega'],
+  J:['🇦🇷 Argentina','🇩🇿 Argelia','🇦🇹 Austria','🇯🇴 Jordania'],
+  K:['🇵🇹 Portugal','🇨🇩 República Democrática del Congo','🇺🇿 Uzbekistán','🇨🇴 Colombia'],
+  L:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra','🇭🇷 Croacia','🇬🇭 Ghana','🇵🇦 Panamá']
+};
+const GROUP_COLORS = {
+  A:'#ff6b35',B:'#2dd4bf',C:'#fbbf24',D:'#f43f5e',
+  E:'#4ade80',F:'#a78bfa',G:'#fb923c',H:'#38bdf8',
+  I:'#e879f9',J:'#34d399',K:'#c084fc',L:'#f87171'
+};
+
+// For jsPDF (r,g,b)
+const GROUP_RGB = {
+  A:[255,107,53],B:[45,212,191],C:[251,191,36],D:[244,63,94],
+  E:[74,222,128],F:[167,139,250],G:[251,146,60],H:[56,189,248],
+  I:[232,121,249],J:[52,211,153],K:[192,132,252],L:[248,113,113]
+};
+const GROUP_INFO = {
+  A:{label:'Grupo del Anfitrión',analysis:'México llega como favorito absoluto siendo co-anfitrión con el respaldo de millones de aficionados. La República de Corea con Heung-min Son es la principal amenaza, mientras Sudáfrica y la República Checa buscan la sorpresa.',tags:['México Favorito','Son vs Jiménez','Sorpresa: Sudáfrica']},
+  B:{label:'Grupo del Talento Joven',analysis:'Canadá como co-anfitrión trae una generación histórica con Davies y Jonathan David. Suiza, siempre competitiva, complica cualquier pronóstico. Bosnia y Herzegovina con Džeko busca su mejor resultado mundialista.',tags:['Davies & David','Suiza Sólida','Bosnia Peligrosa']},
+  C:{label:'El Grupo del Maracanazo',analysis:'Brasil, la selección más laureada del mundo, es el gran favorito del grupo. Marruecos llega como la revelación de Qatar 2022 y buscará revalidar su histórica actuación. Haití y Escocia completan un grupo de alto nivel.',tags:['Brasil 5x Campeón','Marruecos Revelación','QF 2022: Marruecos']},
+  D:{label:'Grupo Norteamérica vs Mundo',analysis:'EE.UU. como co-anfitrión sueña con una actuación histórica en casa liderada por Christian Pulisic. Turquía con Arda Güler y Australia, que llegó a octavos en Qatar, hacen de este grupo uno de los más disputados.',tags:['Pulisic Estrella','Arda Güler Joya','Australia en Alza']},
+  E:{label:'Grupo de la Potencia Europea',analysis:'Alemania busca reivindicarse tras la decepción de Qatar 2022 con Wirtz y Musiala como su dúo más emocionante en años. Costa de Marfil con Haller y Ecuador con Moisés Caicedo son adversarios de máximo respeto.',tags:['Alemania Favorita','Wirtz & Musiala','Caicedo Top 5 Mundo']},
+  F:{label:'Grupo del Juego Veloz',analysis:'Países Bajos busca su elusivo primer título con Van Dijk y Gakpo. Japón demostró en Qatar 2022 que puede eliminar a cualquier favorito. Suecia con Gyökeres e Isak tiene el mejor ataque de su historia reciente.',tags:['Oranje Naranja','Japón Sorprendió QF22','Gyökeres Imparable']},
+  G:{label:'Grupo de los Reyes de África',analysis:'Bélgica con De Bruyne intenta ganar algo con su generación dorada antes de que expire. Egipto con Salah es la gran potencia africana. Irán, siempre competitiva, y Nueva Zelanda completan un grupo equilibrado.',tags:['De Bruyne Mundial','Mo Salah 900 Goles','Irán Compacta']},
+  H:{label:'Grupo de los Campeones',analysis:'España, ganadora del Mundial 2010, trae a Lamine Yamal, el prodigio del Barcelona. Uruguay con Valverde y Darwin Núñez defiende la tradición de la garra charrúa. Arabia Saudí recuerda que puede dar sorpresas.',tags:['Lamine Yamal 17 años','Valverde Top Mundo','Sorpresa: Arabia Saudí']},
+  I:{label:'Grupo de la Muerte',analysis:'Francia con Mbappé es el máximo favorito al título del grupo y del torneo. Senegal ganó 2 Copas Africanas consecutivas. Noruega de Haaland buscará su primer Mundial de impacto. El más difícil de predecir.',tags:['Mbappé El Mejor','Haaland Debut Mundial','Senegal 2x CAF Champ']},
+  J:{label:'Grupo del Campeón Vigente',analysis:'Argentina defiende el título del mundo con Messi en lo que podría ser su última Copa del Mundo. Argelia con Mahrez busca su primer gran resultado mundialista. Austria con Alaba sorprende siempre. Jordania es la revelación de Asia.',tags:['Messi Último Baile','Mahrez Líder Argelia','Alaba Real Madrid']},
+  K:{label:'Grupo Ibérico y Africano',analysis:'Portugal con Cristiano Ronaldo busca su primer Mundial. Bernardo Silva y Bruno Fernandes rodean al astro portugués. Colombia con Luis Díaz y James Rodríguez es la gran amenaza. DR Congo y Uzbekistán sorprenderán.',tags:['Ronaldo 900 Goles','Luis Díaz Liverpool','Uzbekistán Debut']},
+  L:{label:'Grupo de los Inventores',analysis:'Inglaterra, inventora del fútbol, busca su segundo Mundial con Kane, Bellingham y Foden como tridente histórico. Croacia con Modrić sigue siendo temible. Ghana y Panamá completan un grupo atractivo.',tags:['Kane & Bellingham','Modrić Leyenda','Ghana Sub-campeón CAF']},
+};
+const COUNTRY_DATA = {
+  "🇲🇽 México":{flag:'mx',wiki:'Mexico_national_football_team',nick:'El Tri',conf:'CONCACAF',rank:15,bestWC:'Cuartos de Final (1970, 1986)',founded:1927,achiev:['16 Mundiales consecutivos','Juegos Olímpicos Oro 1996','10 × Campeonato CONCACAF'],history:'La selección mexicana, conocida como <strong>"El Tri"</strong>, es la potencia histórica de la CONCACAF con 16 participaciones mundialistas consecutivas. Su Estadio Azteca es el único en albergar dos finales de Copa del Mundo (1970 y 1986), y la afición mexicana es de las más apasionadas del planeta. Raúl Jiménez e Hirving Lozano lideran esta generación que, en 2026, actúa como <strong>co-anfitrión ante su propio público</strong>, soñando con superar los octavos de final por primera vez en 40 años.'},
+  "🇿🇦 Sudáfrica":{flag:'za',wiki:'South_Africa_national_football_team',nick:'Bafana Bafana',conf:'CAF',rank:68,bestWC:'Fase de Grupos (anfitriones 2010)',founded:1892,achiev:['Copa Africana de Naciones 1996','Primer anfitrión africano de un Mundial','4 × COSAFA Cup'],history:'Los <strong>"Bafana Bafana"</strong> (Los Chicos) son la única nación africana que ha organizado un Mundial, haciendo historia en 2010 ante el mundo. Ganaron la Copa Africana en 1996 como anfitriones con una generación brillante. Lyle Foster y Oswin Appollis representan una nueva era con jugadores forjados en Europa que buscan devolver a Sudáfrica a la élite continental y mundial.'},
+  "🇰🇷 República de Corea":{flag:'kr',wiki:'South_Korea_national_football_team',nick:'Guerreros Taeguk',conf:'AFC',rank:22,bestWC:'Semifinales (2002)',founded:1928,achiev:['Semifinales Mundial 2002 (únicos en Asia)','2 × Copa Asiática (1956, 1960)','9 Mundiales consecutivos'],history:'Los <strong>"Guerreros Taeguk"</strong> protagonizaron la mayor sorpresa mundialista en 2002 al llegar a las semifinales como co-anfitriones, siendo la única nación asiática en lograr tal hazaña. <strong>Heung-min Son</strong>, capitán del Tottenham, es uno de los mejores extremos del planeta. Su generación también incluyó la eliminación de Portugal en Qatar 2022, demostrando su talento para las sorpresas.'},
+  "🇨🇿 República Checa":{flag:'cz',wiki:'Czech_Republic_national_football_team',nick:'Los Leones',conf:'UEFA',rank:37,bestWC:'Cuartos de Final (herederos de Checoslovaquia)',founded:1901,achiev:['Final Eurocopa 1996 (República Checa)','Copa del Mundo Checoslovaquia: Final 1962','Balón de Oro 2003: Pavel Nedvěd'],history:'Heredera del glorioso legado de <strong>Checoslovaquia</strong>, la República Checa llegó a la final de la Eurocopa 1996 con una generación brillante. Pavel Nedvěd, Balón de Oro 2003, es su mayor leyenda. Hoy, <strong>Patrik Schick y Adam Hložek</strong> lideran la promisoria generación checa con talento en las mejores ligas europeas que busca devolver al país al mapa futbolístico mundial.'},
+  "🇨🇦 Canadá":{flag:'ca',wiki:'Canada_national_soccer_team',nick:'Les Rouges',conf:'CONCACAF',rank:47,bestWC:'Octavos Qatar 2022 (debut moderno)',founded:1912,achiev:['Copa de Oro CONCACAF 2000','Liga de Naciones CONCACAF 2022','Primera clasificación en 36 años (Qatar 2022)'],history:'Los <strong>"Les Rouges"</strong> vivieron su renacimiento mundialista en Qatar 2022, su primer Mundial en 36 años. <strong>Alphonso Davies</strong> del Bayern Múnich y <strong>Jonathan David</strong>, uno de los máximos goleadores de Europa, forman la dupla más emocionante de su historia. Como co-anfitriones en 2026, ante su propia afición, sueñan con ir más lejos que nunca y consolidar el fútbol canadiense.'},
+  "🇧🇦 Bosnia y Herzegovina":{flag:'ba',wiki:'Bosnia_and_Herzegovina_national_football_team',nick:'Zmajevi (Los Dragones)',conf:'UEFA',rank:54,bestWC:'Fase de Grupos (2014, debut)',founded:1992,achiev:['Debut Mundial 2014 con victoria ante Argentina','Edin Džeko: máximo goleador histórico','Copa COSAFA 2023'],history:'Esta nación de apenas 30 años de historia futbolística debutó brillantemente en el <strong>Mundial 2014</strong>, donde marcó goles a campeones como Argentina. La generación de <strong>Edin Džeko</strong> —uno de los grandes delanteros de su época— puso el fútbol balcánico en el mapa. Ahora Benjamin Tahirović y Amar Memić portan el testigo hacia su segunda actuación mundialista.'},
+  "🇶🇦 Catar":{flag:'qa',wiki:'Qatar_national_football_team',nick:'Al Annabi (Los Granates)',conf:'AFC',rank:58,bestWC:'Fase de Grupos (anfitrión 2022)',founded:1960,achiev:['Copa Asiática 2019','Primer anfitrión árabe del Mundial','Aspire Football Dreams (academia mundial)'],history:'<strong>Catar 2022</strong> fue el primer Mundial árabe de la historia. Como anfitriones, fueron eliminados en fase de grupos, pero el proyecto deportivo catarí es de los más ambiciosos del mundo con inversiones de miles de millones. <strong>Akram Afif</strong>, Balón de Oro de la Copa Asiática 2023, lidera esta selección que busca dejar su huella en el primer Mundial donde participarán como visitantes.'},
+  "🇨🇭 Suiza":{flag:'ch',wiki:'Switzerland_national_football_team',nick:'La Nati',conf:'UEFA',rank:19,bestWC:'Cuartos de Final (1934, 1938, 1954)',founded:1895,achiev:['Cuartos de Final 3 Mundiales','13 participaciones mundialistas','Logro: Octavos en Qatar 2022'],history:'La <strong>"Nati"</strong> es sinónimo de consistencia mundialista con 13 participaciones históricas. Su extraordinaria mezcla de culturas germana, italiana y francesa la convierte en un caso único. <strong>Granit Xhaka</strong>, capitán del Arsenal, es el guerrero que personifica el espíritu helvético. En Qatar 2022, eliminaron a Serbia y llegaron a cuartos, demostrando que siempre compiten aunque nunca sean favoritos.'},
+  "🇧🇷 Brasil":{flag:'br',wiki:'Brazil_national_football_team',nick:'A Canarinha',conf:'CONMEBOL',rank:5,bestWC:'Campeón (1958, 1962, 1970, 1994, 2002)',founded:1914,achiev:['5 Copas del Mundo (récord mundial)','Único en participar en todos los Mundiales','9 × Copa América'],history:'La <strong>"Canarinha"</strong> es la selección más exitosa del mundo con <strong>5 títulos mundiales</strong>. El único equipo presente en todos los Mundiales, inventó el "jogo bonito" con leyendas como Pelé, Ronaldo y Ronaldinho. <strong>Vinícius Júnior</strong>, candidato eterno al Balón de Oro, y el joven Estêvão representan la nueva generación dorada que busca la sexta estrella y exorcizar el fantasma del 7-1 de 2014.'},
+  "🇲🇦 Marruecos":{flag:'ma',wiki:'Morocco_national_football_team',nick:'Los Leones del Atlas',conf:'CAF',rank:14,bestWC:'Semifinales Qatar 2022 (¡Primeros africanos!)',founded:1955,achiev:['Primeros africanos en llegar a Semifinales de un Mundial (2022)','Copa Africana de Naciones 1976','2 × Copa Árabe'],history:'Los <strong>"Leones del Atlas"</strong> escribieron el capítulo más emocionante del fútbol africano en Qatar 2022, siendo el <strong>primer equipo del continente en alcanzar las semifinales mundialistas</strong>. Con Achraf Hakimi (PSG), Sofyan Amrabat y una defensa heroica, demostraron que África puede competir con los mejores. En 2026 llegan como candidatos serios a ir aún más lejos.'},
+  "🇭🇹 Haití":{flag:'ht',wiki:'Haiti_national_football_team',nick:'Los Grenadiers',conf:'CONCACAF',rank:102,bestWC:'Fase de Grupos (1974)',founded:1904,achiev:['Mundial 1974 en Alemania','Campeonato CONCACAF varias ediciones','Primer gol haitiano en un Mundial'],history:'Los <strong>"Grenadiers"</strong> tienen una historia emotiva en el fútbol mundial. Participaron en el <strong>Mundial 1974</strong> en Alemania, siendo uno de los equipos caribeños más destacados de esa época. A pesar de las enormes adversidades que enfrenta el país, el fútbol haitiano cuenta con una activa diáspora en Francia y América. <strong>Frantzdy Pierrot</strong> representa las esperanzas de una nación resiliente que nunca se rinde.'},
+  "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia":{flag:'gb-sct',wiki:'Scotland_national_football_team',nick:'Los Guerreros Azules',conf:'UEFA',rank:39,bestWC:'Primera ronda (múltiples participaciones)',founded:1873,achiev:['Primera selección internacional del mundo (1872)','Primer internacional: 0-0 vs Inglaterra','8 participaciones mundialistas'],history:'Escocia es una de las <strong>cuatro asociaciones fundadoras del fútbol moderno</strong>. En 1872 disputó el primer partido internacional de la historia ante Inglaterra. A pesar de su rica tradición, nunca ha superado la fase de grupos mundialista. <strong>Scott McTominay</strong> (Nápoles) y <strong>Andrew Robertson</strong> (Liverpool) lideran la generación actual que busca devolverle el orgullo a la nación del thistles.'},
+  "🇺🇸 EE. UU.":{flag:'us',wiki:"United_States_men's_national_soccer_team",nick:'Stars and Stripes',conf:'CONCACAF',rank:16,bestWC:'Semifinales (1930), Octavos (2022)',founded:1913,achiev:['Semifinalistas del primer Mundial 1930','3 × Copa Oro CONCACAF','Copa América 2024: Sede'],history:'Los <strong>"Stars and Stripes"</strong> llegaron a las semifinales del primer Mundial de 1930 en Uruguay. En Qatar 2022 alcanzaron octavos con <strong>Christian Pulisic</strong> como estandarte. Como co-anfitriones en 2026, con la Major League Soccer en pleno crecimiento y una nueva generación liderada por Pulisic y Gio Reyna, sueñan con hacer historia ante el mundo en su propio territorio.'},
+  "🇵🇾 Paraguay":{flag:'py',wiki:'Paraguay_national_football_team',nick:'La Albirroja',conf:'CONMEBOL',rank:64,bestWC:'Cuartos de Final (2010)',founded:1906,achiev:['2 × Copa América (1953, 1979)','Cuartos de Final: Korea 2002 y Sudáfrica 2010','Campeones absolutos de la CONMEBOL sub-20 (2007)'],history:'La <strong>"Albirroja"</strong> es una potencia histórica del fútbol sudamericano con dos Copas América. Su mejor actuación mundialista fue llegar a cuartos de final en Sudáfrica 2010, donde dieron pelea a España. <strong>Miguel Almirón</strong> del Newcastle y el joven <strong>Julio Enciso</strong> del Brighton representan la nueva guardia de un país con enorme pasión futbolística.'},
+  "🇦🇺 Australia":{flag:'au',wiki:'Australia_national_soccer_team',nick:'Socceroos',conf:'AFC',rank:25,bestWC:'Cuartos de Final (2006), Octavos (2022)',founded:1961,achiev:['Cuartos de Final Alemania 2006','Octavos Qatar 2022','Copa OFC (antes de migrar a AFC)'],history:'Los <strong>"Socceroos"</strong> alcanzaron cuartos en Alemania 2006 con la magia de Harry Kewell y Mark Viduka. En Qatar 2022 eliminaron a Dinamarca con un grupo renovado. Su fútbol híbrido combina intensidad física con la técnica de jugadores forjados en Europa. <strong>Harry Souttar</strong> y el experimentado <strong>Mathew Ryan</strong> lideran esta generación comprometida con llegar aún más lejos.'},
+  "🇹🇷 Turquía":{flag:'tr',wiki:'Turkey_national_football_team',nick:'Ay-Yıldızlılar',conf:'UEFA',rank:29,bestWC:'Tercer lugar (2002)',founded:1923,achiev:['3er Lugar Mundial 2002','Semifinalistas Eurocopa 2008','Hakan Şükür: gol más rápido del Mundial (11 seg, 2002)'],history:'Los turcos alcanzaron su mejor resultado mundialista en 2002 al quedar en <strong>tercer lugar</strong>, con Hakan Şükür marcando el gol más rápido en la historia de un Mundial (11 segundos). <strong>Arda Güler</strong> del Real Madrid, considerado el Mozart del fútbol, y <strong>Hakan Çalhanoğlu</strong> del Inter de Milán lideran una generación de extraordinario talento que sueña con repetir aquella hazaña.'},
+  "🇩🇪 Alemania":{flag:'de',wiki:'Germany_national_football_team',nick:'Die Mannschaft',conf:'UEFA',rank:13,bestWC:'Campeón (1954, 1974, 1990, 2014)',founded:1900,achiev:['4 Copas del Mundo','4 Eurocopas','Más de 900 partidos internacionales jugados'],history:'La <strong>"Mannschaft"</strong> es una de las selecciones más exitosas de la historia con 4 títulos mundiales. Tras la decepción de Qatar 2022, donde cayeron en fase de grupos, el futuro es brillante: <strong>Florian Wirtz</strong> y <strong>Jamal Musiala</strong> forman la dupla más emocionante del fútbol europeo actualmente. Alemania llega a 2026 hambrienta de reivindicación y con una de las generaciones más talentosas de su historia reciente.'},
+  "🇨🇼 Curaçao":{flag:'cw',wiki:'Curaçao_national_football_team',nick:'Los Delfines del Caribe',conf:'CONCACAF',rank:72,bestWC:'Primera clasificación (2026)',founded:1921,achiev:['Clasificación histórica al Mundial 2026','Varias participaciones en Copa Oro','Diáspora activa en Holanda'],history:'La perla del fútbol caribeño. Una nación de apenas 160.000 habitantes que produce <strong>jugadores de alto nivel</strong> gracias a su nutrida diáspora en los Países Bajos. Los hermanos <strong>Juninho y Leandro Bacuna</strong> y el experimentado <strong>Jürgen Locadia</strong> representan la ambición de este pequeño gran equipo. Su clasificación al Mundial 2026 es histórica y sería su debut absoluto en la máxima competición.'},
+  "🇨🇮 Costa de Marfil":{flag:'ci',wiki:'Ivory_Coast_national_football_team',nick:'Los Elefantes',conf:'CAF',rank:50,bestWC:'Fase de Grupos (2006, 2010, 2014)',founded:1960,achiev:['2 × Copa Africana de Naciones (1992, 2015)','Didier Drogba: leyenda mundial','Copa Africana 2023: Campeones (locales)'],history:'Los <strong>"Elefantes"</strong> han conquistado la Copa Africana de Naciones en 1992 y 2015. La generación de <strong>Didier Drogba</strong> —campeón de la Champions con el Chelsea— llevó el fútbol marfileño a la cima mundial. <strong>Sébastien Haller</strong>, quien superó un cáncer testicular con ejemplo y valentía, y <strong>Simon Adingra</strong> del Brighton lideran esta nueva e ilusionante generación.'},
+  "🇪🇨 Ecuador":{flag:'ec',wiki:'Ecuador_national_football_team',nick:'La Tri',conf:'CONMEBOL',rank:36,bestWC:'Octavos de Final (2006)',founded:1925,achiev:['Octavos de Final Alemania 2006','4 participaciones mundialistas','Enner Valencia: máximo goleador histórico'],history:'La <strong>"Tri"</strong> ecuatoriana ha participado en 4 Mundiales con su mejor resultado en los octavos de final de Alemania 2006. <strong>Moisés Caicedo</strong>, uno de los mejores mediocampistas defensivos del mundo en el Chelsea, es la joya más brillante de la historia del fútbol ecuatoriano. El veterano <strong>Enner Valencia</strong>, máximo goleador histórico, es el ejemplo de sacrificio y gol de varias generaciones.'},
+  "🇳🇱 Países Bajos":{flag:'nl',wiki:'Netherlands_national_football_team',nick:'La Naranja Mecánica',conf:'UEFA',rank:8,bestWC:'Finalista (1974, 1978, 2010)',founded:1889,achiev:['3 Finales mundialistas sin título','Eurocopa 1988 con Van Basten y Gullit','Fútbol Total inventado por Cruyff'],history:'La <strong>"Naranja Mecánica"</strong> revolucionó el fútbol mundial en los años 70 con Johan Cruyff y el "fútbol total". Aunque finalistas en 1974, 1978 y 2010, el título mundial se les ha resistido. <strong>Virgil van Dijk</strong>, uno de los mejores defensores del planeta, y <strong>Cody Gakpo</strong> lideran una generación que quiere conquistar lo que históricamente les ha eludido. ¿Será 2026 su año?'},
+  "🇯🇵 Japón":{flag:'jp',wiki:'Japan_national_football_team',nick:'Samurái Azul',conf:'AFC',rank:17,bestWC:'Cuartos de Final (2002), Octavos (2022)',founded:1921,achiev:['Eliminaron a Alemania y España en Qatar 2022','4 × Copa Asiática','9 Mundiales consecutivos'],history:'Los <strong>"Samurái Azul"</strong> escribieron el capítulo de la sorpresa en Qatar 2022 al eliminar a <strong>Alemania y España</strong> en la fase de grupos. Su fútbol veloz, ordenado y lleno de sacrificio colectivo ha conquistado al mundo. <strong>Takefusa Kubo</strong>, formado en La Masía del Barcelona y ahora estrella de la Real Sociedad, y la nueva generación de japoneses en Europa marcan una era dorada del fútbol nipón.'},
+  "🇸🇪 Suecia":{flag:'se',wiki:'Sweden_national_football_team',nick:'Blågult',conf:'UEFA',rank:27,bestWC:'3er Lugar (1994), 4to (1938, 1950)',founded:1904,achiev:['3er Lugar 1994 con Brolin y Larsson','Cuna de Zlatan Ibrahimović','Gyökeres: Mejor Goleador Europa 2024-25'],history:'La <strong>"Blågult"</strong> tiene una de las historias más ricas del fútbol escandinavo: tercer lugar en 1994 con Tomas Brolin y Henrik Larsson. <strong>Zlatan Ibrahimović</strong> fue el jugador más icónico de décadas. Ahora <strong>Alexander Isak</strong> del Newcastle y <strong>Viktor Gyökeres</strong> del Sporting (el máximo goleador de Europa) forman la mejor dupla atacante de la historia reciente de Suecia.'},
+  "🇹🇳 Túnez":{flag:'tn',wiki:'Tunisia_national_football_team',nick:'Águilas de Cartago',conf:'CAF',rank:32,bestWC:'Octavos de Final (2022)',founded:1956,achiev:['7 participaciones mundialistas (récord africano compartido)','Primera victoria africana en un Mundial: 3-1 México (1978)','Copa Africana 2004'],history:'Las <strong>"Águilas de Cartago"</strong> son uno de los equipos africanos con más historia mundialista. En 1978 lograron la <strong>primera victoria africana en un Mundial</strong> al vencer a México. En Qatar 2022 alcanzaron los octavos de final. <strong>Hannibal Mejbri</strong> del Manchester United es el futuro del fútbol tunecino, con una calidad técnica que recuerda a los grandes mediocampistas del continente.'},
+  "🇧🇪 Bélgica":{flag:'be',wiki:'Belgium_national_football_team',nick:'Diablos Rojos',conf:'UEFA',rank:3,bestWC:'3er Lugar (2018)',founded:1895,achiev:['3er Lugar Mundial 2018','Número 1 del ranking FIFA (4 años)','Eurocopa 1980: Subcampeones'],history:'Los <strong>"Diablos Rojos"</strong> alcanzaron el tercer lugar en Rusia 2018 con lo que se llamó su "generación dorada": De Bruyne, Hazard, Lukaku y Courtois. <strong>Kevin De Bruyne</strong>, considerado uno de los mejores mediocampistas de la historia moderna, sigue siendo el faro del equipo. Bélgica busca el éxito que se les ha escapado a pesar de tener uno de los elencos más talentosos del mundo durante una década.'},
+  "🇪🇬 Egipto":{flag:'eg',wiki:'Egypt_national_football_team',nick:'Los Faraones',conf:'CAF',rank:44,bestWC:'Fase de Grupos (1934, 1990, 2018)',founded:1921,achiev:['7 × Copa Africana de Naciones (récord absoluto)','Primera selección africana en un Mundial (1934)','Mohamed Salah: leyenda del Liverpool'],history:'Los <strong>"Faraones"</strong> son los campeones históricos de África con un <strong>récord de 7 títulos de la Copa Africana de Naciones</strong>. Han ganado tres ediciones consecutivas en 1957-59-74. <strong>Mohamed Salah</strong>, considerado el mejor jugador africano de la historia reciente y leyenda del Liverpool, es el ídolo absoluto de más de 100 millones de fanáticos del fútbol en Egipto.'},
+  "🇮🇷 RI de Irán":{flag:'ir',wiki:'Iran_national_football_team',nick:'Selección Melli',conf:'AFC',rank:21,bestWC:'Fase de Grupos (1978, 1998, 2006, 2014, 2018, 2022)',founded:1920,achiev:['3 × Copa Asiática (1968, 1972, 1976)','6 participaciones mundialistas','Primera en eliminar a EE.UU. en 1998'],history:'La <strong>"Selección Melli"</strong> es una de las potencias del fútbol asiático con 6 participaciones mundialistas. En Qatar 2022 protagonizaron momentos dramáticos e históricos, batiendo a Gales. <strong>Mehdi Taremi</strong> del Inter de Milán y <strong>Sardar Azmoun</strong> son los referentes de una generación que combina calidad técnica con una intensidad defensiva reconocida mundialmente.'},
+  "🇳🇿 Nueva Zelanda":{flag:'nz',wiki:'New_Zealand_national_football_team',nick:'All Whites',conf:'OFC',rank:97,bestWC:'Fase de Grupos (1982, 2010)',founded:1891,achiev:['Campeones de Oceanía (múltiples veces)','Invictos en el Mundial 2010 (3 empates)','Chris Wood: máximo goleador histórico'],history:'Los <strong>"All Whites"</strong> tienen una historia mundialista especial con solo dos participaciones. El rugby sigue siendo el deporte rey pero el fútbol crece. En 2010 lograron un mérito histórico: quedaron invictos con tres empates en la fase de grupos. <strong>Chris Wood</strong> del Nottingham Forest, con más de 30 goles internacionales, es el mayor goleador histórico y el símbolo de una generación que aspira a más.'},
+  "🇪🇸 España":{flag:'es',wiki:'Spain_national_football_team',nick:'La Roja',conf:'UEFA',rank:9,bestWC:'Campeón (2010)',founded:1913,achiev:['Mundial 2010','3 × Eurocopa (1964, 2008, 2012)','El "tiki-taka" que cambió el fútbol'],history:'La <strong>"Roja"</strong> ganó su único y glorioso Mundial en Sudáfrica 2010 con el "tiki-taka" que revolucionó el fútbol moderno. Iniesta, Xavi y Villa fueron los héroes. También dominó Europa ganando las Eurocopas de 2008 y 2012. <strong>Lamine Yamal</strong>, con apenas 17 años y prodigio del Barcelona, lidera junto a <strong>Nico Williams</strong> una nueva era dorada española que ya ganó la Eurocopa 2024.'},
+  "🇨🇻 Cabo Verde":{flag:'cv',wiki:'Cape_Verde_national_football_team',nick:'Tubarões Azuis',conf:'CAF',rank:81,bestWC:'Primera clasificación (2026)',founded:1982,achiev:['Cuartos de Final Copa Africana 2021 y 2023','Jugadores en Portugal y España','Jovane Cabral: estrella de la Lazio'],history:'Las <strong>"Tubarões Azuis"</strong> (Tiburones Azules) son la gran revelación del fútbol africano en la última década. Han llegado a cuartos de la Copa Africana en varias ediciones consecutivas. Su selección se nutre de la activa diáspora en Portugal y España. <strong>Jovane Cabral</strong> de la Lazio es su gran figura y símbolo de un archipiélago que produce talento desproporcionado a su tamaño.'},
+  "🇸🇦 Arabia Saudí":{flag:'sa',wiki:'Saudi_Arabia_national_football_team',nick:'Halcones Verdes',conf:'AFC',rank:57,bestWC:'Octavos de Final (1994)',founded:1959,achiev:['3 × Copa Asiática (1984, 1988, 1996)','¡Venció a Argentina 2-1 en Qatar 2022!','Salem Al-Dawsari: héroe nacional'],history:'Los <strong>"Halcones Verdes"</strong> causaron la mayor sorpresa de Qatar 2022 al vencer a la campeona del mundo <strong>Argentina</strong> con un fútbol de presión alta y velocidad impresionante. <strong>Salem Al-Dawsari</strong> fue el héroe de esa noche histórica. Han ganado 3 Copas Asiáticas y su liga atrae ahora a las mayores estrellas del mundo. Buscan reivindicarse en el torneo americano con hambre de protagonismo.'},
+  "🇺🇾 Uruguay":{flag:'uy',wiki:'Uruguay_national_football_team',nick:'La Celeste',conf:'CONMEBOL',rank:18,bestWC:'Campeón (1930, 1950)',founded:1900,achiev:['2 × Copa del Mundo (1930, 1950 - El Maracanazo)','15 × Copa América (récord mundial)','Fundadores del primer Mundial de la historia'],history:'La <strong>"Celeste"</strong> ganó los dos primeros Mundiales de la historia (1930 como anfitrión y 1950 con el legendario Maracanazo). Su <strong>"garra charrúa"</strong> es legendaria en el fútbol mundial. <strong>Federico Valverde</strong> del Real Madrid es el mejor futbolista de América del Sur actualmente, mientras que <strong>Darwin Núñez</strong> del Liverpool es la punta de lanza de esta brillante generación de jugadores orientales.'},
+  "🇫🇷 Francia":{flag:'fr',wiki:'France_national_football_team',nick:'Les Bleus',conf:'UEFA',rank:2,bestWC:'Campeón (1998, 2018), Finalista (2022)',founded:1904,achiev:['2 × Copa del Mundo (1998, 2018)','2 × Eurocopa (1984, 2000)','Mbappé: el más caro en la historia del fútbol'],history:'Los <strong>"Bleus"</strong> han ganado el Mundial en 1998 (de local con el dios Zidane) y en Rusia 2018. <strong>Kylian Mbappé</strong>, el jugador más caro del mundo y delantero del Real Madrid, es considerado el mejor de su generación y posible sucesor del trono de Messi. Con el elenco más talentoso del planeta, Francia es el <strong>máximo favorito</strong> para cualquier competición que dispute en 2026.'},
+  "🇸🇳 Senegal":{flag:'sn',wiki:'Senegal_national_football_team',nick:'Leones de Teranga',conf:'CAF',rank:20,bestWC:'Cuartos de Final (2002), Octavos (2022)',founded:1960,achiev:['2 × Copa Africana de Naciones (2021, 2022)','Cuartos de Final debut mundialista (2002)','Sadio Mané: el rey de África'],history:'Los <strong>"Leones de Teranga"</strong> protagonizaron cuartos de final en el Mundial 2002, su primera participación histórica. Ganaron la Copa Africana de Naciones en <strong>2021 y 2022 consecutivamente</strong>, siendo la mejor selección de África. <strong>Sadio Mané</strong>, dos veces Balón de Oro africano y ex-estrella del Liverpool, es la leyenda viva. <strong>Nicolas Jackson</strong> del Chelsea y Pape Matar Sarr representan el prometedor futuro.'},
+  "🇮🇶 Irak":{flag:'iq',wiki:'Iraq_national_football_team',nick:'Leones de Mesopotamia',conf:'AFC',rank:62,bestWC:'Fase de Grupos (1986)',founded:1948,achiev:['Copa Asiática 2007 (en plena guerra civil)','Participación en el Mundial 1986','Zidane Iqbal: la nueva joya'],history:'Los <strong>"Leones de Mesopotamia"</strong> lograron su mayor hazaña ganando la <strong>Copa Asiática 2007</strong> en plena guerra civil en el país, un logro que unificó a toda la nación y emocionó al mundo entero. <strong>Zidane Iqbal</strong>, nacido en Manchester de familia iraquí y forjado en las academias de Europa, es el futuro del fútbol iraquí con una visión de juego y calidad técnica que marca diferencias.'},
+  "🇳🇴 Noruega":{flag:'no',wiki:'Norway_national_football_team',nick:'Los Vikingos',conf:'UEFA',rank:31,bestWC:'Cuartos de Final (1938, 2002 fallida clasificación)',founded:1902,achiev:['Erling Haaland: El goleador más mortal del planeta','Noveno lugar en 1938','Ole Gunnar Solskjær: leyenda del Manchester United'],history:'Noruega tiene en <strong>Erling Haaland</strong> la mayor estrella del fútbol mundial actual y el delantero más mortal en la historia del deporte. El monstruo del Manchester City ha roto todos los récords posibles de goles. Paradójicamente, Noruega ha luchado por clasificar con su estrella y llega a 2026 con una generación liderada por Haaland, <strong>Martin Ødegaard</strong> y Antonio Nusa que por fin puede hacer historia.'},
+  "🇦🇷 Argentina":{flag:'ar',wiki:'Argentina_national_football_team',nick:'La Albiceleste',conf:'CONMEBOL',rank:1,bestWC:'Campeón (1978, 1986, 2022)',founded:1893,achiev:['3 × Copa del Mundo (1978, 1986, 2022)','15 × Copa América','Lionel Messi: 8 Balones de Oro'],history:'Los <strong>"Albicelestes"</strong> son campeones del mundo en 1978, 1986 con el dios Maradona y 2022 con el inmortal Messi. <strong>Lionel Messi</strong>, ganador de 8 Balones de Oro y considerado el mejor jugador de la historia del fútbol, busca el bicampeonato en lo que podría ser su último Mundial. Con <strong>Julián Álvarez, Enzo Fernández y Rodrigo De Paul</strong>, la Albiceleste llega como gran favorita.'},
+  "🇩🇿 Argelia":{flag:'dz',wiki:'Algeria_national_football_team',nick:'Los Zorros del Desierto',conf:'CAF',rank:52,bestWC:'Octavos de Final (1982)',founded:1958,achiev:['2 × Copa Africana de Naciones (1990, 2019)','Invictos en la Copa Africana 2019 bajo Belmadi','Riyad Mahrez: estrella del Manchester City'],history:'Los <strong>"Zorros del Desierto"</strong> ganaron la Copa Africana de Naciones en 2019 invictos bajo la brillante dirección de Belmadi. <strong>Riyad Mahrez</strong> (Al-Ahli), referente en los títulos del Manchester City de Guardiola, es la gran estrella. Su momento mundialista más histórico fue llegar a los octavos del <strong>Mundial 1982</strong> en España, donde causaron la mayor sorpresa hasta ese momento al vencer a Alemania.'},
+  "🇦🇹 Austria":{flag:'at',wiki:'Austria_national_football_team',nick:'Das Nationalteam',conf:'UEFA',rank:24,bestWC:'3er Lugar (1954)',founded:1904,achiev:['3er Lugar Mundial 1954','El "Wunderteam" de los años 30: mejor equipo del mundo','David Alaba: mejor jugador austriaco de la historia'],history:'El <strong>"Wunderteam"</strong> austriaco de los años 30 fue considerado el mejor equipo del mundo, aunque la II Guerra Mundial truncó su desarrollo. Austria alcanzó el <strong>tercer lugar del Mundial 1954</strong>. <strong>David Alaba</strong> del Real Madrid, ganador de la Champions League, es el mejor futbolista austriaco de la historia moderna. Marcel Sabitzer y Florian Grillitsch también brillan en las mejores ligas europeas.'},
+  "🇯🇴 Jordania":{flag:'jo',wiki:'Jordan_national_football_team',nick:'Los Nashama',conf:'AFC',rank:69,bestWC:'Primera clasificación (2026)',founded:1949,achiev:['Final Copa Asiática 2023 (primera vez)','Clasificación histórica al Mundial 2026','Mousa Al-Taamari: estrella emergente'],history:'Una selección en constante y sorprendente crecimiento. Jordania llegó por primera vez a la <strong>final de la Copa Asiática 2023</strong>, donde cayó ante Qatar, sorprendiendo al mundo árabe. <strong>Mousa Al-Taamari</strong> es su gran figura con actuaciones destacadas en Europa. Su clasificación al Mundial 2026 sería absolutamente histórica y representaría el espíritu emergente del fútbol árabe que aspira a dejar su huella en la máxima competición.'},
+  "🇵🇹 Portugal":{flag:'pt',wiki:'Portugal_national_football_team',nick:'A Seleção',conf:'UEFA',rank:6,bestWC:'3er Lugar (1966), Semifinales (2006)',founded:1914,achiev:['Eurocopa 2016 (con gol de Éder)','Liga de Naciones 2019','Cristiano Ronaldo: +900 goles en su carrera'],history:'Los <strong>"Navegantes"</strong> ganaron la Eurocopa 2016 con el inesperado héroe Éder y la Liga de Naciones 2019. <strong>Cristiano Ronaldo</strong>, con más de 900 goles en su carrera y récord de goles internacionales, busca su primer y último Mundial como corona de su legendaria trayectoria. <strong>Bernardo Silva, Bruno Fernandes y Rafael Leão</strong> forman la nueva generación que quiere regalar a CR7 el título que merece.'},
+  "🇨🇩 República Democrática del Congo":{flag:'cd',wiki:'Democratic_Republic_of_the_Congo_national_football_team',nick:'Los Leopardos',conf:'CAF',rank:56,bestWC:'Fase de Grupos (1974, como Zaire)',founded:1919,achiev:['2 × Copa Africana de Naciones (1968, 1974)','Primer equipo africano en marcar en un Mundial (1974)','Aaron Wan-Bissaka: Premier League'],history:'Los <strong>"Leopardos"</strong>, antes conocidos como Zaire, ganaron la Copa Africana en 1968 y 1974 y participaron en el Mundial de ese año. <strong>Aaron Wan-Bissaka</strong> (West Ham), <strong>Yoane Wissa</strong> (Brentford) y <strong>Cédric Bakambu</strong> representan el inmenso talento congoleño. Con 100 millones de habitantes y millones de apasionados aficionados, DR Congo busca volver a la élite del fútbol mundial.'},
+  "🇺🇿 Uzbekistán":{flag:'uz',wiki:'Uzbekistan_national_football_team',nick:'Los Lobos Blancos',conf:'AFC',rank:71,bestWC:'Primera clasificación (2026)',founded:1946,achiev:['Copa Asiática de Fútbol Sub-23 2018','Eldor Shomurodov: estrella de la Roma','Abbosbek Fayzullaev: talento emergente'],history:'Una nación en plena revolución futbolística. Uzbekistán nunca ha participado en un Mundial, y 2026 sería su <strong>debut histórico absoluto</strong>. <strong>Eldor Shomurodov</strong> del Roma y <strong>Abbosbek Fayzullaev</strong> son sus estrellas en el fútbol europeo. El país invierte fuerte en el desarrollo del fútbol con academias modernas, y el talento uzbeko en Europa y el Medio Oriente crece año tras año de forma impresionante.'},
+  "🇨🇴 Colombia":{flag:'co',wiki:'Colombia_national_football_team',nick:'Los Cafeteros',conf:'CONMEBOL',rank:11,bestWC:'Cuartos de Final (2014)',founded:1924,achiev:['Copa América 2001','James Rodríguez: Balón de Oro Mundial 2014 (6 goles)','Luis Díaz: estrella del Liverpool'],history:'Los <strong>"Cafeteros"</strong> alcanzaron los cuartos de final en Brasil 2014 con un torneo memorable. <strong>James Rodríguez</strong> fue el Balón de Oro del torneo con 6 goles, imagen icónica del Mundial. <strong>Luis Díaz</strong> del Liverpool es la nueva generación: extremo explosivo, desequilibrante e imparable. Colombia tiene actualmente una de las mejores generaciones de su historia, disputando incluso la Copa América 2024 con enorme nivel.'},
+  "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra":{flag:'gb-eng',wiki:'England_national_football_team',nick:'Three Lions',conf:'UEFA',rank:4,bestWC:'Campeón (1966)',founded:1863,achiev:['Copa del Mundo 1966 en Wembley con Bobby Moore','Inventores del fútbol moderno (1863)','Jude Bellingham: El talento más valorado del mundo'],history:'La nación <strong>inventora del fútbol</strong> ganó su único título mundialista en 1966 en Wembley, con Bobby Moore levantando la Copa ante su público. El "¡El fútbol viene a casa!" es el anhelo de décadas. <strong>Harry Kane</strong> (Bayern Múnich), <strong>Jude Bellingham</strong> (Real Madrid) y <strong>Phil Foden</strong> (Manchester City) forman la trinidad dorada que lleva años siendo favorita y que puede escribir la historia que los ingleses llevan 60 años esperando.'},
+  "🇭🇷 Croacia":{flag:'hr',wiki:'Croatia_national_football_team',nick:'Vatreni (Los Ardientes)',conf:'UEFA',rank:10,bestWC:'Finalista (2018), 3er Lugar (2022)',founded:1912,achiev:['Final del Mundial 2018','3er Lugar del Mundial 2022','Luka Modrić: Balón de Oro 2018'],history:'Los <strong>"Vatreni"</strong> llegaron a la final del Mundial 2018 y al tercer lugar de 2022, un rendimiento extraordinario para una nación de 4 millones de habitantes. <strong>Luka Modrić</strong>, Balón de Oro 2018, es una de las leyendas vivas del fútbol mundial. La Croacia de Modrić y Kovačić ha demostrado que las naciones pequeñas también pueden llegar a lo más alto con inteligencia táctica y calidad técnica superior.'},
+  "🇬🇭 Ghana":{flag:'gh',wiki:'Ghana_national_football_team',nick:'Estrellas Negras',conf:'CAF',rank:65,bestWC:'Cuartos de Final (2010)',founded:1957,achiev:['4 × Copa Africana de Naciones (1963, 1965, 1978, 1982)','Cuartos de Final Sudáfrica 2010','Thomas Partey: Arsenal y selección'],history:'Las <strong>"Estrellas Negras"</strong> llegaron a los cuartos de final en Sudáfrica 2010, donde eliminaron al equipo local en un emocionante partido. <strong>Thomas Partey</strong> del Arsenal y <strong>Mohammed Kudus</strong> del West Ham lideran la nueva generación que busca repetir ese histórico sueño mundialista en 2026.'},
+  "🇵🇦 Panamá":{flag:'pa',wiki:'Panama_national_football_team',nick:'Los Canaleros',conf:'CONCACAF',rank:55,bestWC:'Fase de Grupos (Rusia 2018)',founded:1937,achiev:['Primera clasificación al Mundial en Rusia 2018','Campeones Liga de Naciones CONCACAF 2023','Rommel Fernández: leyenda histórica'],history:'Los <strong>"Canaleros"</strong> lograron su primer Mundial en Rusia 2018, un hito histórico para el fútbol panameño. Aunque cayeron en fase de grupos, el partido ante Inglaterra fue histórico con el primer gol mundialista de Panamá, celebrado como un título nacional. <strong>Aníbal Godoy</strong> y <strong>Adalberto Carrasquilla</strong> lideran una generación competitiva que busca en 2026 superar aquella primera actuación y demostrar que el fútbol centroamericano llegó para quedarse.'}
+};
+
+// Exponer todos los jugadores del álbum para profiles.js y once-ideal.js
+// Formato: { "🇲🇽 México": ["Luis Malagón","Johan Vásquez",...], ... }
+window._albumPlayers = {};
+Object.entries(albumData).forEach(([country, names]) => {
+  // Filtrar entradas que NO son jugadores (logos, escudos, etc.)
+  window._albumPlayers[country] = names.filter(n =>
+    n && !n.toLowerCase().includes('logo') &&
+    !n.toLowerCase().includes('escudo') &&
+    !n.toLowerCase().includes('estadio') &&
+    !n.toLowerCase().includes('stadium') &&
+    n.trim().length > 1
+  );
+});
+
+// ════════════ ANTHEM ENGINE ════════════
+const ANTHEMS = {
+  // Grupo A
+  "🇲🇽 México":           "https://upload.wikimedia.org/wikipedia/commons/transcoded/9/9d/Himno_Nacional_Mexicano_instrumental.ogg/Himno_Nacional_Mexicano_instrumental.ogg.mp3",
+  "🇿🇦 Sudáfrica":        "https://upload.wikimedia.org/wikipedia/commons/transcoded/1/1d/South_African_national_anthem.oga/South_African_national_anthem.oga.mp3",
+  "🇰🇷 República de Corea":"https://upload.wikimedia.org/wikipedia/commons/transcoded/7/75/National_Anthem_of_Republic_of_Korea_2018_Chorus.wav/National_Anthem_of_Republic_of_Korea_2018_Chorus.wav.mp3",
+  "🇨🇿 República Checa":  "https://upload.wikimedia.org/wikipedia/commons/transcoded/6/6e/Czech_anthem.ogg/Czech_anthem.ogg.mp3",
+  // Grupo B
+  "🇨🇦 Canadá":           "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/b4/United_States_Navy_Band_-_O_Canada.ogg/United_States_Navy_Band_-_O_Canada.ogg.mp3",
+  "🇧🇦 Bosnia y Herzegovina":"https://upload.wikimedia.org/wikipedia/en/transcoded/d/dd/Bosnia_and_Herzegovina%27s_national_anthem.ogg/Bosnia_and_Herzegovina%27s_national_anthem.ogg.mp3",
+  "🇶🇦 Catar":            "https://upload.wikimedia.org/wikipedia/commons/transcoded/e/ec/National_anthem_of_Qatar.ogg/National_anthem_of_Qatar.ogg.mp3",
+  "🇨🇭 Suiza":            "https://upload.wikimedia.org/wikipedia/commons/transcoded/0/00/Swiss_Psalm.ogg/Swiss_Psalm.ogg.mp3",
+  // Grupo C
+  "🇧🇷 Brasil":           "https://upload.wikimedia.org/wikipedia/commons/transcoded/9/9b/Hino_Nacional_Brasileiro_instrumental.ogg/Hino_Nacional_Brasileiro_instrumental.ogg.mp3",
+  "🇲🇦 Marruecos":        "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/3f/National_Anthem_of_Morocco.ogg/National_Anthem_of_Morocco.ogg.mp3",
+  "🇭🇹 Haití":            "https://upload.wikimedia.org/wikipedia/commons/transcoded/4/4f/Haiti_National_Anthem.ogg/Haiti_National_Anthem.ogg.mp3",
+  "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia":        "https://files.catbox.moe/d09fhq.mp3",
+  // Grupo D
+  "🇺🇸 EE. UU.":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/6/65/Star_Spangled_Banner_instrumental.ogg/Star_Spangled_Banner_instrumental.ogg.mp3",
+  "🇵🇾 Paraguay":         "https://upload.wikimedia.org/wikipedia/commons/transcoded/a/a6/Paraguayan_National_Anthem.oga/Paraguayan_National_Anthem.oga.mp3",
+  "🇦🇺 Australia":        "https://upload.wikimedia.org/wikipedia/commons/transcoded/a/a6/U.S._Navy_Band%2C_Advance_Australia_Fair_%28instrumental%29.ogg/U.S._Navy_Band%2C_Advance_Australia_Fair_%28instrumental%29.ogg.mp3",
+  "🇹🇷 Turquía":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/9/99/Istikl%C3%A2l_Marsi_instrumetal.ogg/Istikl%C3%A2l_Marsi_instrumetal.ogg.mp3",
+  // Grupo E
+  "🇩🇪 Alemania":         "https://upload.wikimedia.org/wikipedia/commons/transcoded/a/a6/German_national_anthem_performed_by_the_US_Navy_Band.ogg/German_national_anthem_performed_by_the_US_Navy_Band.ogg.mp3",
+  "🇨🇼 Curaçao":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/7/7a/Curacaoanthem.ogg/Curacaoanthem.ogg.mp3",
+  "🇨🇮 Costa de Marfil":  "https://upload.wikimedia.org/wikipedia/commons/transcoded/6/67/United_States_Navy_Band_-_National_Anthem_of_C%C3%B4te_D%27Ivoire_%22L%27Abidjanaise%22.ogg/United_States_Navy_Band_-_National_Anthem_of_C%C3%B4te_D%27Ivoire_%22L%27Abidjanaise%22.ogg.mp3",
+  "🇪🇨 Ecuador":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/6/6e/Anthem_of_Ecuador.ogg/Anthem_of_Ecuador.ogg.mp3",
+  // Grupo F
+  "🇳🇱 Países Bajos":     "https://upload.wikimedia.org/wikipedia/commons/transcoded/f/f5/United_States_Navy_Band_-_Het_Wilhelmus_%28tempo_corrected%29.ogg/United_States_Navy_Band_-_Het_Wilhelmus_%28tempo_corrected%29.ogg.mp3",
+  "🇯🇵 Japón":            "https://upload.wikimedia.org/wikipedia/commons/transcoded/a/a3/Kimi_ga_Yo_instrumental.ogg/Kimi_ga_Yo_instrumental.ogg.mp3",
+  "🇸🇪 Suecia":           "https://upload.wikimedia.org/wikipedia/commons/transcoded/0/02/United_States_Navy_Band_-_Sweden.ogg/United_States_Navy_Band_-_Sweden.ogg.mp3",
+  "🇹🇳 Túnez":            "https://upload.wikimedia.org/wikipedia/commons/transcoded/2/23/Humat_al-Hima.ogg/Humat_al-Hima.ogg.mp3",
+  // Grupo G
+  "🇧🇪 Bélgica":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/e/e8/La_Braban%C3%A7onne.oga/La_Braban%C3%A7onne.oga.mp3",
+  "🇪🇬 Egipto":           "https://upload.wikimedia.org/wikipedia/commons/transcoded/f/f2/Bilady%2C_Bilady%2C_Bilady.ogg/Bilady%2C_Bilady%2C_Bilady.ogg.mp3",
+  "🇮🇷 RI de Irán":       "https://upload.wikimedia.org/wikipedia/commons/transcoded/f/f2/Sorud-e_Mell%C3%AD-e_Yomhur%C3%AD-e_Eslam%C3%AD-e_Ir%C3%A1n_%28instrumental%29.oga/Sorud-e_Mell%C3%AD-e_Yomhur%C3%AD-e_Eslam%C3%AD-e_Ir%C3%A1n_%28instrumental%29.oga.mp3",
+  "🇳🇿 Nueva Zelanda":    "https://upload.wikimedia.org/wikipedia/commons/transcoded/d/d6/God_Defend_New_Zealand_instrumental.ogg/God_Defend_New_Zealand_instrumental.ogg.mp3",
+  // Grupo H
+  "🇪🇸 España":           "https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c8/Marcha_Real-Royal_March_by_US_Navy_Band.ogg/Marcha_Real-Royal_March_by_US_Navy_Band.ogg.mp3",
+  "🇨🇻 Cabo Verde":       "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/b6/C%C3%A2ntico_da_Liberdade_%28instrumental%29.ogg/C%C3%A2ntico_da_Liberdade_%28instrumental%29.ogg.mp3",
+  "🇸🇦 Arabia Saudí":     "https://upload.wikimedia.org/wikipedia/commons/transcoded/f/f0/Aash_Al_Maleek_instrumental.ogg/Aash_Al_Maleek_instrumental.ogg.mp3",
+  "🇺🇾 Uruguay":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/2/2b/United_States_Navy_Band_-_National_Anthem_of_Uruguay_%28complete%29.ogg/United_States_Navy_Band_-_National_Anthem_of_Uruguay_%28complete%29.ogg.mp3",
+  // Grupo I
+  "🇫🇷 Francia":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/30/La_Marseillaise.ogg/La_Marseillaise.ogg.mp3",
+  "🇸🇳 Senegal":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/8/8c/National_Anthem_of_Senegal.ogg/National_Anthem_of_Senegal.ogg.mp3",
+  "🇮🇶 Irak":             "https://upload.wikimedia.org/wikipedia/commons/transcoded/1/16/United_States_Navy_Band_-_Mawtini.ogg/United_States_Navy_Band_-_Mawtini.ogg.mp3",
+  "🇳🇴 Noruega":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/f/f6/Norway_%28National_Anthem%29.ogg/Norway_%28National_Anthem%29.ogg.mp3",
+  // Grupo J
+  "🇦🇷 Argentina":        "https://upload.wikimedia.org/wikipedia/commons/transcoded/c/cd/Himno_Nacional_Argentino_instrumental.ogg/Himno_Nacional_Argentino_instrumental.ogg.mp3",
+  "🇩🇿 Argelia":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/4/48/Kassaman_instrumental.ogg/Kassaman_instrumental.ogg.mp3",
+  "🇦🇹 Austria":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/7/7c/Land_der_Berge_Land_am_Strome_instrumental.ogg/Land_der_Berge_Land_am_Strome_instrumental.ogg.mp3",
+  "🇯🇴 Jordania":         "https://upload.wikimedia.org/wikipedia/commons/transcoded/e/ee/National_anthem_of_Jordan_instrumental.ogg/National_anthem_of_Jordan_instrumental.ogg.mp3",
+  // Grupo K
+  "🇵🇹 Portugal":         "https://upload.wikimedia.org/wikipedia/commons/transcoded/5/58/A_Portuguesa.ogg/A_Portuguesa.ogg.mp3",
+  "🇨🇩 República Democrática del Congo": "https://files.catbox.moe/5ln77y.mp3",
+  "🇺🇿 Uzbekistán":       "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/36/National_Anthem_of_Uzbekistan_%28Instrumental%29.ogg/National_Anthem_of_Uzbekistan_%28Instrumental%29.ogg.mp3",
+  "🇨🇴 Colombia":         "https://upload.wikimedia.org/wikipedia/commons/transcoded/5/55/United_States_Navy_Band_-_%C2%A1Oh%2C_gloria_inmarcesible%21.ogg/United_States_Navy_Band_-_%C2%A1Oh%2C_gloria_inmarcesible%21.ogg.mp3",
+  // Grupo L
+  "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra":    "https://upload.wikimedia.org/wikipedia/commons/transcoded/0/03/United_States_Navy_Band_-_God_Save_the_Queen.oga/United_States_Navy_Band_-_God_Save_the_Queen.oga.mp3",
+  "🇭🇷 Croacia":          "https://upload.wikimedia.org/wikipedia/commons/transcoded/d/df/Lijepa_nasa_domovino_instrumental.ogg/Lijepa_nasa_domovino_instrumental.ogg.mp3",
+  "🇬🇭 Ghana":            "https://upload.wikimedia.org/wikipedia/commons/transcoded/4/43/National_Anthem_of_Ghana.ogg/National_Anthem_of_Ghana.ogg.mp3",
+  "🇵🇦 Panamá":           "https://upload.wikimedia.org/wikipedia/commons/transcoded/4/4a/Panama_National_Anthem.ogg/Panama_National_Anthem.ogg.mp3",
+};
+
+let _anthemAudio = null;
+
+function playAnthem(country) {
+  stopAnthem();
+  pauseRadio(false); // pausa radio sin restaurar video (el himno toma el control)
+
+  const url = ANTHEMS[country];
+  if (!url) return;
+
+  const bgVideo = document.getElementById('bg-video');
+  if (bgVideo) { bgVideo._prevVolume = bgVideo.volume; bgVideo.volume = 0; }
+
+  _anthemAudio = new Audio(url);
+  _anthemAudio.volume = Math.min(1, _deps.getEffectiveVolume() + 0.1);
+  _anthemAudio.play().catch(() => {});
+}
+
+export function stopAnthem() {
+  if (_anthemAudio) { _anthemAudio.pause(); _anthemAudio.currentTime = 0; _anthemAudio = null; }
+  const bgVideo = document.getElementById('bg-video');
+  if (bgVideo && !isRadioPlaying()) {
+    bgVideo.volume = bgVideo._prevVolume != null ? bgVideo._prevVolume : _deps.getEffectiveVolume();
+    bgVideo._prevVolume = null;
+  }
+}
+
+// Usados por script.js (applyMasterVolume) para no tocar el volumen de
+// fondo cuando un himno está sonando, y para mantener el volumen del
+// himno sincronizado con el slider maestro.
+export function hasActiveAnthem() { return !!_anthemAudio; }
+export function setAnthemVolume(v) {
+  if (_anthemAudio) _anthemAudio.volume = Math.min(1, v + 0.1);
+}
+
+// ════════════ STATE ════════════
+let state = {};
+let activeGroup = 'all';
+let activeStatus = 'all';
+let searchQuery = '';
+let currentOverlayCountry = null;
+let pdfMode = 'owned';
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    state = raw ? JSON.parse(raw) : {};
+  } catch(e) { state = {}; }
+}
+function saveLocalState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+function saveState() {
+  saveLocalState();
+  scheduleCloudSave();
+}
+
+function hasProgress(data) {
+  return data && typeof data === 'object' && Object.keys(data).length > 0;
+}
+function withTimeout(promise, ms = 12000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => {
+      const error = new Error('Tiempo de espera agotado')
+      error.name = 'SyncTimeoutError'
+      reject(error)
+    }, ms))
+  ]);
+}
+function mergeProgress(localProgress, cloudProgress) {
+  return {
+    ...(localProgress && typeof localProgress === 'object' ? localProgress : {}),
+    ...(cloudProgress && typeof cloudProgress === 'object' ? cloudProgress : {})
+  };
+}
+
+let cloudSyncTimer = null;
+let cloudSyncBusy = false;
+let lastCloudSave = '';
+
+// Llamado por script.js en enterAlbumShell() cuando hay un usuario Google.
+export async function syncCloudState(user) {
+  if (!user || cloudSyncBusy) return;
+  cloudSyncBusy = true;
+  _deps.setProfileStatus('Sincronizando...');
+  try {
+    const { data, error } = await withTimeout(
+      supabase
+        .from(CLOUD_PROGRESS_TABLE)
+        .select('progress')
+        .eq('user_id', user.id)
+        .eq('album_id', CLOUD_ALBUM_ID)
+        .maybeSingle()
+    );
+
+    if (error) {
+      console.error('Error cargando progreso online:', error);
+      _deps.setProfileStatus('Error sync');
+      return;
+    }
+
+    if (hasProgress(data?.progress)) {
+      state = mergeProgress(state, data.progress);
+      saveLocalState();
+      updateAll();
+      renderGroups();
+      _deps.setProfileStatus('Sincronizado');
+      if (hasProgress(state)) await saveCloudStateNow(user, { silent: true });
+    } else if (hasProgress(state)) {
+      await saveCloudStateNow(user);
+    } else {
+      _deps.setProfileStatus('Sincronizado');
+    }
+  } catch (err) {
+    if (err?.name === 'SyncTimeoutError') {
+      console.warn('La sincronización online está tardando más de lo esperado. La app sigue con el progreso local.');
+      _deps.setProfileStatus('Local listo');
+    } else {
+      console.error('Error inesperado sincronizando progreso online:', err);
+      _deps.setProfileStatus('Error sync');
+    }
+  } finally {
+    if (_deps.getProfileStatus() === 'Sincronizando...') {
+      _deps.setProfileStatus('Local listo');
+    }
+    cloudSyncBusy = false;
+  }
+}
+function scheduleCloudSave() {
+  const user = _deps.getCurrentUser();
+  if (!user || _deps.getAccessMode() !== 'google') return;
+  clearTimeout(cloudSyncTimer);
+  _deps.setProfileStatus('Guardando...');
+  cloudSyncTimer = setTimeout(() => {
+    saveCloudStateNow(user);
+  }, 250);
+}
+async function saveCloudStateNow(user = _deps.getCurrentUser(), opts = {}) {
+  if (!user || _deps.getAccessMode() !== 'google') return;
+  const payload = {
+    user_id: user.id,
+    album_id: CLOUD_ALBUM_ID,
+    progress: state,
+    updated_at: new Date().toISOString()
+  };
+
+  let result;
+  try {
+    result = await withTimeout(
+      supabase
+        .from(CLOUD_PROGRESS_TABLE)
+        .upsert(payload, { onConflict: 'user_id,album_id' })
+        .select('updated_at')
+        .single()
+    );
+  } catch (err) {
+    if (err?.name === 'SyncTimeoutError') {
+      console.warn('El guardado online está tardando más de lo esperado. Se mantiene el guardado local.');
+      if (!opts.silent) _deps.setProfileStatus('Sync pendiente');
+    } else {
+      console.error('Error inesperado guardando progreso online:', err);
+      if (!opts.silent) _deps.setProfileStatus('Error sync');
+    }
+    return;
+  }
+
+  const { data, error } = result;
+  if (error) {
+    console.error('Error guardando progreso online:', error);
+    if (!opts.silent) _deps.setProfileStatus('Error sync');
+    return;
+  }
+
+  lastCloudSave = data?.updated_at || payload.updated_at;
+  if (!opts.silent) _deps.setProfileStatus('Sincronizado');
+}
+
+// Para el beforeunload de script.js: vuelca el guardado pendiente sin esperar el debounce.
+export function flushPendingCloudSync() {
+  const user = _deps.getCurrentUser();
+  if (cloudSyncTimer && user && _deps.getAccessMode() === 'google') {
+    clearTimeout(cloudSyncTimer);
+    saveCloudStateNow(user, { silent: true });
+  }
+}
+// Para showAuthScreen() en script.js: cancela cualquier guardado programado al cerrar sesión.
+export function cancelPendingCloudSync() {
+  clearTimeout(cloudSyncTimer);
+}
+function getStickerKey(country, idx) { return country + '::' + idx; }
+function getStickerState(country, idx) { return state[getStickerKey(country, idx)] || 'none'; }
+function cycleStickerState(country, idx) {
+  const k = getStickerKey(country, idx);
+  const cur = state[k] || 'none';
+  if (cur === 'none') state[k] = 'tengo';
+  else if (cur === 'tengo') state[k] = 'falta';
+  else { state[k] = 'none'; clearStickerSubState(country, idx); }
+  saveState();
+}
+
+// ── SUB-STATES ──
+function getSubKey(c, i) { return c + '::' + i + '::sub'; }
+function normalizeStickerSub(raw) {
+  if (!raw) return { repetida: 0, reserva: false };
+  if (raw === 'repetida') return { repetida: 1, reserva: false };
+  if (raw === 'reserva') return { repetida: 0, reserva: true };
+  if (typeof raw === 'object') {
+    return {
+      repetida: Math.max(0, Math.min(9, Number(raw.repetida || 0) || 0)),
+      reserva: Boolean(raw.reserva)
+    };
+  }
+  return { repetida: 0, reserva: false };
+}
+function getStickerSubData(c, i) { return normalizeStickerSub(state[getSubKey(c, i)]); }
+function getStickerSubState(c, i) {
+  const sub = getStickerSubData(c, i);
+  if (sub.repetida > 0) return 'repetida';
+  if (sub.reserva) return 'reserva';
+  return null;
+}
+function getRepetidaCount(c, i) { return getStickerSubData(c, i).repetida; }
+function hasRepetida(c, i) { return getRepetidaCount(c, i) > 0; }
+function hasReserva(c, i) { return getStickerSubData(c, i).reserva; }
+function saveStickerSubData(c, i, sub) {
+  const k = getSubKey(c, i);
+  const clean = normalizeStickerSub(sub);
+  if (clean.repetida > 0 || clean.reserva) state[k] = clean;
+  else delete state[k];
+  saveState();
+}
+function incrementRepetida(c, i) {
+  const sub = getStickerSubData(c, i);
+  sub.repetida = sub.repetida >= 9 ? 0 : sub.repetida + 1;
+  saveStickerSubData(c, i, sub);
+}
+function decrementRepetida(c, i) {
+  const sub = getStickerSubData(c, i);
+  sub.repetida = sub.repetida > 1 ? sub.repetida - 1 : 0;
+  saveStickerSubData(c, i, sub);
+}
+function toggleReserva(c, i) {
+  const sub = getStickerSubData(c, i);
+  sub.reserva = !sub.reserva;
+  saveStickerSubData(c, i, sub);
+}
+function cycleStickerSubState(c, i) { incrementRepetida(c, i); }
+function getStickerSubClasses(c, i) {
+  const sub = getStickerSubData(c, i);
+  return (sub.repetida > 0 ? ' sub-repetida' : '') + (sub.reserva ? ' sub-reserva' : '');
+}
+function getStickerSubControlsHtml(c, i) {
+  const sub = getStickerSubData(c, i);
+  if (sub.repetida > 0) {
+    return `<span class="s-sub-btn sub-repetida active sub-dec" data-sub-action="rep-dec" title="Dar una">−</span><span class="s-sub-btn sub-repetida active" data-sub-action="rep" title="Tengo ${sub.repetida} repetida(s)">🔄 x${sub.repetida}</span><span class="s-sub-btn sub-repetida active sub-inc" data-sub-action="rep" title="Añadir repetida">+</span>
+    <span class="s-sub-btn sub-reserva${sub.reserva ? ' active' : ' sub-none'}" data-sub-action="res">📌 RES</span>`;
+  }
+  return `<span class="s-sub-btn sub-repetida sub-none" data-sub-action="rep">🔄 REP</span>
+    <span class="s-sub-btn sub-reserva${sub.reserva ? ' active' : ' sub-none'}" data-sub-action="res">📌 RES</span>`;
+}
+function getPcardSubControlsHtml(c, i) {
+  const sub = getStickerSubData(c, i);
+  if (sub.repetida > 0) {
+    return `<span class="pcard-sub sub-repetida active sub-dec" data-action="rep-dec" title="Dar una">−</span><span class="pcard-sub sub-repetida active" data-action="rep" title="Tengo ${sub.repetida} repetida(s)">🔄 x${sub.repetida}</span><span class="pcard-sub sub-repetida active sub-inc" data-action="rep" title="Añadir repetida">+</span>
+    <span class="pcard-sub sub-reserva${sub.reserva ? ' active' : ' sub-none'}" data-action="res">📌 RES</span>`;
+  }
+  return `<span class="pcard-sub sub-repetida sub-none" data-action="rep">🔄 REP</span>
+    <span class="pcard-sub sub-reserva${sub.reserva ? ' active' : ' sub-none'}" data-action="res">📌 RES</span>`;
+}
+function clearStickerSubState(c, i) { delete state[getSubKey(c, i)]; saveState(); }
+// ════════════ STATS ════════════
+function getCountryStats(country) {
+  const stickers = albumData[country];
+  if (!stickers) return {owned:0,missing:0,total:0,pct:0,repetida:0,reserva:0};
+  let owned=0,missing=0,repetida=0,reserva=0;
+  stickers.forEach((_, i) => {
+    const s = getStickerState(country, i);
+    if (s === 'tengo') owned++;
+    else if (s === 'falta') missing++;
+    repetida += getRepetidaCount(country, i);
+    if (hasReserva(country, i)) reserva++;
+  });
+  const total = stickers.length;
+  return {owned, missing, total, pct: total ? Math.round(owned/total*100) : 0, repetida, reserva};
+}
+function getGroupStats(grp) {
+  const countries = GROUPS[grp] || [];
+  let owned=0, total=0;
+  countries.forEach(c => {
+    const s = getCountryStats(c);
+    owned += s.owned; total += s.total;
+  });
+  return {owned, total, pct: total ? Math.round(owned/total*100) : 0};
+}
+function getGlobalStats() {
+  let owned=0, missing=0, total=0, repetida=0, reserva=0;
+
+  INTRO_DATA.forEach((_, i) => {
+    const s = getStickerState('INTRO', i);
+    if (s === 'tengo') owned++;
+    else if (s === 'falta') missing++;
+    repetida += getRepetidaCount('INTRO', i);
+    if (hasReserva('INTRO', i)) reserva++;
+    total++;
+  });
+
+  Object.keys(albumData).forEach(c => {
+    const s = getCountryStats(c);
+    owned += s.owned; missing += s.missing; total += s.total;
+    repetida += s.repetida; reserva += s.reserva;
+  });
+
+  return {owned, missing, total, pct: total ? Math.round(owned/total*100) : 0, repetida, reserva};
+}
+function updateStatsBar() {
+  const gs = getGlobalStats();
+  document.getElementById('s-total').textContent = gs.total;
+  document.getElementById('s-tengo').textContent = gs.owned;
+  document.getElementById('s-falta').textContent = gs.missing;
+  document.getElementById('s-pct').textContent   = gs.pct + '%';
+  document.getElementById('s-rep').textContent   = gs.repetida;
+  document.getElementById('s-res').textContent   = gs.reserva;
+}
+// ════════════ GROUP TABS ════════════
+function buildGroupTabs() {
+  const wrap = document.getElementById('group-tabs');
+  wrap.innerHTML = '';
+  // ALL
+  const allBtn = document.createElement('button');
+  allBtn.className = 'gtab all-tab' + (activeGroup==='all' ? ' active' : '');
+  allBtn.dataset.group = 'all';
+  allBtn.style.background = activeGroup==='all' ? 'var(--gold)' : 'var(--card)';
+  allBtn.innerHTML = 'TODOS';
+  wrap.appendChild(allBtn);
+
+  'ABCDEFGHIJKL'.split('').forEach(g => {
+    const gs = getGroupStats(g);
+    const col = GROUP_COLORS[g];
+    const btn = document.createElement('button');
+    btn.className = 'gtab' + (activeGroup===g ? ' active' : '');
+    btn.dataset.group = g;
+    btn.style.background = activeGroup===g ? col : 'var(--card)';
+    btn.style.borderColor = activeGroup===g ? col : 'var(--border)';
+    btn.innerHTML = `<span>${g}</span><span class="gtab-pct">${gs.pct}%</span>`;
+    wrap.appendChild(btn);
+  });
+
+  wrap.querySelectorAll('.gtab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeGroup = btn.dataset.group;
+      buildGroupTabs();
+      renderGroups();
+    });
+  });
+}
+// ════════════ RENDER GROUPS ════════════
+function renderGroups() {
+  const container = document.getElementById('groups-container');
+  container.innerHTML = '';
+
+  if (activeGroup === 'all' && !searchQuery) {
+    const introOwned = INTRO_DATA.filter((_, i) => getStickerState('INTRO', i) === 'tengo').length;
+    const introPct = INTRO_DATA.length ? Math.round(introOwned / INTRO_DATA.length * 100) : 0;
+
+    const introAcc = document.createElement('div');
+    introAcc.className = 'group-accordion';
+    introAcc.style.setProperty('--g-color', '#f5c518');
+
+    introAcc.innerHTML = `
+      <div class="group-header" data-grp="INTRO">
+        <div class="group-letter" style="background:#f5c518">✨</div>
+        <div class="group-header-info">
+          <div class="group-label">Intro</div>
+          <div class="group-names">WE ARE PANINI · Emblems · Mascots · Slogan · Ball · Hosts</div>
+          <div class="group-prog-wrap">
+            <div class="group-prog-track">
+              <div class="group-prog-fill" style="background:#f5c518;width:${introPct}%"></div>
+            </div>
+            <span class="group-prog-pct" style="color:#f5c518">${introPct}%</span>
+          </div>
+        </div>
+        <svg class="group-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="group-body" id="body-INTRO">
+        <ul class="sticker-list" id="intro-list"></ul>
+      </div>
+    `;
+
+    container.appendChild(introAcc);
+
+    // Toggle intro accordion
+    introAcc.querySelector('.group-header').addEventListener('click', () => {
+      const isOpen = introAcc.classList.contains('open');
+      const introBody = document.getElementById('body-INTRO');
+      introAcc.classList.toggle('open', !isOpen);
+      introBody.classList.toggle('expanded', !isOpen);
+    });
+
+    const introList = introAcc.querySelector('#intro-list');
+    function renderIntroList() {
+      introList.innerHTML = '';
+      INTRO_DATA.forEach((name, ii) => {
+        const st  = getStickerState('INTRO', ii);
+        if (activeStatus === 'tengo'    && st  !== 'tengo')    return;
+        if (activeStatus === 'falta'    && st  !== 'falta')    return;
+        if (activeStatus === 'repetida' && !hasRepetida('INTRO', ii)) return;
+        if (activeStatus === 'reserva'  && !hasReserva('INTRO', ii))  return;
+        if (searchQuery && !name.toLowerCase().includes(searchQuery)) return;
+
+        const stClass  = st  === 'tengo' ? ' state-tengo' : st  === 'falta' ? ' state-falta' : '';
+        const subClass = getStickerSubClasses('INTRO', ii);
+        const li = document.createElement('li');
+        li.className = 'sticker' + stClass + subClass;
+        li.dataset.country = 'INTRO';
+        li.dataset.idx = ii;
+
+        const subBtnHtml = st !== 'none'
+          ? getStickerSubControlsHtml('INTRO', ii)
+          : '';
+
+        li.innerHTML = `
+          <div class="sticker-top">
+            <span class="s-dot-num"><span class="s-dot"></span>#${ii}</span>
+            <span class="s-badge">${st === 'tengo' ? 'TENGO' : st === 'falta' ? 'FALTA' : '—'}</span>
+          </div>
+          <span class="s-name">${name}</span>
+          ${subBtnHtml ? `<div class="sticker-sub-row">${subBtnHtml}</div>` : ''}`;
+
+        li.addEventListener('click', (e) => {
+          if (e.target.closest('.s-sub-btn')) return;
+          cycleStickerState('INTRO', ii);
+          updateAll();
+          const introPct2 = INTRO_DATA.length ? Math.round(
+            INTRO_DATA.filter((_, x) => getStickerState('INTRO', x) === 'tengo').length / INTRO_DATA.length * 100
+          ) : 0;
+          const fill = introAcc.querySelector('.group-prog-fill');
+          const pct  = introAcc.querySelector('.group-prog-pct');
+          if (fill) fill.style.width = introPct2 + '%';
+          if (pct)  pct.textContent  = introPct2 + '%';
+          renderIntroList();
+        });
+
+        const subBtn = li.querySelector('.s-sub-btn');
+        li.querySelectorAll('.s-sub-btn').forEach(subBtn => {
+          subBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (subBtn.dataset.subAction === 'rep') incrementRepetida('INTRO', ii);
+            if (subBtn.dataset.subAction === 'rep-dec') decrementRepetida('INTRO', ii);
+            if (subBtn.dataset.subAction === 'res') toggleReserva('INTRO', ii);
+            updateAll();
+            renderIntroList();
+          });
+        });
+
+        introList.appendChild(li);
+      });
+    }
+    renderIntroList();
+  }
+
+  let groupsToShow = 'ABCDEFGHIJKL'.split('');
+  if (activeGroup !== 'all') groupsToShow = [activeGroup];
+
+  groupsToShow.forEach((grp, gi) => {
+    const countries = GROUPS[grp];
+    const gColor = GROUP_COLORS[grp];
+    const gInfo = GROUP_INFO[grp];
+    const gs = getGroupStats(grp);
+
+    // Filter by search / status at country level
+    const visibleCountries = countries.filter(c => {
+      if (searchQuery) {
+        const stickers = albumData[c] || [];
+        const match = c.toLowerCase().includes(searchQuery) ||
+          stickers.some(s => s.toLowerCase().includes(searchQuery));
+        if (!match) return false;
+      }
+      return true;
+    });
+    if (visibleCountries.length === 0) return;
+
+    const acc = document.createElement('div');
+    acc.className = 'group-accordion';
+    acc.style.setProperty('--g-color', gColor);
+    acc.style.animationDelay = (gi * 0.06) + 's';
+
+    // Names string
+    const nameStr = countries.map(c => c.replace(/^[\p{Emoji}\s]+/u,'')).join(' · ');
+
+    acc.innerHTML = `
+      <div class="group-header" data-grp="${grp}">
+        <div class="group-letter" style="background:${gColor}">${grp}</div>
+        <div class="group-header-info">
+          <div class="group-label">${gInfo ? gInfo.label : 'Grupo '+grp}</div>
+          <div class="group-names">${nameStr}</div>
+          <div class="group-prog-wrap">
+            <div class="group-prog-track">
+              <div class="group-prog-fill" style="background:${gColor};width:${gs.pct}%"></div>
+            </div>
+            <span class="group-prog-pct" style="color:${gColor}">${gs.pct}%</span>
+          </div>
+        </div>
+        <div class="group-flags" id="flags-${grp}"></div>
+        <svg class="group-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="group-body" id="body-${grp}">
+        <div id="countries-${grp}"></div>
+        ${gInfo ? `<div class="group-info-card">
+          <h4>📊 ${gInfo.label}</h4>
+          <p>${gInfo.analysis}</p>
+          <div class="group-info-tags">${gInfo.tags.map(t=>`<span class="g-tag">${t}</span>`).join('')}</div>
+        </div>` : ''}
+        <div class="group-minigames" id="minigames-${grp}">
+          <button class="minigame-btn trivia-btn" data-grp="${grp}" style="--mg-color:${gColor}">
+            🧠 Trivia del Grupo
+          </button>
+          <button class="minigame-btn once-btn" data-grp="${grp}" style="--mg-color:${gColor}">
+            👕 11 Ideal
+          </button>
+        </div>
+      </div>`;
+
+    container.appendChild(acc);
+
+    // Mini flags
+    const flagsDiv = acc.querySelector(`#flags-${grp}`);
+    countries.forEach(c => {
+      const cd = COUNTRY_DATA[c];
+      if (!cd) return;
+      const img = document.createElement('img');
+      img.className = 'mini-flag';
+      img.src = `https://flagcdn.com/w40/${cd.flag}.png`;
+      img.alt = c;
+      img.onerror = () => { img.style.display='none'; };
+      flagsDiv.appendChild(img);
+    });
+
+    // Header click → expand
+    acc.querySelector('.group-header').addEventListener('click', () => toggleGroup(grp, acc));
+
+    // Trivia button
+    acc.querySelector(`.trivia-btn[data-grp="${grp}"]`)?.addEventListener('click', e => {
+      e.stopPropagation();
+      openTriviaModal(grp, gColor, window._currentUserId || null);
+    });
+
+    // 11 Ideal button
+    acc.querySelector(`.once-btn[data-grp="${grp}"]`)?.addEventListener('click', e => {
+      e.stopPropagation();
+      openOnceIdealModal(grp, gColor, countries, window._currentUserId || null);
+    });
+
+    // If only one group shown, auto-open
+    if (activeGroup !== 'all') {
+      setTimeout(() => toggleGroup(grp, acc, true), 80);
+    }
+  });
+}
+
+function toggleGroup(grp, acc, forceOpen) {
+  const body = document.getElementById('body-'+grp);
+  const isOpen = acc.classList.contains('open');
+  if (forceOpen && isOpen) return;
+  if (forceOpen || !isOpen) {
+    acc.classList.add('open');
+    body.classList.add('expanded');
+    renderCountries(grp);
+  } else {
+    acc.classList.remove('open');
+    body.classList.remove('expanded');
+  }
+}
+
+function renderCountries(grp) {
+  const wrap = document.getElementById('countries-'+grp);
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const countries = GROUPS[grp];
+  const gColor = GROUP_COLORS[grp];
+
+  countries.forEach(c => {
+    // Search filter
+    if (searchQuery) {
+      const stickers = albumData[c] || [];
+      const match = c.toLowerCase().includes(searchQuery) ||
+        stickers.some(s => s.toLowerCase().includes(searchQuery));
+      if (!match) return;
+    }
+
+    const cs = getCountryStats(c);
+    const cd = COUNTRY_DATA[c];
+    const flagCode = cd ? cd.flag : 'xx';
+    const isComplete = cs.pct === 100;
+
+    const sec = document.createElement('div');
+    sec.className = 'country-section' + (isComplete ? ' completed' : '');
+
+    sec.innerHTML = `
+      <div class="country-header" data-country="${c}">
+        <div class="country-flag-wrap">
+          <img class="country-flag" src="https://flagcdn.com/w80/${flagCode}.png" alt="${c}" onerror="this.style.display='none'">
+        </div>
+        <div class="country-info">
+          <div class="country-name">${c}</div>
+          <div class="cp-wrap">
+            <div class="cp-track"><div class="cp-fill" style="background:${gColor};width:${cs.pct}%"></div></div>
+            <span class="cp-text">${cs.owned}/${cs.total} · ${cs.pct}%</span>
+          </div>
+        </div>
+        <button class="view-btn" data-country="${c}">VER SELECCIÓN →</button>
+      </div>
+      <ul class="sticker-list" id="slist-${CSS.escape(c)}" style="display:none"></ul>`;
+
+    wrap.appendChild(sec);
+
+    // Toggle sticker list on header click
+    sec.querySelector('.country-header').addEventListener('click', (e) => {
+      if (e.target.closest('.view-btn')) return;
+      const list = sec.querySelector('.sticker-list');
+      if (list.style.display === 'none') {
+        list.style.display = '';
+        renderStickerList(c, list, gColor);
+      } else {
+        list.style.display = 'none';
+      }
+    });
+
+    // View overlay button
+    sec.querySelector('.view-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      openOverlay(c);
+    });
+  });
+}
+
+function renderStickerList(country, listEl, gColor) {
+  listEl.innerHTML = '';
+  const stickers = albumData[country] || [];
+  stickers.forEach((name, i) => {
+    const st  = getStickerState(country, i);
+
+    // Status filter
+    if (activeStatus === 'tengo'    && st !== 'tengo') return;
+    if (activeStatus === 'falta'    && st !== 'falta') return;
+    if (activeStatus === 'repetida' && !hasRepetida(country, i)) return;
+    if (activeStatus === 'reserva'  && !hasReserva(country, i))  return;
+    if (searchQuery && !name.toLowerCase().includes(searchQuery) && !country.toLowerCase().includes(searchQuery)) return;
+
+    const li = document.createElement('li');
+    const stClass = st === 'tengo' ? ' state-tengo' : st === 'falta' ? ' state-falta' : '';
+    const subClass = getStickerSubClasses(country, i);
+    li.className = 'sticker' + stClass + subClass;
+    li.dataset.country = country;
+    li.dataset.idx = i;
+
+    const subBtnHtml = st !== 'none'
+      ? getStickerSubControlsHtml(country, i)
+      : '';
+
+        li.innerHTML = `
+          <div class="sticker-top">
+            <span class="s-dot-num"><span class="s-dot"></span>#${i}</span>
+            <span class="s-badge">${st === 'tengo' ? 'TENGO' : st === 'falta' ? 'FALTA' : '—'}</span>
+          </div>
+          <span class="s-name">${name}</span>
+          ${subBtnHtml ? `<div class="sticker-sub-row">${subBtnHtml}</div>` : ''}`;
+
+    // Primary click → cycle main state
+    li.addEventListener('click', (e) => {
+      if (e.target.closest('.s-sub-btn')) return;
+      cycleStickerState(country, i);
+      updateAll();
+      const pl = li.closest('.sticker-list');
+      const pg = li.closest('.group-accordion');
+      const gc = pg ? pg.querySelector('.group-header').dataset.grp : null;
+      renderStickerList(country, pl, gc ? GROUP_COLORS[gc] : gColor);
+      updateCountryBar(country, gc ? GROUP_COLORS[gc] : gColor);
+    });
+
+    // Sub-state click
+    li.querySelectorAll('.s-sub-btn').forEach(subBtn => {
+      subBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (subBtn.dataset.subAction === 'rep') incrementRepetida(country, i);
+        if (subBtn.dataset.subAction === 'rep-dec') decrementRepetida(country, i);
+        if (subBtn.dataset.subAction === 'res') toggleReserva(country, i);
+        updateAll();
+        const pl = li.closest('.sticker-list');
+        const pg = li.closest('.group-accordion');
+        const gc = pg ? pg.querySelector('.group-header').dataset.grp : null;
+        renderStickerList(country, pl, gc ? GROUP_COLORS[gc] : gColor);
+      });
+    });
+
+    listEl.appendChild(li);
+  });
+}
+
+function updateCountryBar(country, gColor) {
+  const cs = getCountryStats(country);
+  const fill = document.querySelector(`.country-header[data-country="${country}"] .cp-fill`);
+  const text = document.querySelector(`.country-header[data-country="${country}"] .cp-text`);
+  if (fill) { fill.style.width = cs.pct + '%'; fill.style.background = gColor; }
+  if (text) text.textContent = `${cs.owned}/${cs.total} · ${cs.pct}%`;
+  // Update completed state
+  const hdr = document.querySelector(`.country-header[data-country="${CSS.escape(country)}"]`);
+  if (hdr) { const sec = hdr.closest('.country-section'); if (sec) sec.classList.toggle('completed', cs.pct === 100); }
+  // also update group progress
+  const grp = Object.keys(GROUPS).find(g => GROUPS[g].includes(country));
+  if (grp) {
+    const gs = getGroupStats(grp);
+    const gFill = document.querySelector(`.group-header[data-grp="${grp}"] .group-prog-fill`);
+    const gPct = document.querySelector(`.group-header[data-grp="${grp}"] .group-prog-pct`);
+    if (gFill) gFill.style.width = gs.pct + '%';
+    if (gPct) { gPct.textContent = gs.pct + '%'; }
+  }
+}
+async function checkAndUnlockMedals() {
+  const profile = getCurrentProfile()
+  if (!profile) return
+
+  const stored     = Array.isArray(profile.medallas) ? profile.medallas : []
+  const storedSet  = new Set(stored)
+
+  // Recalcular el set COMPLETO según estado actual del álbum
+  const countryEarned = checkCountryMedals(getCountryStats, albumData)
+  const gs            = getGlobalStats()
+  const albumEarned   = checkAlbumComplete(gs.owned, gs.total) ? ['album_complete'] : []
+
+  // La medalla musical NO se revoca (no depende del álbum)
+  const musicMedal = stored.includes('music_note') ? ['music_note'] : []
+
+  const currentMedals = [...new Set([...countryEarned, ...albumEarned, ...musicMedal])]
+  const currentSet    = new Set(currentMedals)
+
+  // Detectar cambios en cualquier dirección (ganadas O perdidas)
+  const hasChanges = currentMedals.some(id => !storedSet.has(id)) ||
+                     stored.some(id => !currentSet.has(id))
+
+  if (!hasChanges) return
+
+  // Medallas recién ganadas (para mostrar toast)
+  const newOnes = currentMedals.filter(id => !storedSet.has(id))
+
+  try {
+    await supabase.from('profiles').update({ medallas: currentMedals }).eq('id', profile.id)
+    profile.medallas = currentMedals
+    newOnes.forEach(id => showMedalUnlockToast(id))
+  } catch (e) {
+    console.error('[medals] save error:', e)
+  }
+}
+
+let _exchangeSyncTimer = null
+
+export function scheduleExchangeSync() {
+  const user = _deps.getCurrentUser()
+  if (!user) return
+  clearTimeout(_exchangeSyncTimer)
+  _exchangeSyncTimer = setTimeout(async () => {
+    await syncExchangeOffers(
+      user.id, albumData, INTRO_DATA,
+      getStickerState, getRepetidaCount, hasReserva
+    )
+  }, 4000)   // debounce 4s para no saturar en clics rápidos
+}
+
+function updateAll() {
+  updateStatsBar();
+  buildGroupTabs();
+  checkAndUnlockMedals();
+  scheduleExchangeSync();
+
+  // 🎉 Fase 4 — celebración álbum completo
+  const gs = getGlobalStats();
+  if (gs.owned > 0 && gs.owned === gs.total) {
+    triggerAlbumCompleteCelebration();
+  } else {
+    resetCelebrationIfNeeded();
+  }
+}
+let _celebrationShown = false;
+
+function triggerAlbumCompleteCelebration() {
+  // Solo mostrar una vez por sesión
+  if (_celebrationShown) return;
+  // Verificar que no se mostró ya en sesiones previas
+  if (localStorage.getItem('album_complete_celebrated') === 'true') return;
+  _celebrationShown = true;
+
+  const overlay = document.getElementById('album-complete-overlay');
+  if (!overlay) return;
+
+  overlay.classList.add('visible');
+
+  // Guardar para no volver a mostrar
+  try { localStorage.setItem('album_complete_celebrated', 'true'); } catch(e) {}
+
+  // Cerrar al hacer clic fuera del video o en el botón
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay || e.target.id === 'album-complete-close') {
+      closeAlbumCompleteCelebration();
+    }
+  });
+
+  document.addEventListener('keydown', function escHandler(e) {
+    if (e.key === 'Escape') {
+      closeAlbumCompleteCelebration();
+      document.removeEventListener('keydown', escHandler);
+    }
+  });
+}
+
+function closeAlbumCompleteCelebration() {
+  const overlay = document.getElementById('album-complete-overlay');
+  if (!overlay) return;
+  overlay.classList.add('hiding');
+  setTimeout(() => {
+    overlay.classList.remove('visible', 'hiding');
+  }, 500);
+}
+
+// Resetear celebración si el álbum ya no está completo
+function resetCelebrationIfNeeded() {
+  const gs = getGlobalStats();
+  if (gs.owned < gs.total) {
+    _celebrationShown = false;
+    try { localStorage.removeItem('album_complete_celebrated'); } catch(e) {}
+  }
+}
+function openOverlay(country) {
+  currentOverlayCountry = country;
+  const cd = COUNTRY_DATA[country];
+  const stickers = albumData[country] || [];
+  const cs = getCountryStats(country);
+  const grp = Object.keys(GROUPS).find(g => GROUPS[g].includes(country)) || 'A';
+  const gColor = GROUP_COLORS[grp] || '#f5c518';
+
+  const flagCode = cd ? cd.flag : 'xx';
+  const flagUrl = `https://flagcdn.com/w160/${flagCode}.png`;
+
+  document.getElementById('ov-flag').src = flagUrl;
+  document.getElementById('ov-flag').alt = country;
+  document.getElementById('ov-bg').style.backgroundImage = `url(${flagUrl})`;
+  document.getElementById('ov-nick').textContent = cd ? cd.nick : '';
+  document.getElementById('ov-name').textContent = country.replace(/^[\p{Emoji}\s]+/u, '');
+  document.getElementById('ov-pbar').style.width = cs.pct + '%';
+  document.getElementById('ov-pbar').style.background = cs.pct === 100 ? 'var(--gold)' : 'var(--green)';
+  document.getElementById('ov-ptext').textContent = cs.pct === 100
+    ? `¡COLECCIÓN COMPLETA! ⭐ ${cs.owned}/${cs.total}`
+    : `${cs.owned} / ${cs.total} cromos (${cs.pct}%)`;
+
+  // Badges
+  const badgesEl = document.getElementById('ov-badges');
+  badgesEl.innerHTML = '';
+  if (cd) {
+    [{l:'🌍 '+cd.conf},{l:'FIFA #'+cd.rank},{l:'Fundado: '+cd.founded},{l:'🏆 '+cd.bestWC}].forEach(b => {
+      const s = document.createElement('span');
+      s.className = 'o-badge'; s.textContent = b.l;
+      badgesEl.appendChild(s);
+    });
+  }
+
+  // Body
+  const body = document.getElementById('ov-body');
+  body.innerHTML = '';
+
+  // Players section
+  const playersSection = document.createElement('div');
+  playersSection.className = 'overlay-section';
+  playersSection.innerHTML = `<div class="overlay-section-title"><span>🃏</span> CROMOS DE LA SELECCIÓN</div><div class="player-grid" id="ov-player-grid"></div>`;
+  body.appendChild(playersSection);
+
+  const grid = playersSection.querySelector('#ov-player-grid');
+  stickers.forEach((name, i) => {
+    const st  = getStickerState(country, i);
+    const card = document.createElement('div');
+    const stClass = st==='tengo' ? ' owned' : st==='falta' ? ' missing' : '';
+    const subClass = getStickerSubClasses(country, i);
+    card.className = 'pcard' + stClass + subClass;
+
+    const subHtml  = st !== 'none'
+      ? `<div class="pcard-sub-row">${getPcardSubControlsHtml(country, i)}</div>`
+      : '';
+
+    card.innerHTML = `<div class="pcard-num">#${i}</div><div class="pcard-name">${name}</div>${subHtml}`;
+
+    // Main click -> cycle primary
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.pcard-sub')) return;
+      cycleStickerState(country, i);
+      const ns = getStickerState(country, i);
+      const stC = ns==='tengo' ? ' owned' : ns==='falta' ? ' missing' : '';
+      card.className = 'pcard' + stC + getStickerSubClasses(country, i);
+      const row = card.querySelector('.pcard-sub-row');
+      if (ns !== 'none' && !row) {
+        const newRow = document.createElement('div');
+        newRow.className = 'pcard-sub-row';
+        newRow.innerHTML = getPcardSubControlsHtml(country, i);
+        card.appendChild(newRow);
+        bindPcardSubButtons(newRow);
+      } else if (ns === 'none' && row) row.remove();
+      else if (row) {
+        row.innerHTML = getPcardSubControlsHtml(country, i);
+        bindPcardSubButtons(row);
+      }
+      const cs2 = getCountryStats(country);
+      document.getElementById('ov-pbar').style.width = cs2.pct + '%';
+      document.getElementById('ov-ptext').textContent = `${cs2.owned} / ${cs2.total} cromos (${cs2.pct}%)`;
+      updateAll();
+      updateCountryBar(country, gColor);
+    });
+
+    function subClickHandler(e) {
+      e.stopPropagation();
+      const action = e.currentTarget.dataset.action;
+      if (action === 'rep') incrementRepetida(country, i);
+      if (action === 'rep-dec') decrementRepetida(country, i);
+      if (action === 'res') toggleReserva(country, i);
+      const row = card.querySelector('.pcard-sub-row');
+      if (row) {
+        row.innerHTML = getPcardSubControlsHtml(country, i);
+        bindPcardSubButtons(row);
+      }
+      const stC = getStickerState(country,i);
+      card.className = 'pcard' + (stC==='tengo'?' owned':stC==='falta'?' missing':'') + getStickerSubClasses(country, i);
+      updateAll();
+    }
+
+    function bindPcardSubButtons(scope = card) {
+      scope.querySelectorAll('.pcard-sub').forEach(btn => btn.addEventListener('click', subClickHandler));
+    }
+    bindPcardSubButtons();
+    grid.appendChild(card);
+  });
+
+  // History
+  if (cd && cd.history) {
+    const histSection = document.createElement('div');
+    histSection.className = 'overlay-section';
+    histSection.innerHTML = `<div class="overlay-section-title"><span>📖</span> HISTORIA DE LA SELECCIÓN</div><p class="history-text">${cd.history}</p>`;
+    body.appendChild(histSection);
+  }
+
+  // Achievements
+  if (cd && cd.achiev && cd.achiev.length) {
+    const achSection = document.createElement('div');
+    achSection.className = 'overlay-section';
+    achSection.innerHTML = `<div class="overlay-section-title"><span>🏆</span> PALMARÉS Y LOGROS</div>
+      <ul class="achievements-list">${cd.achiev.map(a=>`<li>${a}</li>`).join('')}</ul>`;
+    body.appendChild(achSection);
+  }
+
+  document.getElementById('country-overlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+
+  // ► Reproducir himno de la selección
+  playAnthem(country);
+}
+
+function closeOverlay() {
+  stopAnthem(); // detiene himno y restaura video (solo si radio no está activa)
+  document.getElementById('country-overlay').classList.remove('visible');
+  document.body.style.overflow = '';
+  currentOverlayCountry = null;
+  // Si la radio estaba visible y "debería" estar sonando, reanudarla
+  if (isRadioVisible() && isRadioPlaying() === false && hasRadioAudio()) {
+    // No auto-resume; el usuario decide
+  }
+}
+document.getElementById('ov-back').addEventListener('click', closeOverlay);
+function pdfSafeText(str=''){
+  return String(str)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[â€œâ€]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/[â€‑–—]/g, '-')
+    .replace(/[•·]/g, '-')
+    .replace(/[\u{1F1E6}-\u{1F1FF}]/gu, '')
+    .replace(/[\p{Extended_Pictographic}]/gu, '')
+    .replace(/[^\x20-\x7E\n]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+function showPdfModal() { document.getElementById('pdf-modal').classList.add('visible'); }
+function hidePdfModal() { document.getElementById('pdf-modal').classList.remove('visible'); }
+
+document.getElementById('pdf-modal').querySelectorAll('.modal-opt').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('pdf-modal').querySelectorAll('.modal-opt').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    pdfMode = btn.dataset.mode;
+  });
+});
+document.getElementById('pdf-cancel').addEventListener('click', hidePdfModal);
+document.getElementById('pdf-modal').addEventListener('click', e => { if(e.target===e.currentTarget) hidePdfModal(); });
+
+document.getElementById('pdf-generate').addEventListener('click', () => {
+  hidePdfModal();
+  generatePDF(pdfMode);
+});
+
+function generatePDF(mode) {
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210, margin=14;
+  let y = margin;
+
+  // Title
+  doc.setFillColor(8,12,24);
+  doc.rect(0,0,W,30,'F');
+  doc.setTextColor(245,197,24);
+  doc.setFontSize(22);
+  doc.setFont('helvetica','bold');
+  doc.text('ALBUM MUNDIAL 2026', W/2, 12, {align:'center'});
+  doc.setFontSize(9);
+  doc.setTextColor(122,138,170);
+  const modeLabel = mode==='owned'?'Solo TENGO': mode==='missing'?'Solo FALTAN': mode==='repetida'?'Mis REPETIDAS': mode==='reserva'?'Mis RESERVADAS':'Colección completa (TENGO / FALTA)';
+  const gs = getGlobalStats();
+  doc.text(pdfSafeText(`${modeLabel} - ${gs.owned}/${gs.total} cromos (${gs.pct}%)`), W/2, 20, {align:'center'});
+  doc.setFontSize(8); doc.text(pdfSafeText(`Generado: ${new Date().toLocaleDateString('es-CL')}`), W/2, 26, {align:'center'});
+  y = 36;
+
+
+  // Intro
+  const introItems = [];
+  INTRO_DATA.forEach((name, i) => {
+    const st  = getStickerState('INTRO', i);
+    if (mode === 'owned'    && st  !== 'tengo')    return;
+    if (mode === 'missing'  && st  !== 'falta')    return;
+    if (mode === 'repetida' && !hasRepetida('INTRO', i)) return;
+    if (mode === 'reserva'  && !hasReserva('INTRO', i))  return;
+    introItems.push({name, st, i, rep: getRepetidaCount('INTRO', i), res: hasReserva('INTRO', i)});
+  });
+
+  if (introItems.length > 0) {
+    if (y > 260) { doc.addPage(); y = margin; }
+
+    doc.setFillColor(245,197,24);
+    doc.roundedRect(margin, y, W - margin * 2, 9, 2, 2, 'F');
+    doc.setTextColor(0,0,0);
+    doc.setFontSize(10);
+    doc.setFont('helvetica','bold');
+    doc.text('SECCION INTRO', margin + 4, y + 6);
+    y += 12;
+
+    const colW = (W - margin * 2 - 6) / 3;
+
+    introItems.forEach((item, ii) => {
+      const col = ii % 3;
+      const row = Math.floor(ii / 3);
+      const x = margin + col * (colW + 3);
+      const safeY = y + row * 7;
+
+      if (safeY > 270) {
+        doc.addPage();
+        y = margin;
+      }
+
+      const yy = y + Math.floor(ii / 3) * 7;
+
+      if (mode === 'all') {
+        if (item.st === 'tengo') doc.setFillColor(34,197,94);
+        else if (item.st === 'falta') doc.setFillColor(229,57,53);
+        else doc.setFillColor(74,85,104);
+        doc.circle(x + 2, yy + 2.5, 1.5, 'F');
+      } else {
+        doc.setFillColor(245,197,24);
+        doc.circle(x + 2, yy + 2.5, 1.5, 'F');
+      }
+
+      doc.setTextColor(50,60,80);
+      doc.setFontSize(6);
+      doc.setFont('helvetica','normal');
+      doc.text(`#${item.i}`, x + 5, yy + 3.5);
+
+      doc.setTextColor(20,30,50);
+      doc.setFontSize(7);
+      const introName = item.name.length > 22 ? item.name.substring(0,20) + '…' : item.name;
+      doc.text(pdfSafeText(introName), x + 11, yy + 3.5);
+
+      if (mode === 'all') {
+        doc.setFontSize(6);
+        doc.setTextColor(item.st === 'tengo' ? [34,197,94] : item.st === 'falta' ? [229,57,53] : [150,150,150]);
+        const badge = item.st === 'tengo' ? 'TENGO' : item.st === 'falta' ? 'FALTA' : '—';
+        doc.text(badge, x + colW - 2, yy + 3.5, {align:'right'});
+      }
+      if (item.rep > 0 || item.res) {
+        doc.setFontSize(5.5);
+        doc.setTextColor(90,95,120);
+        const subBadge = [item.rep > 0 ? `REP x${item.rep}` : '', item.res ? 'RES' : ''].filter(Boolean).join(' / ');
+        doc.text(subBadge, x + colW - 2, yy + 6.2, {align:'right'});
+      }
+    });
+
+    const introRows = Math.ceil(introItems.length / 3);
+    y += introRows * 7 + 8;
+  }
+  'ABCDEFGHIJKL'.split('').forEach(grp => {
+    const countries = GROUPS[grp];
+    const gColor = GROUP_RGB[grp] || [245,197,24];
+    const gInfo = GROUP_INFO[grp];
+    const gs2 = getGroupStats(grp);
+
+    // Check if group has anything to show
+    let groupHasItems = false;
+    countries.forEach(c => {
+      const stickers = albumData[c] || [];
+      stickers.forEach((name, i) => {
+        const st  = getStickerState(c, i);
+        if (mode==='owned'    && st==='tengo')      groupHasItems=true;
+        if (mode==='missing'  && st==='falta')      groupHasItems=true;
+        if (mode==='all')                           groupHasItems=true;
+        if (mode==='repetida' && hasRepetida(c, i)) groupHasItems=true;
+        if (mode==='reserva'  && hasReserva(c, i))  groupHasItems=true;
+      });
+    });
+    if (!groupHasItems) return;
+
+    // Page break if needed
+    if (y > 260) { doc.addPage(); y = margin; }
+
+    // Group header bar
+    doc.setFillColor(...gColor);
+    doc.roundedRect(margin, y, W-margin*2, 9, 2, 2, 'F');
+    doc.setTextColor(0,0,0);
+    doc.setFontSize(10);
+    doc.setFont('helvetica','bold');
+    doc.text(pdfSafeText(`GRUPO ${grp} - ${gInfo ? gInfo.label.toUpperCase() : ''}`), margin+4, y+6);
+    doc.setFontSize(8);
+    doc.text(`${gs2.pct}%`, W-margin-4, y+6, {align:'right'});
+    y += 12;
+
+    countries.forEach(c => {
+      const stickers = albumData[c] || [];
+      const cs = getCountryStats(c);
+      const items = [];
+      stickers.forEach((name, i) => {
+        const st  = getStickerState(c, i);
+        if (mode==='owned'    && st  !== 'tengo')     return;
+        if (mode==='missing'  && st  !== 'falta')     return;
+        if (mode==='repetida' && !hasRepetida(c, i))  return;
+        if (mode==='reserva'  && !hasReserva(c, i))   return;
+        items.push({name, st, rep: getRepetidaCount(c, i), res: hasReserva(c, i), i});
+      });
+      if (items.length===0) return;
+
+      if (y > 268) { doc.addPage(); y = margin; }
+
+      // Country sub-header
+      const cName = pdfSafeText(c.replace(/^[\p{Emoji}\s]+/u,''));
+      doc.setFillColor(22,32,58);
+      doc.rect(margin, y, W-margin*2, 7, 'F');
+      doc.setTextColor(...gColor);
+      doc.setFontSize(8);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(8.5); doc.text(pdfSafeText(`${cName} (${cs.owned}/${cs.total} - ${cs.pct}%)`), margin+3, y+4.8);
+      y += 9;
+
+      // Sticker rows — 3 columns
+      const colW = (W-margin*2-6)/3;
+      items.forEach((item, ii) => {
+        const col = ii % 3;
+        const row = Math.floor(ii / 3);
+        const x = margin + col*(colW+3);
+        const ry = y + row*7;
+
+        if (ry + 7 > 285) {
+          if (col===0 && row > 0) { doc.addPage(); y = margin; }
+        }
+
+        const finalY = y + row*7;
+        if (finalY > 270) { doc.addPage(); y = margin; return; }
+
+        // Color dot
+        if (mode==='all') {
+          if (item.st==='tengo') doc.setFillColor(34,197,94);
+          else if (item.st==='falta') doc.setFillColor(229,57,53);
+          else doc.setFillColor(74,85,104);
+          doc.circle(x+2, finalY+2.5, 1.5, 'F');
+        } else {
+          doc.setFillColor(...gColor);
+          doc.circle(x+2, finalY+2.5, 1.5, 'F');
+        }
+
+        doc.setTextColor(50,60,80);
+        doc.setFontSize(6);
+        doc.setFont('helvetica','normal');
+        doc.text(`#${item.i}`, x+5, finalY+3.5);
+        doc.setTextColor(20,30,50);
+        doc.setFontSize(7);
+        const nameStr = item.name.length > 22 ? item.name.substring(0,20)+'…' : item.name;
+        doc.text(pdfSafeText(nameStr), x+11, finalY+3.5);
+
+        if (mode==='all') {
+          doc.setFontSize(6);
+          doc.setTextColor(item.st==='tengo'?[34,197,94]:item.st==='falta'?[229,57,53]:[150,150,150]);
+          const badge = item.st==='tengo'?'TENGO':item.st==='falta'?'FALTA':'—';
+          doc.text(badge, x+colW-2, finalY+3.5, {align:'right'});
+        }
+        if (item.rep > 0 || item.res) {
+          doc.setFontSize(5.5);
+          doc.setTextColor(90,95,120);
+          const subBadge = [item.rep > 0 ? `REP x${item.rep}` : '', item.res ? 'RES' : ''].filter(Boolean).join(' / ');
+          doc.text(subBadge, x+colW-2, finalY+6.2, {align:'right'});
+        }
+      });
+
+      const rows = Math.ceil(items.length/3);
+      y += rows*7 + 4;
+    });
+
+    y += 4;
+  });
+
+  // Footer on last page
+  doc.setFontSize(7);
+  doc.setTextColor(100,110,130);
+  doc.text('Album Mundial 2026 - Panini Digital', W/2, 292, {align:'center'});
+
+  const fname = mode==='owned'?'tengo':mode==='missing'?'faltan':mode==='repetida'?'repetidas':mode==='reserva'?'reservadas':'completo';
+  doc.save(`album-mundial-2026-${fname}.pdf`);
+}
+
+// ════════════ PDF BUTTON ════════════
+document.getElementById('btn-pdf').addEventListener('click', showPdfModal);
+
+// ════════════ STATUS TABS ════════════
+document.querySelectorAll('.stab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.stab').forEach(b => {
+      b.classList.remove('active');
+      b.style.background = '';
+      b.style.color = '';
+      b.style.borderColor = '';
+    });
+    btn.classList.add('active');
+    // Custom colors for sub-state tabs
+    const customColor = btn.style.getPropertyValue('--stab-active');
+    if (customColor) {
+      btn.style.background = customColor;
+      btn.style.color = '#111';
+      btn.style.borderColor = customColor;
+    }
+    activeStatus = btn.dataset.status;
+    renderGroups();
+  });
+});
+// Mejora de ARIA en los mismos tabs (segundo listener, igual que en el original)
+document.querySelectorAll('.stab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.stab').forEach(b => b.setAttribute('aria-selected', b === btn ? 'true' : 'false'));
+  });
+});
+
+// ════════════ KEYBOARD ESC (overlays del álbum) ════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeOverlay();
+    hidePdfModal();
+    document.getElementById('reset-modal').classList.remove('visible');
+  }
+});
+
+// ════════════ COLECCIONISMO (shell del álbum) ════════════
+// Abre el overlay de Coleccionismo (antes mostraba el álbum como pantalla
+// principal; ahora Grada/el feed es la página de entrada y esto es secundario)
+function startAlbum(){
+  document.getElementById('coleccionismo-overlay')?.classList.add('visible');
+  const video = document.getElementById('bg-video');
+  if(video){
+    video.muted = true;   // muteado por defecto; el slider lo controla
+    video.play().catch(() => {});
+  }
+  _deps.applyMasterVolume();
+}
+window.startAlbum = startAlbum;
+
+document.getElementById('coleccionismo-close')?.addEventListener('click', () => {
+  document.getElementById('coleccionismo-overlay')?.classList.remove('visible');
+});
+
+// ════════════ Animación de clic en cromos ════════════
+// (en el script.js original era un parche aplicado después; aquí se deja
+// igual, como envoltorio sobre la función base, para no tocar el cuerpo
+// de renderGroups extraído tal cual del original)
+const _renderGroupsBase = renderGroups;
+renderGroups = function () {
+  _renderGroupsBase();
+  setTimeout(() => {
+    document.querySelectorAll('.sticker').forEach(st => {
+      if (st.dataset.flashBound) return;
+      st.dataset.flashBound = '1';
+      st.addEventListener('click', () => {
+        st.classList.remove('flash');
+        void st.offsetWidth;
+        st.classList.add('flash');
+      }, { capture: true });
+    });
+  }, 0);
+};
+
+// Exportados para que script.js los use desde el handler global de
+// popstate (botón "atrás" del navegador/gestos móviles).
+export { closeOverlay, hidePdfModal };
+
+// ════════════ INIT ════════════
+loadState();
+buildGroupTabs();
+renderGroups();
+updateStatsBar();
