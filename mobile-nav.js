@@ -1,216 +1,312 @@
 /**
- * mobile-nav.js
- * Lógica de navegación móvil para Grada.
- * Depende de responsive.css — cargar después de todos los módulos ES.
- * NO usar type="module" para que los IDs del DOM ya existan al ejecutarse.
- *
- * En index.html, justo antes de </body>:
- *   <script src="mobile-nav.js"></script>
+ * mobile-nav.js  (v4)
+ * Tab bar + drawers + menú "Más" para Grada en móvil.
+ * Cargar SIN type="module", al final del <body>.
  */
 
 (function () {
   'use strict';
 
-  // Solo activo en móvil
   const BREAKPOINT = 860;
   if (window.innerWidth > BREAKPOINT) return;
 
-  /* ─── Referencias al DOM existente ─── */
-  const socialPanel = document.querySelector('.social-panel.friends-panel');
-  const chatPanel   = document.querySelector('.social-panel.chat-panel');
+  const friendsPanel = document.querySelector('.social-panel.friends-panel');
+  const chatPanel    = document.querySelector('.social-panel.chat-panel');
+  const radioBar     = document.getElementById('radio-bar');
+  if (!friendsPanel || !chatPanel) return;
 
-  if (!socialPanel || !chatPanel) return; // seguridad
-
-  /* ─── 1. Crear backdrop ─── */
+  /* ═══════════════════════════════════════════
+     1. BACKDROP
+  ═══════════════════════════════════════════ */
   const backdrop = document.createElement('div');
   backdrop.id = 'mob-backdrop';
   document.body.appendChild(backdrop);
 
-  /* ─── 2. Crear barra de tabs ─── */
+  /* ═══════════════════════════════════════════
+     2. MENÚ "MÁS" (sheet desde abajo)
+  ═══════════════════════════════════════════ */
+  const moreSheet = document.createElement('div');
+  moreSheet.id = 'mob-more-sheet';
+  moreSheet.innerHTML = `
+    <div id="mob-more-handle"></div>
+    <div id="mob-more-grid">
+      <button class="mob-more-item" data-more="album">
+        <span class="mob-more-icon">🗂️</span>
+        <span>Álbum</span>
+      </button>
+      <button class="mob-more-item" data-more="historia">
+        <span class="mob-more-icon">📜</span>
+        <span>Historia</span>
+      </button>
+      <button class="mob-more-item" data-more="calendario">
+        <span class="mob-more-icon">📅</span>
+        <span>Calendario</span>
+      </button>
+      <button class="mob-more-item" data-more="talentos">
+        <span class="mob-more-icon">🌟</span>
+        <span>Talentos</span>
+      </button>
+      <button class="mob-more-item" data-more="codigos">
+        <span class="mob-more-icon">🎫</span>
+        <span>Códigos</span>
+      </button>
+      <button class="mob-more-item" data-more="intercambios">
+        <span class="mob-more-icon">🔄</span>
+        <span>Intercambios</span>
+      </button>
+    </div>
+  `;
+  document.body.appendChild(moreSheet);
+
+  /* ═══════════════════════════════════════════
+     3. TAB BAR
+  ═══════════════════════════════════════════ */
   const tabBar = document.createElement('nav');
   tabBar.id = 'mob-tab-bar';
   tabBar.setAttribute('aria-label', 'Navegación principal');
   tabBar.innerHTML = `
-    <button class="mob-tab active" data-tab="feed" aria-label="Feed">
-      <span class="mob-tab-icon" aria-hidden="true">⚽</span>
-      Feed
+    <button class="mob-tab active" data-tab="feed"   aria-label="Feed">
+      <span class="mob-tab-icon">⚽</span>Feed
     </button>
     <button class="mob-tab" data-tab="amigos" aria-label="Amigos">
-      <span class="mob-tab-icon" aria-hidden="true">👥</span>
-      Amigos
+      <span class="mob-tab-icon">👥</span>Amigos
     </button>
-    <button class="mob-tab" data-tab="chat" aria-label="Chat">
-      <span class="mob-tab-icon" aria-hidden="true">💬</span>
-      <span class="mob-tab-badge" id="mob-chat-badge" aria-label="mensajes no leídos"></span>
-      Chat
+    <button class="mob-tab" data-tab="chat"   aria-label="Chat">
+      <span class="mob-tab-icon">💬</span>
+      <span class="mob-tab-badge" id="mob-chat-badge"></span>Chat
     </button>
-    <button class="mob-tab" data-tab="coleccion" aria-label="Álbum">
-      <span class="mob-tab-icon" aria-hidden="true">📋</span>
-      Álbum
+    <button class="mob-tab" data-tab="radio"  aria-label="Radio">
+      <span class="mob-tab-icon">📻</span>Radio
     </button>
-    <button class="mob-tab" data-tab="historia" aria-label="Historia">
-      <span class="mob-tab-icon" aria-hidden="true">📜</span>
-      Historia
+    <button class="mob-tab" data-tab="mas"    aria-label="Más opciones">
+      <span class="mob-tab-icon">···</span>Más
     </button>
   `;
   document.body.appendChild(tabBar);
 
-  /* ─── 3. Helpers ─── */
-  const allTabs = () => tabBar.querySelectorAll('.mob-tab');
+  /* ═══════════════════════════════════════════
+     4. ESTADO
+  ═══════════════════════════════════════════ */
+  let activeTab  = 'feed';
+  let radioOpen  = false;
+  let moreOpen   = false;
 
-  function setActiveTab(tabName) {
-    allTabs().forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+  /* ═══════════════════════════════════════════
+     5. HELPERS
+  ═══════════════════════════════════════════ */
+  function setTab(name) {
+    activeTab = name;
+    tabBar.querySelectorAll('.mob-tab').forEach(t =>
+      t.classList.toggle('active', t.dataset.tab === name)
+    );
   }
 
-  function closeAll() {
-    socialPanel.classList.remove('mob-open');
+  function closePanels() {
+    friendsPanel.classList.remove('mob-open');
     chatPanel.classList.remove('mob-chat-open');
     backdrop.classList.remove('mob-backdrop-visible');
   }
 
-  function openAmigos() {
-    closeAll();
-    socialPanel.classList.add('mob-open');
-    backdrop.classList.add('mob-backdrop-visible');
-    setActiveTab('amigos');
+  function closeMore() {
+    moreOpen = false;
+    moreSheet.classList.remove('mob-more-open');
   }
 
-  function openChat() {
+  function closeRadio() {
+    if (!radioOpen) return;
+    radioOpen = false;
+    document.body.classList.remove('mob-radio-open');
+    if (radioBar) radioBar.classList.remove('visible');
+  }
+
+  function closeAll() {
+    closePanels();
+    closeMore();
+    // No cerramos radio al navegar — la música sigue
+  }
+
+  /* ── Acciones de cada tab ── */
+  function goFeed() {
+    closeAll();
+    setTab('feed');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goAmigos() {
+    closeAll();
+    friendsPanel.classList.add('mob-open');
+    backdrop.classList.add('mob-backdrop-visible');
+    setTab('amigos');
+  }
+
+  function goChat() {
     closeAll();
     chatPanel.classList.add('mob-chat-open');
     backdrop.classList.add('mob-backdrop-visible');
-    setActiveTab('chat');
-    // Scroll al último mensaje con un pequeño delay para la animación CSS
+    setTab('chat');
     setTimeout(() => {
-      const msgs = chatPanel.querySelector('.chat-messages');
+      const msgs = chatPanel.querySelector('.chat-messages, #chat-messages');
       if (msgs) msgs.scrollTo({ top: msgs.scrollHeight, behavior: 'smooth' });
-    }, 340);
+    }, 320);
   }
 
-  function goToFeed() {
+  function goRadio() {
+    if (radioOpen) {
+      // Toggle off — oculta el panel pero la música sigue
+      closeRadio();
+      setTab('feed');
+      return;
+    }
     closeAll();
-    setActiveTab('feed');
-    // Scroll suave al inicio del feed
-    const feed = document.querySelector('.album-main');
-    if (feed) feed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    radioOpen = true;
+    document.body.classList.add('mob-radio-open');
+    if (radioBar) radioBar.classList.add('visible');
+    // Si la radio no estaba iniciada, arranca
+    const btnRadio = document.getElementById('btn-radio');
+    if (btnRadio && !radioBar?.classList.contains('playing')) btnRadio.click();
+    setTab('radio');
   }
 
-  /* ─── 4. Click en tabs ─── */
+  function goMas() {
+    if (moreOpen) { closeMore(); setTab(activeTab === 'mas' ? 'feed' : activeTab); return; }
+    closePanels();
+    moreOpen = true;
+    moreSheet.classList.add('mob-more-open');
+    backdrop.classList.add('mob-backdrop-visible');
+    setTab('mas');
+  }
+
+  /* ── Acciones del menú Más ── */
+  function handleMore(action) {
+    closeMore();
+    backdrop.classList.remove('mob-backdrop-visible');
+
+    switch (action) {
+      case 'album':
+        setTab('mas');
+        document.getElementById('coleccionismo-overlay')?.classList.add('visible');
+        break;
+      case 'historia':
+        setTab('mas');
+        if (typeof window.openMundiales === 'function') window.openMundiales();
+        else document.getElementById('btn-mundiales-header')?.click();
+        break;
+      case 'calendario':
+        setTab('mas');
+        if (typeof window.openCalendar === 'function') window.openCalendar();
+        else document.getElementById('btn-calendario-header')?.click();
+        break;
+      case 'talentos':
+        setTab('mas');
+        document.getElementById('btn-talentos')?.click();
+        break;
+      case 'codigos':
+        setTab('mas');
+        document.getElementById('btn-codes')?.click();
+        break;
+      case 'intercambios':
+        setTab('mas');
+        document.getElementById('btn-intercambios')?.click();
+        break;
+    }
+  }
+
+  /* ═══════════════════════════════════════════
+     6. EVENTOS
+  ═══════════════════════════════════════════ */
+
+  // Tab bar
   tabBar.addEventListener('click', e => {
     const btn = e.target.closest('.mob-tab');
     if (!btn) return;
-    const tab = btn.dataset.tab;
-
-    switch (tab) {
-      case 'feed':
-        goToFeed();
-        break;
-
-      case 'amigos':
-        openAmigos();
-        break;
-
-      case 'chat':
-        openChat();
-        break;
-
-      case 'coleccion':
-        closeAll();
-        setActiveTab('coleccion');
-        // Abre el overlay de coleccionismo existente
-        const colOverlay = document.getElementById('coleccionismo-overlay');
-        if (colOverlay) colOverlay.classList.add('visible');
-        break;
-
-      case 'historia':
-        closeAll();
-        setActiveTab('historia');
-        // Llama la función global openMundiales() si existe
-        if (typeof window.openMundiales === 'function') {
-          window.openMundiales();
-        }
-        break;
+    switch (btn.dataset.tab) {
+      case 'feed':   goFeed();   break;
+      case 'amigos': goAmigos(); break;
+      case 'chat':   goChat();   break;
+      case 'radio':  goRadio();  break;
+      case 'mas':    goMas();    break;
     }
   });
 
-  /* ─── 5. Cerrar al tocar backdrop ─── */
-  backdrop.addEventListener('click', () => {
-    goToFeed();
+  // Menú Más
+  moreSheet.addEventListener('click', e => {
+    const item = e.target.closest('.mob-more-item');
+    if (item) handleMore(item.dataset.more);
   });
 
-  /* ─── 6. Escuchar evento del chat (disparado desde amigos.js) ─── */
+  // Backdrop
+  backdrop.addEventListener('click', () => {
+    closeAll();
+    setTab('feed');
+  });
+
+  // Desde amigos.js — pulsar "Chat" en una tarjeta
   document.addEventListener('gradaChatOpened', () => {
     if (window.innerWidth > BREAKPOINT) return;
-    openChat();
+    goChat();
   });
 
-  /* ─── 6b. Escuchar goHome desde script.js — resetea tab a "feed" ─── */
+  // Desde script.js — goHome()
   document.addEventListener('gradaGoHome', () => {
     if (window.innerWidth > BREAKPOINT) return;
     closeAll();
-    setActiveTab('feed');
+    closeRadio();
+    setTab('feed');
   });
 
-  /* ─── 7. El botón Amigos del header-nav existente también abre el drawer ─── */
-  const btnAmigos = document.getElementById('btn-amigos');
-  if (btnAmigos) {
-    btnAmigos.addEventListener('click', () => {
-      if (window.innerWidth <= BREAKPOINT) openAmigos();
+  // Cerrar overlays secundarios → volver a Más activo
+  document.getElementById('coleccionismo-close')?.addEventListener('click', () => setTab('feed'));
+  document.getElementById('mun-close')?.addEventListener('click',           () => setTab('feed'));
+
+  // Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeAll(); setTab('feed'); }
+  });
+
+  // Botón atrás
+  window.addEventListener('popstate', () => {
+    if (window.innerWidth > BREAKPOINT) return;
+    if (moreOpen || friendsPanel.classList.contains('mob-open') ||
+        chatPanel.classList.contains('mob-chat-open')) {
+      closeAll();
+      setTab('feed');
+    }
+  });
+
+  /* ═══════════════════════════════════════════
+     7. BADGE DE MENSAJES NO LEÍDOS
+  ═══════════════════════════════════════════ */
+  const mobBadge = document.getElementById('mob-chat-badge');
+
+  function syncBadge() {
+    if (!mobBadge) return;
+    let total = 0;
+    document.querySelectorAll('.chat-unread-badge').forEach(el => {
+      total += parseInt(el.textContent || '0', 10) || 0;
+    });
+    mobBadge.textContent = total > 9 ? '9+' : (total || '');
+    mobBadge.classList.toggle('has-badge', total > 0);
+  }
+
+  const panelBody = document.getElementById('friends-panel-body');
+  if (panelBody) {
+    new MutationObserver(syncBadge).observe(panelBody, {
+      childList: true, subtree: true, characterData: true
     });
   }
 
-  /* ─── 8. Sincronizar badge de mensajes no leídos ───
-     El sistema de notificaciones existente actualiza #notif-badge.
-     Aquí miramos ese elemento y replicamos el número en el tab de Chat.
-  ── */
-  const mobChatBadge = document.getElementById('mob-chat-badge');
-  const notifBadge   = document.getElementById('notif-badge');
-
-  function syncChatBadge() {
-    if (!mobChatBadge) return;
-    // Revisa el badge de mensajes no leídos del chat (ajusta el selector
-    // al elemento que tu JS ya actualiza cuando llegan mensajes nuevos)
-    const chatUnread = document.querySelector('.chat-unread-badge');
-    const count = chatUnread
-      ? parseInt(chatUnread.textContent || '0', 10)
-      : 0;
-    if (count > 0) {
-      mobChatBadge.textContent = count > 9 ? '9+' : count;
-      mobChatBadge.classList.add('has-badge');
-    } else {
-      mobChatBadge.textContent = '';
-      mobChatBadge.classList.remove('has-badge');
-    }
-  }
-
-  // Observar cambios en el badge existente para sincronizar
-  if (notifBadge || document.querySelector('.chat-unread-badge')) {
-    const observer = new MutationObserver(syncChatBadge);
-    const target = document.querySelector('.chat-unread-badge') || notifBadge;
-    if (target) observer.observe(target, { childList: true, characterData: true, subtree: true });
-  }
-
-  /* ─── 9. Cerrar drawers con Escape ─── */
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') goToFeed();
-  });
-
-  /* ─── 10. Restaurar layout en resize a escritorio ─── */
+  /* ═══════════════════════════════════════════
+     8. RESIZE
+  ═══════════════════════════════════════════ */
   window.addEventListener('resize', () => {
     if (window.innerWidth > BREAKPOINT) {
-      closeAll();
-      tabBar.style.display = 'none';
+      closeAll(); closeRadio();
+      tabBar.hidden = true;
+      moreSheet.hidden = true;
     } else {
-      tabBar.style.display = '';
+      tabBar.hidden = false;
+      moreSheet.hidden = false;
     }
   });
-
-  /* ─── 11. Cuando los overlays del coleccionismo/historia se cierran,
-      volvemos al tab de feed automáticamente ─── */
-  const colClose = document.getElementById('coleccionismo-close');
-  const munClose = document.getElementById('mun-close');
-
-  if (colClose) colClose.addEventListener('click', () => setActiveTab('feed'));
-  if (munClose) munClose.addEventListener('click', () => setActiveTab('feed'));
 
 })();
