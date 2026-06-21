@@ -672,12 +672,12 @@ html[data-theme="contrast"] .codes-warn{background:#1a0000;border-color:#ff4444;
 .mun-card-champ{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:var(--dim);font-weight:600;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 
 /* ── Detail view ── */
-#mun-detail-view{position:absolute;inset:0;background:var(--bg);z-index:10;overflow-y:auto;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
+#mun-detail-view{position:absolute;top:var(--header-h,150px);left:0;right:0;bottom:0;background:var(--bg);z-index:10;overflow-y:auto;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
 #mun-detail-view.visible{transform:translateX(0)}
 .mun-detail-inner{max-width:780px;margin:0 auto;padding-bottom:60px}
 
-.mun-detail-header{position:sticky;top:0;z-index:5;background:var(--bg);padding:14px 24px 10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06)}
-.mun-back-detail{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:700;letter-spacing:.08em;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;min-height:38px}
+.mun-detail-header{padding:20px 24px 0;flex-shrink:0}
+.mun-back-detail{padding:8px 18px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.08em;cursor:pointer;transition:all .2s}
 .mun-back-detail:hover{background:var(--card2);color:var(--text);border-color:#3a5280}
 
 /* Hero */
@@ -765,7 +765,6 @@ html[data-theme="light"] .mun-player-btn{background:#dde8f7;border-color:#c6d3e6
 html[data-theme="light"] .mun-hito{background:rgba(212,164,0,.06);border-color:rgba(212,164,0,.3)}
 html[data-theme="light"] .mun-mascot-strip{background:#eef3fb;border-color:#c6d3e6}
 html[data-theme="light"] .mun-back-home,.mun-back-detail{background:#eef3fb;border-color:#c6d3e6}
-html[data-theme="light"] .mun-detail-header{background:#eef3fb;border-bottom-color:rgba(0,0,0,.07)}
 
 /* ── High contrast theme ── */
 html[data-theme="contrast"] .mun-card{background:#000;border-color:#fff}
@@ -775,7 +774,6 @@ html[data-theme="contrast"] .mun-card:hover .mun-card-img{filter:grayscale(0) br
 html[data-theme="contrast"] .mun-card-champ{color:#ccc}
 html[data-theme="contrast"] .mun-card-footer{border-color:#fff}
 html[data-theme="contrast"] #mun-detail-view{background:#000}
-html[data-theme="contrast"] .mun-detail-header{background:#000;border-bottom-color:#fff}
 html[data-theme="contrast"] .mun-stat{background:#111;border-color:#fff}
 html[data-theme="contrast"] .mun-stat-champ{color:#ff0}
 html[data-theme="contrast"] .mun-player{background:#111;border-color:#fff}

@@ -97,6 +97,12 @@ function enterAlbumShell(mode, user = null) {
 setupProfileViewButton();
 initAmigos();
 
+// Interceptar btn-amigos en fase de captura para cerrar cualquier sección
+// abierta ANTES de que amigos.js procese el click y muestre su overlay.
+document.getElementById('btn-amigos')?.addEventListener('click', function () {
+  window.closeAllOverlays?.();
+}, true /* capture: true → se ejecuta antes del handler de amigos.js */);
+
 // Convertir amigos-overlay en panel flotante: envolver contenido en .amigos-shell
 // y cerrar al hacer click en el backdrop
 (function wrapAmigosShell() {
@@ -494,24 +500,15 @@ document.addEventListener('click', e => {
 
 
 // ── Navegación: header siempre visible ─────────────
-// Cierra TODOS los overlays de sección sin resetear scroll ni tab.
-// Llamar antes de abrir cualquier sección para exclusividad.
-window.closeAllOverlays = function () {
+// Vuelve a Grada (feed) cerrando cualquier overlay de sección que esté abierto
+function goHome() {
   document.getElementById('coleccionismo-overlay')?.classList.remove('visible');
-  if (typeof window.closeMundiales === 'function') {
-    window.closeMundiales();
-  } else {
-    document.getElementById('mundiales-overlay')?.classList.remove('visible');
-  }
+  document.getElementById('mundiales-overlay')?.classList.remove('visible');
   document.getElementById('calendar-overlay')?.classList.remove('visible');
   document.getElementById('amigos-overlay')?.classList.remove('visible');
   document.body.style.overflow = '';
-};
-
-// Vuelve a Grada (feed) cerrando cualquier overlay de sección que esté abierto
-function goHome() {
-  window.closeAllOverlays();
   window.scrollTo({ top: 0, behavior: a11yPrefs.reduceMotion ? 'auto' : 'smooth' });
+  // Notifica a mobile-nav.js para que resetee el tab activo a "feed"
   document.dispatchEvent(new CustomEvent('gradaGoHome'));
 }
 window.goHome = goHome;
