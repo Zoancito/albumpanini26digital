@@ -4,6 +4,7 @@
 // ═══════════════════════════════════════════════════
 import { supabase } from './supabase.js'
 import { getCreatorProfile, activateCreator, deactivateCreator, openManageCategoriesModal } from './creadores.js'
+import { createNotificacion } from './notificaciones.js'
 
 // ── Estado interno ────────────────────────────────
 let _currentUser    = null
@@ -90,13 +91,62 @@ export async function uploadAvatar(userId, file) {
   return data.publicUrl + '?t=' + Date.now()
 }
 
-// ── Apoyar perfil ────────────────────────────────
-
+// ── Apoyar / desapoyar perfil ─────────────────────
+// Usa profile_apoyos (toggle). El trigger en Supabase actualiza apoyo_count.
 export async function apoyarPerfil(profileId) {
-  // Usa un RPC para incrementar de forma segura
-  const { data, error } = await supabase.rpc('increment_apoyo', { target_profile_id: profileId })
-  if (error) throw error
-  return data   // devuelve el nuevo total
+  if (!_currentUser) throw new Error('No autenticado')
+  const supporterId = _currentUser.id
+
+  // ¿Ya apoyé a este perfil?
+  const { data: existing } = await supabase
+    .from('profile_apoyos')
+    .select('supporter_id')
+    .eq('supporter_id', supporterId)
+    .eq('supported_id', profileId)
+    .maybeSingle()
+
+  if (existing) {
+    // Toggle off — quitar apoyo
+    const { error } = await supabase
+      .from('profile_apoyos')
+      .delete()
+      .eq('supporter_id', supporterId)
+      .eq('supported_id', profileId)
+    if (error) throw error
+    return { action: 'removed' }
+  } else {
+    // Toggle on — agregar apoyo
+    const { error } = await supabase
+      .from('profile_apoyos')
+      .insert({ supporter_id: supporterId, supported_id: profileId })
+    if (error) throw error
+
+    // Notificar al dueño del perfil (solo si no se apoya a sí mismo)
+    if (supporterId !== profileId) {
+      const senderName = _currentProfile?.full_name
+        || _currentUser.user_metadata?.full_name
+        || _currentUser.user_metadata?.name
+        || _currentUser.email?.split('@')[0]
+        || 'Alguien'
+      createNotificacion(profileId, 'profile_apoyo', {
+        msg: `${senderName} apoyó tu perfil`,
+        sender_id: supporterId,
+      }).catch(() => {})
+    }
+    return { action: 'added' }
+  }
+}
+
+// Chequea si el usuario actual ya apoyó un perfil
+export async function hasApoyado(profileId) {
+  if (!_currentUser) return false
+  const { data } = await supabase
+    .from('profile_apoyos')
+    .select('supporter_id')
+    .eq('supporter_id', _currentUser.id)
+    .eq('supported_id', profileId)
+    .maybeSingle()
+  return !!data
 }
 
 // ── Accessor ─────────────────────────────────────

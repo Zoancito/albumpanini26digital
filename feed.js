@@ -832,6 +832,9 @@ async function loadFeedComments(postId, section, authorId) {
       const emojiBtn = createEmojiPicker(input, form)
       form.insertBefore(emojiBtn, submit)
 
+      // @menciones autocomplete
+      attachMentionAutocomplete(input)
+
       submit.addEventListener('click', () => submitFeedComment(postId, input, authorId))
       input.addEventListener('keydown', e => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitFeedComment(postId, input, authorId) }
@@ -901,6 +904,22 @@ async function submitFeedComment(postId, input, authorId) {
         post_id: postId,
       }).catch(() => {})
     }
+
+    // Detectar @menciones y notificar a los mencionados
+    const mentionHandles = [...new Set((content.match(/@([\w.]+)/g) || []).map(m => m.slice(1)))]
+    if (mentionHandles.length) {
+      const { data: mentioned } = await supabase
+        .from('profiles').select('id, username').in('username', mentionHandles)
+      const commenterName = comment.profiles?.full_name || comment.profiles?.username || 'Alguien'
+      for (const mu of (mentioned || [])) {
+        if (mu.id !== _userId) {
+          createNotificacion(mu.id, 'mention', {
+            msg: `${commenterName} te mencionó en un comentario`,
+            post_id: postId,
+          }).catch(() => {})
+        }
+      }
+    }
   } catch (e) {
     console.error('[feed comment]', e)
     showFeedToast('Error al publicar comentario')
@@ -919,6 +938,62 @@ function _bumpCommentCount(postId, delta) {
 }
 
 // ── Apoyo en posts ────────────────────────────────
+// ── Autocomplete @menciones en inputs de comentario ──
+function attachMentionAutocomplete(input) {
+  const form = input.closest('.comment-form')
+  if (!form || form.dataset.mentionAttached) return
+  form.dataset.mentionAttached = '1'
+
+  const dropdown = document.createElement('div')
+  dropdown.className = 'mention-dropdown'
+  form.appendChild(dropdown)
+
+  let _mentionStart = -1
+
+  function close() { dropdown.classList.remove('open'); dropdown.innerHTML = '' }
+
+  input.addEventListener('input', async () => {
+    const val = input.value
+    const cur = input.selectionStart ?? val.length
+    const before = val.slice(0, cur)
+    const atIdx = before.lastIndexOf('@')
+    if (atIdx === -1) { close(); return }
+    const query = before.slice(atIdx + 1)
+    if (!query || /\s/.test(query)) { close(); return }
+
+    _mentionStart = atIdx
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, username, full_name, avatar_url')
+      .or(`username.ilike.${query}%,full_name.ilike.${query}%`)
+      .limit(6)
+    if (!data?.length) { close(); return }
+
+    dropdown.innerHTML = data.map(p => {
+      const ini = (p.full_name || p.username || '?')[0].toUpperCase()
+      return `<button type="button" class="mention-item" data-id="${p.id}" data-uname="${esc(p.username || p.full_name)}">
+        ${p.avatar_url ? `<img src="${p.avatar_url}" class="mention-avatar" alt="">` : `<div class="mention-avatar-fb">${ini}</div>`}
+        <div><div class="mention-name">${esc(p.full_name || p.username)}</div>${p.username ? `<div class="mention-handle">@${esc(p.username)}</div>` : ''}</div>
+      </button>`
+    }).join('')
+    dropdown.classList.add('open')
+
+    dropdown.querySelectorAll('.mention-item').forEach(item => {
+      item.addEventListener('mousedown', e => {
+        e.preventDefault()
+        const uname = item.dataset.uname
+        const after = val.slice(input.selectionStart ?? val.length)
+        input.value = val.slice(0, _mentionStart) + '@' + uname + ' ' + after
+        input.selectionStart = input.selectionEnd = _mentionStart + uname.length + 2
+        close(); input.focus()
+      })
+    })
+  })
+
+  input.addEventListener('keydown', e => { if (e.key === 'Escape') close() })
+  document.addEventListener('click', e => { if (!dropdown.contains(e.target) && e.target !== input) close() })
+}
+
 async function toggleApoyo(p, card) {
   const btn   = card.querySelector('.fp-apoyo-btn')
   const count = card.querySelector('.fp-apoyo-count')
@@ -936,9 +1011,19 @@ async function toggleApoyo(p, card) {
     } else {
       await supabase.from('post_reactions')
         .upsert({ post_id: p.id, user_id: _userId }, { onConflict: 'post_id,user_id' })
+      // Notificar al autor del post (solo si no es el mismo usuario)
+      if (p.user_id && p.user_id !== _userId) {
+        // Obtener nombre del que apoya
+        const { data: myProfile } = await supabase
+          .from('profiles').select('full_name, username').eq('id', _userId).single()
+        const myName = myProfile?.full_name || myProfile?.username || 'Alguien'
+        createNotificacion(p.user_id, 'post_apoyo', {
+          msg: `${myName} apoyó tu publicación`,
+          post_id: p.id,
+        }).catch(() => {})
+      }
     }
   } catch (e) {
-    // Revert
     btn.classList.toggle('active', wasActive)
     count.textContent = parseInt(count.textContent) + (wasActive ? 1 : -1)
   } finally {

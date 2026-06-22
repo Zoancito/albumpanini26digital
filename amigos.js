@@ -9,6 +9,7 @@ import {
   removeFriendship,
   sendFriendRequest
 } from './friendships.js'
+import { createNotificacion } from './notificaciones.js'
 
 let _searchTimer = null
 let _currentUser = null
@@ -666,6 +667,16 @@ async function handleCardClick(e) {
       addBtn.textContent = '✓ Enviado'
       addBtn.classList.replace('amigos-add-btn', 'amigos-sent-btn')
       debouncedFriendsRefresh()
+
+      // Notificar al receptor de la solicitud
+      const senderName = _currentUser?.user_metadata?.full_name
+        || _currentUser?.user_metadata?.name
+        || _currentUser?.email?.split('@')[0]
+        || 'Alguien'
+      createNotificacion(profileId, 'friend_request', {
+        msg: `${senderName} te envió una solicitud de amistad`,
+        sender_id: _currentUser?.id,
+      }).catch(() => {})
     } catch (err) {
       console.error('[amigos] sendFriendRequest:', err)
       addBtn.disabled = false; addBtn.textContent = '➕'

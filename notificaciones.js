@@ -15,6 +15,10 @@ export const NOTIF_TYPES = {
   EXCHANGE_ACCEPTED: 'exchange_accepted',
   EXCHANGE_REJECTED: 'exchange_rejected',
   POST_COMMENT:      'post_comment',
+  POST_APOYO:        'post_apoyo',
+  FRIEND_REQUEST:    'friend_request',
+  PROFILE_APOYO:     'profile_apoyo',
+  MENTION:           'mention',
 }
 
 // ── Inicializar (llamar tras login) ───────────────
@@ -109,6 +113,10 @@ const NOTIF_ICONS = {
   exchange_accepted: '✅',
   exchange_rejected: '❌',
   post_comment:      '💬',
+  post_apoyo:        '🏆',
+  friend_request:    '👥',
+  profile_apoyo:     '⭐',
+  mention:           '📣',
 }
 const NOTIF_LABELS = {
   exchange_match:    'Intercambio posible',
@@ -116,6 +124,10 @@ const NOTIF_LABELS = {
   exchange_accepted: 'Intercambio aceptado',
   exchange_rejected: 'Intercambio rechazado',
   post_comment:      'Nuevo comentario',
+  post_apoyo:        'Apoyaron tu publicación',
+  friend_request:    'Solicitud de amistad',
+  profile_apoyo:     'Apoyaron tu perfil',
+  mention:           'Te mencionaron',
 }
 
 function showToastNotif(notif) {
