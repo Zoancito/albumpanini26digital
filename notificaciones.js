@@ -14,6 +14,7 @@ export const NOTIF_TYPES = {
   EXCHANGE_REQUEST:  'exchange_request',
   EXCHANGE_ACCEPTED: 'exchange_accepted',
   EXCHANGE_REJECTED: 'exchange_rejected',
+  POST_COMMENT:      'post_comment',
 }
 
 // ── Inicializar (llamar tras login) ───────────────
@@ -107,12 +108,14 @@ const NOTIF_ICONS = {
   exchange_request:  '📩',
   exchange_accepted: '✅',
   exchange_rejected: '❌',
+  post_comment:      '💬',
 }
 const NOTIF_LABELS = {
   exchange_match:    'Intercambio posible',
   exchange_request:  'Solicitud de intercambio',
   exchange_accepted: 'Intercambio aceptado',
   exchange_rejected: 'Intercambio rechazado',
+  post_comment:      'Nuevo comentario',
 }
 
 function showToastNotif(notif) {

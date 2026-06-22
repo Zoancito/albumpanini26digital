@@ -4,6 +4,7 @@
 // ═══════════════════════════════════════════════════
 import { supabase } from './supabase.js'
 import { getCatDef as getCreatorCatDef, loadTalentosOcultos } from './creadores.js'
+import { createNotificacion } from './notificaciones.js'
 
 // ── Categorías disponibles ────────────────────────
 export const FEED_CATEGORIES = [
@@ -625,6 +626,98 @@ function renderEmptyState() {
     </div>`
 }
 
+// ── Emoji picker (reutilizable) ───────────────────
+const EMOJI_CATS = [
+  { icon:'⚽', label:'Fútbol', list:['⚽','🥅','🏆','🥇','🥈','🥉','🎯','🏟️','🎽','👟','🏴','🚩','🎫','🏅','🎪','📺','📻','🎙️','🔴','🟡','🟢','🔵','⚪','⚫','🇦🇷','🇧🇷','🇩🇪','🇪🇸','🇫🇷','🇮🇹','🇵🇹','🇺🇾'] },
+  { icon:'😀', label:'Caras',  list:['😀','😃','😄','😁','😆','😅','🤣','😂','😊','😇','🥹','😍','🤩','😎','🥳','😏','🤔','🤨','😒','😞','😢','😭','😤','😡','🤬','🤯','😳','🥺','😱','😨','😴','🤦','🤷','😵','💀','🤡','👻','😬','🙄','😯','😮','😲'] },
+  { icon:'👏', label:'Gestos', list:['👏','🙌','🤝','🤜','🤛','✊','👊','🫵','💪','🙏','🤲','🫶','❤️','🔥','💯','⭐','🌟','✨','💫','🎉','🎊','👑','🏃','💥','💢','💤','👀','📣','🔔','👆','👇','👈','👉','✌️','🤟','🤘','🤙'] },
+  { icon:'😂', label:'Extra',  list:['🧠','🎭','💡','📸','💻','📱','⌚','🌍','🌎','🌏','☀️','🌙','🌈','❄️','⚡','🌊','🎵','🎶','🎤','🎧','🍕','🍔','🍺','☕','🍾','🎂','🎁','💎','💰','🚀','✈️','🏖️','🏕️','🗺️','🧩','🎮','🕹️','🎲','📚','✏️','📝'] },
+]
+
+/**
+ * Crea y adjunta un emoji picker a un input.
+ * Devuelve el botón para insertar en el DOM.
+ * @param {HTMLInputElement|HTMLTextAreaElement} inputEl
+ * @param {HTMLElement} container – el contenedor relativo (para position:absolute)
+ */
+function createEmojiPicker(inputEl, container) {
+  // Botón emoji
+  const btn = document.createElement('button')
+  btn.type = 'button'
+  btn.className = 'emoji-pick-btn'
+  btn.title = 'Emojis'
+  btn.textContent = '😊'
+
+  // Panel
+  const panel = document.createElement('div')
+  panel.className = 'emoji-panel'
+
+  // Categorías
+  const catsRow = document.createElement('div')
+  catsRow.className = 'emoji-panel-cats'
+
+  const grid = document.createElement('div')
+  grid.className = 'emoji-grid'
+
+  let activeCat = 0
+
+  function showCat(idx) {
+    activeCat = idx
+    catsRow.querySelectorAll('.emoji-cat-btn').forEach((b, i) =>
+      b.classList.toggle('active', i === idx))
+    grid.innerHTML = EMOJI_CATS[idx].list.map(e =>
+      `<button type="button" class="emoji-btn" data-emoji="${e}">${e}</button>`
+    ).join('')
+    grid.querySelectorAll('.emoji-btn').forEach(eb => {
+      eb.addEventListener('click', () => {
+        insertAtCursor(inputEl, eb.dataset.emoji)
+        inputEl.focus()
+      })
+    })
+  }
+
+  EMOJI_CATS.forEach((cat, i) => {
+    const cb = document.createElement('button')
+    cb.type = 'button'
+    cb.className = 'emoji-cat-btn'
+    cb.textContent = cat.icon
+    cb.title = cat.label
+    cb.addEventListener('click', () => showCat(i))
+    catsRow.appendChild(cb)
+  })
+
+  panel.appendChild(catsRow)
+  panel.appendChild(grid)
+  showCat(0)
+
+  // Toggle panel
+  btn.addEventListener('click', e => {
+    e.stopPropagation()
+    panel.classList.toggle('open')
+  })
+  // Cerrar al hacer click afuera
+  document.addEventListener('click', e => {
+    if (!panel.contains(e.target) && e.target !== btn) {
+      panel.classList.remove('open')
+    }
+  })
+
+  container.style.position = 'relative'
+  container.appendChild(panel)
+  return btn
+}
+
+function insertAtCursor(el, text) {
+  const start = el.selectionStart ?? el.value.length
+  const end   = el.selectionEnd   ?? el.value.length
+  el.value = el.value.slice(0, start) + text + el.value.slice(end)
+  el.selectionStart = el.selectionEnd = start + text.length
+  el.dispatchEvent(new Event('input'))
+}
+
+// Exponer para que chat.js u otros módulos puedan usarlo
+window.createEmojiPicker = createEmojiPicker
+
 // ── Bind eventos en cada post ─────────────────────
 function bindPost(card, p) {
   // Apoyo
@@ -635,7 +728,7 @@ function bindPost(card, p) {
 
   // Comentarios
   card.querySelector('.comment-toggle-btn')?.addEventListener('click', () => {
-    toggleFeedComments(p.id)
+    toggleFeedComments(p.id, p.user_id)
   })
 
   // Menú
@@ -682,16 +775,22 @@ function bindPost(card, p) {
 }
 
 // ── Comentarios ────────────────────────────────────
-async function toggleFeedComments(postId) {
+async function toggleFeedComments(postId, authorId) {
   const section = document.getElementById('feed-comments-' + postId)
   if (!section) return
-  if (section.style.display !== 'none') { section.style.display = 'none'; return }
+  const toggleBtn = document.querySelector(`.feed-post[data-post-id="${postId}"] .comment-toggle-btn`)
+  if (section.style.display !== 'none') {
+    section.style.display = 'none'
+    toggleBtn?.classList.remove('open')
+    return
+  }
   section.style.display = ''
-  section.innerHTML = `<div style="padding:10px 16px;color:var(--dim);font-size:.85rem">Cargando comentarios…</div>`
-  await loadFeedComments(postId, section)
+  toggleBtn?.classList.add('open')
+  section.innerHTML = `<div style="padding:8px 0;color:var(--dim);font-size:.85rem">Cargando…</div>`
+  await loadFeedComments(postId, section, authorId)
 }
 
-async function loadFeedComments(postId, section) {
+async function loadFeedComments(postId, section, authorId) {
   try {
     const { data: comments } = await supabase
       .from('post_comments')
@@ -709,7 +808,7 @@ async function loadFeedComments(postId, section) {
           ? `<img src="${u.avatar_url}" class="comment-avatar" alt="">`
           : `<div class="comment-avatar-fb">${ini}</div>`}
         <div class="comment-body">
-          <div class="comment-author">${esc(u.full_name || u.username || 'Usuario')}${isOwn ? ` <button class="comment-delete-btn" data-id="${c.id}" style="float:right;font-size:.68rem;background:none;border:none;color:var(--muted);cursor:pointer" title="Eliminar">✕</button>` : ''}</div>
+          <div class="comment-author">${esc(u.full_name || u.username || 'Usuario')}${isOwn ? `<button class="comment-delete-btn" data-id="${c.id}" title="Eliminar" style="font-size:.68rem;background:none;border:none;color:var(--muted);cursor:pointer;padding:0 2px">✕</button>` : ''}</div>
           <div class="comment-text">${esc(c.content)}</div>
           <div class="comment-time">${formatRelTime(c.created_at)}</div>
         </div>
@@ -719,17 +818,24 @@ async function loadFeedComments(postId, section) {
     const canComment = !!_userId
     section.innerHTML = `
       <div class="comment-list" id="feed-comment-list-${postId}">${listHtml || '<div style="color:var(--dim);font-size:.82rem;padding:4px 0">Sé el primero en comentar</div>'}</div>
-      ${canComment ? `
-        <div class="comment-form">
+      ${canComment ? `<div class="comment-form" id="feed-comment-form-${postId}">
           <input class="comment-input" id="feed-comment-input-${postId}" placeholder="Escribe un comentario…" maxlength="300">
           <button class="comment-submit" id="feed-comment-submit-${postId}">Publicar</button>
         </div>` : `<div style="font-size:.8rem;color:var(--dim);padding:6px 0">Inicia sesión para comentar</div>`}`
 
     if (canComment) {
+      const form   = document.getElementById('feed-comment-form-' + postId)
       const input  = document.getElementById('feed-comment-input-' + postId)
       const submit = document.getElementById('feed-comment-submit-' + postId)
-      submit.addEventListener('click', () => submitFeedComment(postId, input))
-      input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitFeedComment(postId, input) } })
+
+      // Emoji picker — insertar antes del submit
+      const emojiBtn = createEmojiPicker(input, form)
+      form.insertBefore(emojiBtn, submit)
+
+      submit.addEventListener('click', () => submitFeedComment(postId, input, authorId))
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitFeedComment(postId, input, authorId) }
+      })
     }
 
     section.querySelectorAll('.comment-delete-btn').forEach(btn => {
@@ -742,11 +848,11 @@ async function loadFeedComments(postId, section) {
       })
     })
   } catch (e) {
-    section.innerHTML = `<div style="padding:10px 16px;color:var(--dim);font-size:.82rem">Comentarios no disponibles aún.</div>`
+    section.innerHTML = `<div style="padding:10px 0;color:var(--dim);font-size:.82rem">Comentarios no disponibles aún.</div>`
   }
 }
 
-async function submitFeedComment(postId, input) {
+async function submitFeedComment(postId, input, authorId) {
   const content = input.value.trim()
   if (!content || !_userId) return
   input.disabled = true
@@ -769,23 +875,31 @@ async function submitFeedComment(postId, input) {
         ${u.avatar_url ? `<img src="${u.avatar_url}" class="comment-avatar" alt="">` : `<div class="comment-avatar-fb">${ini}</div>`}
         <div class="comment-body">
           <div class="comment-author">${esc(u.full_name || u.username || 'Usuario')}
-            <button class="comment-delete-btn" data-id="${comment.id}" style="float:right;font-size:.68rem;background:none;border:none;color:var(--muted);cursor:pointer" title="Eliminar">✕</button>
+            <button class="comment-delete-btn" data-id="${comment.id}" title="Eliminar" style="font-size:.68rem;background:none;border:none;color:var(--muted);cursor:pointer;padding:0 2px">✕</button>
           </div>
           <div class="comment-text">${esc(comment.content)}</div>
-          <div class="comment-time">hace un momento</div>
+          <div class="comment-time">ahora</div>
         </div>`
       el.querySelector('.comment-delete-btn').addEventListener('click', async () => {
         await supabase.from('post_comments').delete().eq('id', comment.id).eq('user_id', _userId)
         el.remove()
         _bumpCommentCount(postId, -1)
       })
-      // Quitar el placeholder "Sé el primero…" si existía
       if (list.children.length === 1 && list.children[0].tagName === 'DIV' && !list.children[0].classList.contains('comment-item')) {
         list.innerHTML = ''
       }
       list.appendChild(el)
       list.scrollTop = list.scrollHeight
       _bumpCommentCount(postId, 1)
+    }
+
+    // Notificar al autor del post (solo si no es el mismo que comenta)
+    if (authorId && authorId !== _userId) {
+      const commenterName = comment.profiles?.full_name || comment.profiles?.username || 'Alguien'
+      createNotificacion(authorId, 'post_comment', {
+        msg: `${commenterName} comentó en tu publicación`,
+        post_id: postId,
+      }).catch(() => {})
     }
   } catch (e) {
     console.error('[feed comment]', e)

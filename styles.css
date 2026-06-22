@@ -54,7 +54,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);background-image:radia
 .chat-msg.mine{align-self:flex-end;background:rgba(245,197,24,.14);border-color:rgba(245,197,24,.3)}
 .chat-msg-body{font-size:.86rem;line-height:1.35;color:var(--text);white-space:pre-wrap;overflow-wrap:anywhere}
 .chat-msg-time{display:block;margin-top:4px;font-size:.62rem;color:var(--muted);font-family:'Barlow Condensed',sans-serif;text-align:right}
-.chat-form{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border)}
+.chat-form{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);position:relative}
 .chat-input{flex:1;min-width:0;resize:none;max-height:90px;padding:10px 11px;border-radius:10px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:'Barlow',sans-serif;font-size:.86rem;outline:none}
 .chat-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,197,24,.1)}
 .chat-send{width:42px;border-radius:10px;border:1px solid var(--gold);background:var(--gold);color:#111;font-family:'Barlow Condensed',sans-serif;font-weight:700;cursor:pointer}
@@ -672,7 +672,7 @@ html[data-theme="contrast"] .codes-warn{background:#1a0000;border-color:#ff4444;
 .mun-card-champ{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:var(--dim);font-weight:600;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 
 /* ── Detail view ── */
-#mun-detail-view{position:absolute;top:var(--header-h,150px);left:0;right:0;bottom:0;background:var(--bg);z-index:10;overflow-y:auto;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
+#mun-detail-view{position:absolute;inset:0;background:var(--bg);z-index:10;overflow-y:auto;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
 #mun-detail-view.visible{transform:translateX(0)}
 .mun-detail-inner{max-width:780px;margin:0 auto;padding-bottom:60px}
 
@@ -2354,6 +2354,96 @@ html[data-theme="light"] .mun-curiosidad{background:rgba(139,92,246,.06);border-
 @keyframes fpNew{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 .fp-fade-out{animation:fpFade .35s ease forwards}
 @keyframes fpFade{to{opacity:0;transform:scale(.96)}}
+
+/* ── Comment toggle button (pill, igual que apoyo/share) ── */
+.comment-toggle-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+  border-radius:999px;border:1px solid var(--border);background:none;color:var(--dim);
+  cursor:pointer;font-size:.83rem;font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;letter-spacing:.04em;transition:all .2s}
+.comment-toggle-btn:hover{border-color:var(--gold);color:var(--gold)}
+.comment-toggle-btn.open{background:rgba(245,197,24,.08);border-color:var(--gold);color:var(--gold)}
+
+/* ── Sección de comentarios ── */
+.post-comments-section{border-top:1px solid var(--border);padding:12px 16px 10px;
+  display:flex;flex-direction:column;gap:10px}
+
+/* ── Lista de comentarios ── */
+.comment-list{display:flex;flex-direction:column;gap:8px}
+
+/* ── Item de comentario: avatar circular + burbuja ── */
+.comment-item{display:flex;align-items:flex-start;gap:9px}
+
+.comment-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;
+  flex-shrink:0;border:1px solid var(--border);background:var(--card2)}
+.comment-avatar-fb{width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:var(--card2);border:1px solid var(--border);display:flex;
+  align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;
+  font-size:.8rem;color:var(--gold)}
+
+.comment-body{flex:1;min-width:0;background:var(--bg2);
+  border-radius:0 12px 12px 12px;padding:7px 11px 6px}
+.comment-author{font-family:'Barlow Condensed',sans-serif;font-weight:700;
+  font-size:.88rem;color:var(--text);letter-spacing:.02em;
+  display:flex;align-items:center;justify-content:space-between;gap:6px}
+.comment-text{font-size:.85rem;color:var(--text);line-height:1.45;
+  margin-top:2px;word-break:break-word}
+.comment-time{font-size:.7rem;color:var(--muted);margin-top:4px}
+
+/* ── Formulario de comentario ── */
+.comment-form{display:flex;align-items:center;gap:6px;
+  padding-top:10px;border-top:1px solid var(--border);position:relative}
+.comment-input{flex:1;padding:8px 12px;border-radius:20px;
+  border:1px solid var(--border);background:var(--bg2);color:var(--text);
+  font-size:.85rem;font-family:'Barlow',sans-serif;
+  outline:none;transition:border-color .2s;min-width:0}
+.comment-input:focus{border-color:var(--gold)}
+.comment-input::placeholder{color:var(--muted)}
+.comment-submit{padding:8px 14px;border-radius:20px;
+  border:1px solid var(--gold);background:var(--gold);color:#111;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;
+  font-size:.82rem;letter-spacing:.05em;cursor:pointer;
+  transition:opacity .2s;white-space:nowrap;flex-shrink:0}
+.comment-submit:hover{opacity:.85}
+.comment-submit:disabled{opacity:.5;cursor:default}
+
+/* ── Botón emoji (comentarios y chat) ── */
+.emoji-pick-btn{width:32px;height:32px;border-radius:50%;
+  border:1px solid var(--border);background:var(--bg2);
+  font-size:1rem;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;transition:all .15s;
+  -webkit-tap-highlight-color:transparent}
+.emoji-pick-btn:hover{border-color:var(--gold);background:var(--card2)}
+
+/* ── Panel emoji ── */
+.emoji-panel{position:absolute;bottom:calc(100% + 8px);left:0;z-index:1200;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  box-shadow:0 8px 32px rgba(0,0,0,.45);width:300px;max-height:270px;
+  display:none;flex-direction:column;overflow:hidden;
+  animation:emojiIn .15s ease}
+.emoji-panel.open{display:flex}
+@keyframes emojiIn{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:none}}
+.emoji-panel-cats{display:flex;gap:2px;padding:8px 8px 4px;
+  border-bottom:1px solid var(--border);flex-shrink:0}
+.emoji-cat-btn{flex:1;padding:5px 2px;border-radius:8px;border:none;background:none;
+  cursor:pointer;font-size:.95rem;opacity:.5;transition:all .15s;line-height:1}
+.emoji-cat-btn:hover,.emoji-cat-btn.active{background:var(--bg3);opacity:1}
+.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);
+  gap:1px;padding:6px;overflow-y:auto;flex:1}
+.emoji-btn{width:100%;aspect-ratio:1;border:none;background:none;
+  border-radius:6px;font-size:1.15rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .1s;-webkit-tap-highlight-color:transparent}
+.emoji-btn:hover{background:var(--bg3)}
+
+/* Ajustes tema claro/contraste para comentarios */
+html[data-theme="light"] .comment-body{background:#e8edf5}
+html[data-theme="light"] .comment-avatar-fb{background:#dde8f7}
+html[data-theme="contrast"] .comment-body{background:#111;border:1px solid #333}
+html[data-theme="contrast"] .comment-avatar-fb{background:#111;color:#ff0}
+html[data-theme="contrast"] .emoji-panel{background:#000;border-color:#fff}
+html[data-theme="contrast"] .emoji-cat-btn:hover,
+html[data-theme="contrast"] .emoji-cat-btn.active{background:#222}
+html[data-theme="contrast"] .emoji-btn:hover{background:#222}
 
 /* ── Load more ── */
 .feed-load-more-btn{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);
