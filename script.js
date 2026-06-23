@@ -97,12 +97,6 @@ function enterAlbumShell(mode, user = null) {
 setupProfileViewButton();
 initAmigos();
 
-// Interceptar btn-amigos en fase de captura para cerrar cualquier sección
-// abierta ANTES de que amigos.js procese el click y muestre su overlay.
-document.getElementById('btn-amigos')?.addEventListener('click', function () {
-  window.closeAllOverlays?.();
-}, true /* capture: true → se ejecuta antes del handler de amigos.js */);
-
 // Convertir amigos-overlay en panel flotante: envolver contenido en .amigos-shell
 // y cerrar al hacer click en el backdrop
 (function wrapAmigosShell() {
@@ -500,19 +494,43 @@ document.addEventListener('click', e => {
 
 
 // ── Navegación: header siempre visible ─────────────
-// Vuelve a Grada (feed) cerrando cualquier overlay de sección que esté abierto
-function goHome() {
+// Cierra TODOS los overlays de sección. Llamar antes de abrir cualquier sección.
+window.closeAllOverlays = function closeAllOverlays() {
   document.getElementById('coleccionismo-overlay')?.classList.remove('visible');
-  document.getElementById('mundiales-overlay')?.classList.remove('visible');
-  document.getElementById('calendar-overlay')?.classList.remove('visible');
   document.getElementById('amigos-overlay')?.classList.remove('visible');
+  document.getElementById('calendar-overlay')?.classList.remove('visible');
+  // Mundiales: usar closeMundiales si existe (limpia audio y estado interno)
+  if (typeof window.closeMundiales === 'function') {
+    window.closeMundiales();
+  } else {
+    document.getElementById('mundiales-overlay')?.classList.remove('visible');
+  }
   document.body.style.overflow = '';
+};
+
+// Vuelve a Grada (feed) cerrando todo
+function goHome() {
+  window.closeAllOverlays();
   window.scrollTo({ top: 0, behavior: a11yPrefs.reduceMotion ? 'auto' : 'smooth' });
-  // Notifica a mobile-nav.js para que resetee el tab activo a "feed"
   document.dispatchEvent(new CustomEvent('gradaGoHome'));
 }
 window.goHome = goHome;
 document.getElementById('btn-home')?.addEventListener('click', goHome);
+
+// Intercepción de cada botón de sección en fase CAPTURA (antes del onclick).
+// Garantiza que closeAllOverlays se ejecute en TODOS los navegadores de escritorio
+// y móvil, sin depender de optional chaining en atributos HTML.
+[
+  'btn-coleccionismo',
+  'btn-mundiales-header',
+  'btn-calendario-header',
+  'btn-talentos',
+  'btn-amigos',
+].forEach(function(id) {
+  document.getElementById(id)?.addEventListener('click', function() {
+    window.closeAllOverlays();
+  }, true /* capture: se ejecuta antes del onclick nativo */);
+});
 
 // El header es sticky; los overlays necesitan saber su altura real (varía por
 // viewport vía clamp()) para no quedar tapados debajo de él.

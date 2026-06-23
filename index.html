@@ -173,10 +173,10 @@
   <p class="header-sub">Lo que se vive en la cancha, se comenta en la Grada</p>
   <div id="header-nav">
     <button class="action-btn nav-brand-btn" id="btn-home" aria-label="Ir a Grada, inicio">🏟️ <span class="btn-label">Grada</span></button>
-    <button class="action-btn" id="btn-coleccionismo" aria-label="Abrir álbum de cromos" onclick="closeAllOverlays?.();startAlbum()">🗂️ <span class="btn-label">Coleccionismo</span></button>
+    <button class="action-btn" id="btn-coleccionismo" aria-label="Abrir álbum de cromos" onclick="startAlbum()">🗂️ <span class="btn-label">Coleccionismo</span></button>
     <button class="action-btn" id="btn-amigos" aria-label="Buscar amigos coleccionistas">🔎 <span class="btn-label">Amigos</span></button>
-    <button class="action-btn" id="btn-mundiales-header" aria-label="Ver historia de los torneos" onclick="closeAllOverlays?.();openMundiales()">📜 <span class="btn-label">Historia</span></button>
-    <button class="action-btn" id="btn-calendario-header" aria-label="Ver calendario de partidos" onclick="closeAllOverlays?.();openCalendar()">📅 <span class="btn-label">Calendario</span></button>
+    <button class="action-btn" id="btn-mundiales-header" aria-label="Ver historia de los torneos" onclick="openMundiales()">📜 <span class="btn-label">Historia</span></button>
+    <button class="action-btn" id="btn-calendario-header" aria-label="Ver calendario de partidos" onclick="openCalendar()">📅 <span class="btn-label">Calendario</span></button>
     <button class="action-btn" id="btn-talentos" aria-label="Talentos Ocultos">🌟 <span class="btn-label">Talentos</span></button>
     <button class="action-btn" id="btn-radio" aria-label="Activar radio">📻 <span class="btn-label">Radio</span></button>
   </div>
@@ -617,43 +617,5 @@
 
 <!-- Navegación móvil (tab bar + drawers) — sin type=module, va al final -->
 <script src="mobile-nav.js"></script>
-
-<!-- Auto-adjunta emoji picker al input de chat cuando se crea dinámicamente -->
-<script>
-(function attachChatEmojiPicker() {
-  const chatBody = document.getElementById('chat-panel-body');
-  if (!chatBody) return;
-
-  function tryAttach(root) {
-    const form  = root.querySelector?.('.chat-form') || (root.classList?.contains('chat-form') ? root : null);
-    if (!form || form.dataset.emojiAttached) return;
-    const input = form.querySelector('.chat-input, textarea, input[type="text"]');
-    if (!input) return;
-    form.dataset.emojiAttached = '1';
-    form.style.position = 'relative';
-
-    // Esperar a que feed.js exporte createEmojiPicker a window
-    function doAttach() {
-      if (typeof window.createEmojiPicker !== 'function') {
-        setTimeout(doAttach, 150); return;
-      }
-      const emojiBtn = window.createEmojiPicker(input, form);
-      // Insertar antes del botón de enviar (último hijo) o al final
-      const sendBtn = form.querySelector('button[type="submit"], .chat-send, button:last-child');
-      sendBtn ? form.insertBefore(emojiBtn, sendBtn) : form.appendChild(emojiBtn);
-    }
-    doAttach();
-  }
-
-  // Observer para detectar cuando amigos.js inyecta el formulario de chat
-  new MutationObserver(mutations => {
-    mutations.forEach(m => m.addedNodes.forEach(node => {
-      if (node.nodeType !== 1) return;
-      tryAttach(node);
-      node.querySelectorAll?.('.chat-form').forEach(tryAttach);
-    }));
-  }).observe(chatBody, { childList: true, subtree: true });
-})();
-</script>
 </body>
 </html>
