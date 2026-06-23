@@ -150,6 +150,9 @@ function showToastNotif(notif) {
   setTimeout(close, 5000)
 }
 
+// Tipos que llevan a un post — al hacer click navegan al post
+const POST_NOTIF_TYPES = new Set(['post_comment', 'post_apoyo', 'mention'])
+
 // ── Renderizar panel de notificaciones ────────────
 export function renderNotifPanel(container, notifs) {
   if (!container) return
@@ -157,8 +160,12 @@ export function renderNotifPanel(container, notifs) {
     container.innerHTML = '<div class="notif-empty">Sin notificaciones</div>'
     return
   }
-  container.innerHTML = notifs.map(n => `
-    <div class="notif-item${n.read ? '' : ' unread'}" data-notif-id="${n.id}">
+  container.innerHTML = notifs.map(n => {
+    const hasPost = POST_NOTIF_TYPES.has(n.type) && n.data?.post_id
+    return `
+    <div class="notif-item${n.read ? '' : ' unread'}${hasPost ? ' notif-navigable' : ''}"
+         data-notif-id="${n.id}"
+         ${hasPost ? `data-post-id="${n.data.post_id}"` : ''}>
       <span class="notif-item-icon">${NOTIF_ICONS[n.type] || '🔔'}</span>
       <div class="notif-item-body">
         <div class="notif-item-title">${NOTIF_LABELS[n.type] || 'Notificación'}</div>
@@ -171,7 +178,8 @@ export function renderNotifPanel(container, notifs) {
           <button class="notif-action-btn reject" data-action="reject" data-id="${n.data.action_id}">❌</button>
         </div>` : ''}
       <button class="notif-item-del" data-del="${n.id}" title="Eliminar">✕</button>
-    </div>`).join('')
+    </div>`
+  }).join('')
 }
 
 function formatRelTime(iso) {

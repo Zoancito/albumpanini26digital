@@ -445,11 +445,53 @@ function updateNotifBell(notifs) {
   }
 }
 
+// Navega al post referenciado en una notificación:
+// cierra el panel, cierra overlays, hace scroll al post y abre comentarios.
+function navigateToPost(postId) {
+  // 1. Cerrar panel de notificaciones
+  document.getElementById('notif-panel')?.classList.remove('open');
+
+  // 2. Cerrar cualquier sección abierta
+  window.closeAllOverlays();
+
+  // 3. Buscar el post en el DOM
+  const postEl = document.querySelector(`.feed-post[data-post-id="${postId}"]`);
+  if (!postEl) {
+    // El post no está en el feed visible — mostrar aviso
+    const toast = document.createElement('div');
+    toast.className = 'feed-toast';
+    toast.textContent = 'El post no está visible en el feed actual';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+    return;
+  }
+
+  // 4. Scroll al post con offset del header
+  const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 120;
+  const top = postEl.getBoundingClientRect().top + window.scrollY - headerH - 12;
+  window.scrollTo({ top, behavior: 'smooth' });
+
+  // 5. Resaltar el post brevemente
+  postEl.classList.add('post-highlight');
+  setTimeout(() => postEl.classList.remove('post-highlight'), 2200);
+
+  // 6. Abrir la sección de comentarios si no está abierta
+  setTimeout(() => {
+    const commentsSection = document.getElementById('feed-comments-' + postId);
+    if (commentsSection && commentsSection.style.display === 'none') {
+      postEl.querySelector('.comment-toggle-btn')?.click();
+    }
+  }, 600);
+}
+
 function bindNotifPanel(panel) {
-  // Marcar leída al hacer clic
+  // Marcar leída al hacer clic — y navegar al post si aplica
   panel.querySelectorAll('.notif-item').forEach(el => {
     el.addEventListener('click', () => {
       markRead(el.dataset.notifId);
+      const postId = el.dataset.postId;
+      if (postId) navigateToPost(postId);
     });
   });
   // Eliminar

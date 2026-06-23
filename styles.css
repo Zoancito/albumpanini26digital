@@ -2166,6 +2166,10 @@ html[data-theme="light"] .trivia-box{box-shadow:0 12px 40px rgba(0,0,0,.12)}
 .notif-item:hover{background:var(--bg3)}
 .notif-item.unread{background:color-mix(in srgb,var(--gold) 6%,var(--card))}
 .notif-item.unread::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--gold);border-radius:0 3px 3px 0}
+/* Notificaciones que navegan a un post — indicador visual de que son clickeables */
+.notif-navigable{cursor:pointer}
+.notif-navigable:hover{background:color-mix(in srgb,var(--gold) 9%,var(--card))}
+.notif-navigable:hover .notif-item-title::after{content:' →';opacity:.6;font-size:.8em}
 .notif-item-icon{font-size:1.3rem;flex-shrink:0;width:28px;text-align:center}
 .notif-item-body{flex:1;min-width:0}
 .notif-item-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;color:var(--text);letter-spacing:.03em}
@@ -2173,6 +2177,14 @@ html[data-theme="light"] .trivia-box{box-shadow:0 12px 40px rgba(0,0,0,.12)}
 .notif-item-time{font-size:.7rem;color:var(--muted);margin-top:3px}
 .notif-item-del{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.75rem;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
 .notif-item:hover .notif-item-del{opacity:1}
+/* Highlight de post al navegar desde notificación */
+.post-highlight{animation:postHighlight 2.2s ease}
+@keyframes postHighlight{
+  0%  {box-shadow:0 0 0 0 rgba(245,197,24,0)}
+  15% {box-shadow:0 0 0 3px rgba(245,197,24,.7),0 0 24px rgba(245,197,24,.25)}
+  70% {box-shadow:0 0 0 3px rgba(245,197,24,.4),0 0 16px rgba(245,197,24,.1)}
+  100%{box-shadow:0 0 0 0 rgba(245,197,24,0)}
+}
 .notif-item-actions{display:flex;gap:5px;margin-top:6px}
 .notif-action-btn{padding:4px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:.78rem;cursor:pointer;transition:all .15s}
 .notif-action-btn.accept:hover{background:rgba(34,197,94,.15);border-color:#22c55e}
