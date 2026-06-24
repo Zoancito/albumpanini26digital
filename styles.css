@@ -551,6 +551,24 @@ html[data-theme="light"] .radio-artist{color:var(--dim)}
 html[data-theme="light"] .radio-btn{background:#eef3fb;color:var(--text);border-color:var(--border)}
 html[data-theme="light"] .radio-btn:hover{background:#dde8f7}
 html[data-theme="light"] .radio-badge{color:#8a6b00;background:rgba(212,164,0,.12);border-color:rgba(212,164,0,.28)}
+html[data-theme="light"] .radio-stream-btn{background:#eef3fb;border-color:var(--border)}
+html[data-theme="light"] .vol-icon{color:var(--dim)}
+html[data-theme="light"] .vol-label{color:var(--dim)}
+html[data-theme="light"] #radio-bar .radio-icon{color:var(--text)}
+/* Banner "Reproduciendo" en desktop — tema claro */
+html[data-theme="light"] #radio-visual-banner{
+  background:rgba(238,243,251,.97);
+  color:var(--text);
+  border-color:var(--gold);
+  box-shadow:0 4px 16px rgba(0,0,0,.1);
+}
+/* Banner "Reproduciendo" en desktop — alto contraste */
+html[data-theme="contrast"] #radio-visual-banner{
+  background:#000;
+  color:#fff;
+  border-color:#ff0;
+  box-shadow:none;
+}
 html[data-theme="light"] .sticker{background:linear-gradient(180deg,#eef3fb,#dde6f5);border-color:#c6d3e6}
 html[data-theme="light"] .sticker:hover{background:#d7e3f6}
 html[data-theme="light"] .s-name,
@@ -569,6 +587,18 @@ html[data-theme="light"] .modal-opt{background:#f7f9fd}
 html[data-theme="light"] .modal-opt:hover{background:#edf3fb}
 html[data-theme="light"] .group-header:hover,
 html[data-theme="light"] .country-header:hover{background:rgba(13,26,43,.04)}
+
+html[data-theme="light"] #profile-toast{
+  background:rgba(238,243,251,.97);
+  color:var(--text);
+  border-color:rgba(212,164,0,.4);
+  box-shadow:0 4px 16px rgba(0,0,0,.1);
+}
+html[data-theme="contrast"] #profile-toast{
+  background:#000;
+  color:#fff;
+  border-color:#ff0;
+}
 
 html[data-theme="contrast"] #radio-bar{background:#000;border-top:2px solid #fff}
 html[data-theme="contrast"] .radio-title,
@@ -2480,6 +2510,11 @@ html[data-theme="contrast"] .emoji-btn:hover,
 html[data-theme="contrast"] .emoji-cat-btn:hover,
 html[data-theme="contrast"] .emoji-cat-btn.active,
 html[data-theme="contrast"] .mention-item:hover{background:#222}
+
+/* ── Role picker modal (una sola vez) ── */
+.role-picker-overlay{background:rgba(4,9,20,.82)}
+html[data-theme="light"] .role-picker-overlay{background:rgba(180,200,230,.7)}
+html[data-theme="contrast"] .role-picker-overlay{background:rgba(0,0,0,.92)}
 
 /* ── Load more ── */
 .feed-load-more-btn{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);

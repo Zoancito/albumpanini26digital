@@ -282,7 +282,8 @@ function showRolePickerModal() {
 
   const modal = document.createElement('div')
   modal.id = 'role-picker-modal'
-  modal.style.cssText = `position:fixed;inset:0;z-index:10700;background:rgba(4,9,20,.85);
+  modal.className = 'role-picker-overlay'
+  modal.style.cssText = `position:fixed;inset:0;z-index:10700;
     display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)`
   modal.innerHTML = `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;
