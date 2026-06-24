@@ -492,7 +492,6 @@ html[data-theme="contrast"] .mob-more-item {
    ══════════════════════════════════════════════ */
 @media (max-width: 860px) {
   #radio-visual-banner {
-    /* Usa --header-h que script.js actualiza en resize */
     top: calc(var(--header-h, 64px) + 8px);
     font-size: .8rem;
     padding: 7px 14px;
@@ -500,5 +499,46 @@ html[data-theme="contrast"] .mob-more-item {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  /* Radio bar light theme en móvil — aplica sobre el body.mob-radio-open */
+  html[data-theme="light"] body.mob-radio-open #radio-bar {
+    background: rgba(238,243,251,.97);
+    border-top: 1px solid var(--border);
+  }
+  html[data-theme="light"] body.mob-radio-open .radio-title  { color: var(--text); }
+  html[data-theme="light"] body.mob-radio-open .radio-artist { color: var(--dim); }
+  html[data-theme="light"] body.mob-radio-open .radio-btn    {
+    background: #eef3fb;
+    color: var(--text);
+    border-color: var(--border);
+  }
+  html[data-theme="light"] body.mob-radio-open .radio-btn:hover { background: #dde8f7; }
+  html[data-theme="light"] body.mob-radio-open .radio-badge  {
+    color: #8a6b00;
+    background: rgba(212,164,0,.12);
+    border-color: rgba(212,164,0,.28);
+  }
+  html[data-theme="light"] body.mob-radio-open .vol-icon     { color: var(--dim); }
+  html[data-theme="light"] body.mob-radio-open .vol-label    { color: var(--dim); }
+
+  /* Banner visual claro en móvil */
+  html[data-theme="light"] #radio-visual-banner {
+    background: rgba(238,243,251,.97);
+    color: var(--text);
+    border-color: var(--gold);
+    box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  }
+
+  /* Contrast theme */
+  html[data-theme="contrast"] body.mob-radio-open #radio-bar {
+    background: #000;
+    border-top: 2px solid #fff;
+  }
+  html[data-theme="contrast"] body.mob-radio-open .radio-title,
+  html[data-theme="contrast"] body.mob-radio-open .radio-btn  { color: #fff; }
+  html[data-theme="contrast"] body.mob-radio-open .radio-btn  {
+    background: #111;
+    border-color: #fff;
   }
 }

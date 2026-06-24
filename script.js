@@ -88,6 +88,27 @@ function enterAlbumShell(mode, user = null) {
     document.getElementById('compose-fab')?.style.removeProperty('display');
     // Sync inicial de ofertas de intercambio
     setTimeout(() => scheduleExchangeSync(), 3000);
+
+    // Si viene de perfil con ?chat=username, abrir chat con ese amigo
+    const chatParam = new URLSearchParams(window.location.search).get('chat');
+    if (chatParam) {
+      history.replaceState({}, '', window.location.pathname); // limpiar URL
+      setTimeout(() => {
+        // Buscar la tarjeta del amigo en el panel y simular click en Chat
+        const friendCards = document.querySelectorAll('.social-mini-btn, .chat-open-btn, [data-username]');
+        let found = false;
+        friendCards.forEach(el => {
+          if ((el.dataset.username || '').toLowerCase() === chatParam.toLowerCase() && !found) {
+            found = true; el.click();
+          }
+        });
+        // Fallback: abrir panel de amigos para que el usuario elija
+        if (!found) {
+          document.getElementById('btn-amigos')?.click();
+          showFeedToast?.(`Busca a @${chatParam} en tu lista de amigos`);
+        }
+      }, 1800); // esperar a que amigos.js inicialice
+    }
   } else {
     destroyNotificaciones();
   }

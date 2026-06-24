@@ -162,6 +162,10 @@ export async function checkAndHandleFirstLogin(user) {
     showProfileSetupModal(user, false)
   } else {
     updateHeaderProfile(profile)
+    // Si el perfil existe pero no tiene rol → mostrar selector de rol una sola vez
+    if (!profile.grad_role) {
+      showRolePickerModal()
+    }
   }
   return profile
 }
@@ -214,13 +218,40 @@ export function showProfileSetupModal(user, isEdit = false) {
   const eyebrow = modal.querySelector('.psetup-eyebrow')
   const saveBtn = document.getElementById('psetup-save')
   if (title)   title.textContent   = isEdit ? 'EDITAR PERFIL' : 'COMPLETA TU PERFIL FUTBOLERO'
-  if (eyebrow) eyebrow.textContent = isEdit ? '✏️ Editar perfil' : '⚽ Primera vez · Álbum Mundial 2026'
+  if (eyebrow) eyebrow.textContent = isEdit ? '✏️ Editar perfil' : '⚽ Bienvenido/a a La Grada'
   if (saveBtn) saveBtn.textContent = isEdit ? 'Guardar cambios →' : 'Crear perfil →'
+
+  // Inyectar selector de rol si no existe en el modal
+  _injectRoleField(isEdit ? _currentProfile?.grad_role : null)
 
   modal.classList.add('visible')
   setTimeout(() => { if (!isEdit) document.getElementById('psetup-username')?.focus() }, 120)
 
   if (!_listenersSet) { setupSetupListeners(); _listenersSet = true }
+}
+
+function _injectRoleField(currentRole) {
+  if (document.getElementById('psetup-grad-role')) {
+    if (currentRole) document.getElementById('psetup-grad-role').value = currentRole
+    return
+  }
+  const modal = document.getElementById('profile-setup-modal')
+  if (!modal) return
+  // Insertar antes del botón guardar
+  const saveBtn = modal.querySelector('#psetup-save, .psetup-save-btn, button[type="submit"]')
+  const wrap = document.createElement('div')
+  wrap.className = 'psetup-field'
+  wrap.innerHTML = `
+    <label class="psetup-label" for="psetup-grad-role">⭐ Tu rol en La Grada</label>
+    <select id="psetup-grad-role" class="psetup-input" style="cursor:pointer">
+      <option value="">— Elige tu rol —</option>
+      <option value="hincha" ${currentRole==='hincha'?'selected':''}>📣 Hincha</option>
+      <option value="jugador" ${currentRole==='jugador'?'selected':''}>⚽ Jugador</option>
+      <option value="dt" ${currentRole==='dt'?'selected':''}>📋 DT</option>
+      <option value="club" ${currentRole==='club'?'selected':''}>🏟️ Club</option>
+      <option value="ojeador" ${currentRole==='ojeador'?'selected':''}>🔭 Ojeador</option>
+    </select>`
+  if (saveBtn) saveBtn.parentElement.insertBefore(wrap, saveBtn)
 }
 
 function _renderCurrentAvatar(url) {
@@ -235,6 +266,89 @@ function _renderCurrentAvatar(url) {
 
 function hideProfileSetupModal() {
   document.getElementById('profile-setup-modal')?.classList.remove('visible')
+}
+
+// ── Selector de rol (aparece una sola vez si el perfil no tiene rol) ────────
+function showRolePickerModal() {
+  if (document.getElementById('role-picker-modal')) return // ya existe
+
+  const ROLES = [
+    { value: 'hincha',  icon: '📣', label: 'Hincha',  desc: 'Apasionado del fútbol' },
+    { value: 'jugador', icon: '⚽', label: 'Jugador', desc: 'Juegas fútbol activamente' },
+    { value: 'dt',      icon: '📋', label: 'DT',      desc: 'Diriges o analizas táctica' },
+    { value: 'club',    icon: '🏟️', label: 'Club',    desc: 'Representas a un club' },
+    { value: 'ojeador', icon: '🔭', label: 'Ojeador', desc: 'Descubres talentos' },
+  ]
+
+  const modal = document.createElement('div')
+  modal.id = 'role-picker-modal'
+  modal.style.cssText = `position:fixed;inset:0;z-index:10700;background:rgba(4,9,20,.85);
+    display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)`
+  modal.innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;
+      padding:28px 24px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.5)">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--text);
+        letter-spacing:.05em;margin-bottom:4px">¿CUÁL ES TU ROL EN LA GRADA?</div>
+      <div style="color:var(--dim);font-size:.85rem;margin-bottom:20px">
+        Esto aparecerá en tu perfil. Puedes cambiarlo después.
+      </div>
+      <div id="role-picker-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px">
+        ${ROLES.map(r => `
+          <button class="role-pick-item" data-role="${r.value}"
+            style="display:flex;align-items:center;gap:10px;padding:12px 14px;
+            border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);
+            cursor:pointer;text-align:left;transition:all .15s;-webkit-tap-highlight-color:transparent">
+            <span style="font-size:1.4rem;flex-shrink:0">${r.icon}</span>
+            <div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;
+                font-size:.95rem;color:var(--text)">${r.label}</div>
+              <div style="font-size:.72rem;color:var(--dim);margin-top:1px">${r.desc}</div>
+            </div>
+          </button>`).join('')}
+      </div>
+      <button id="role-picker-save" disabled
+        style="width:100%;padding:12px;border-radius:12px;border:none;
+        background:var(--gold);color:#111;font-family:'Barlow Condensed',sans-serif;
+        font-weight:700;font-size:1rem;letter-spacing:.06em;cursor:pointer;
+        opacity:.5;transition:opacity .2s">
+        Confirmar rol →
+      </button>
+    </div>`
+
+  document.body.appendChild(modal)
+
+  let selectedRole = null
+  modal.querySelectorAll('.role-pick-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      modal.querySelectorAll('.role-pick-item').forEach(b => {
+        b.style.borderColor = 'var(--border)'
+        b.style.background  = 'var(--bg2)'
+      })
+      btn.style.borderColor = 'var(--gold)'
+      btn.style.background  = 'rgba(245,197,24,.08)'
+      selectedRole = btn.dataset.role
+      const saveBtn = document.getElementById('role-picker-save')
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.style.opacity = '1' }
+    })
+  })
+
+  document.getElementById('role-picker-save').addEventListener('click', async () => {
+    if (!selectedRole || !_currentUser) return
+    const saveBtn = document.getElementById('role-picker-save')
+    saveBtn.textContent = 'Guardando…'; saveBtn.disabled = true
+    try {
+      const { data, error } = await supabase.from('profiles')
+        .update({ grad_role: selectedRole })
+        .eq('id', _currentUser.id)
+        .select().single()
+      if (error) throw error
+      _currentProfile = { ..._currentProfile, grad_role: selectedRole }
+      modal.remove()
+    } catch (e) {
+      console.error('[role picker]', e)
+      saveBtn.textContent = '⚠ Error. Reintentar'; saveBtn.disabled = false
+    }
+  })
 }
 
 function resetSetupForm() {
@@ -461,6 +575,7 @@ function setupSetupListeners() {
         frase_futbolera:      getVal('psetup-frase'),
         jugadores_favoritos:  _selectedPlayers,
         avatar_url:           avatarUrl,
+        grad_role:            getVal('psetup-grad-role') || _currentProfile?.grad_role || null,
       }
 
       const saved = await saveProfile(profileData)

@@ -386,7 +386,7 @@ html[data-theme="contrast"] #a11y-panel{background:#000;border-left:2px solid #f
 .a11y-checkbox:focus-visible + .a11y-toggle-slider{box-shadow:var(--focus-ring)}
 
 #radio-visual-banner{
-  position:fixed;left:50%;top:16px;transform:translate(-50%,-18px);z-index:1190;opacity:0;pointer-events:none;
+  position:fixed;left:50%;top:calc(var(--header-h, 80px) + 10px);transform:translate(-50%,-18px);z-index:10250;opacity:0;pointer-events:none;
   background:rgba(15,21,36,.96);color:var(--text);border:1px solid var(--gold);border-radius:999px;
   padding:10px 16px;display:flex;align-items:center;gap:8px;font-family:'Barlow Condensed',sans-serif;
   font-weight:700;letter-spacing:.06em;box-shadow:0 12px 24px rgba(0,0,0,.28);transition:all .25s;
@@ -2798,6 +2798,7 @@ html[data-theme="light"] #coleccionismo-overlay{background:var(--bg)}
 
 /* compose-fab con radio activo — responsive.css añade el offset de la tab bar en móvil */
 body.radio-active .compose-fab{bottom:84px}
+body.radio-active #a11y-fab{bottom:148px}
 
 /* ── Accesibilidad / temas para el botón de marca ── */
 html[data-theme="contrast"] .nav-brand-btn{border-color:#ffde00;color:#ffde00}
