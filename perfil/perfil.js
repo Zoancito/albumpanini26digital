@@ -115,8 +115,22 @@ async function loadPage() {
 }
 
 // ══ Render principal del perfil ═══════════════════════
+const GRAD_ROLES = {
+  hincha:   { label: 'Hincha',  icon: '📣' },
+  jugador:  { label: 'Jugador', icon: '⚽' },
+  dt:       { label: 'DT',      icon: '📋' },
+  club:     { label: 'Club',    icon: '🏟️' },
+  ojeador:  { label: 'Ojeador', icon: '🔭' },
+}
+
 function renderProfile(p) {
-  document.title = `${p.full_name || p.username} · Panini Digital`
+  const roleDef = GRAD_ROLES[p.grad_role] || null
+  const roleLabel = roleDef ? `${roleDef.icon} ${roleDef.label}` : 'Miembro'
+  document.title = `${p.full_name || p.username} · La Grada`
+
+  // Eyebrow: La Grada · Rol
+  const eyebrow = document.querySelector('.card-hero-eyebrow')
+  if (eyebrow) eyebrow.textContent = `La Grada · ${roleLabel}`
 
   const ini = (p.full_name || p.username || '?').trim()
     .split(/\s+/).slice(0,2).map(x => x[0]).join('').toUpperCase()
@@ -182,7 +196,7 @@ async function renderApoyoBtn(p) {
     btn.classList.add('apoyo-anon')
     const label = btn.querySelector('.apoyo-label')
     if (label) label.textContent = 'Apoyar'
-    if (hintEl) hintEl.innerHTML = `<a href="https://albumpanini26digital.vercel.app" style="color:var(--gold)">Inicia sesión</a> para apoyar`
+    if (hintEl) hintEl.innerHTML = `<a href="https://lagrada.vercel.app" style="color:var(--gold)">Inicia sesión</a> para apoyar`
     return
   }
 
@@ -492,7 +506,7 @@ async function loadComments(postId, section) {
         <div class="comment-form">
           <input class="comment-input" id="comment-input-${postId}" placeholder="Escribe un comentario…" maxlength="300">
           <button class="comment-submit" id="comment-submit-${postId}">Publicar</button>
-        </div>` : `<div style="font-size:.8rem;color:var(--dim);padding:6px 0"><a href="https://albumpanini26digital.vercel.app" style="color:var(--gold)">Inicia sesión</a> para comentar</div>`}`
+        </div>` : `<div style="font-size:.8rem;color:var(--dim);padding:6px 0"><a href="https://lagrada.vercel.app" style="color:var(--gold)">Inicia sesión</a> para comentar</div>`}`
 
     // Submit comentario
     if (canComment) {
@@ -677,8 +691,11 @@ function renderFriendZone(level) {
   }
   if (f.status === 'accepted') {
     zone.innerHTML = `<span class="friend-status-label">✓ Son amigos</span>
-      <a href="/chat/${encodeURIComponent(_profileData.username || '')}" class="chat-btn-link">💬 Chat</a>
+      <button class="chat-btn-link" id="btn-open-chat">💬 Chat</button>
       <button class="friend-btn secondary" id="btn-remove">✗ Eliminar amigo</button>`
+    document.getElementById('btn-open-chat').addEventListener('click', () => {
+      location.href = `https://lagrada.vercel.app/?chat=${encodeURIComponent(_profileData.username || '')}`
+    })
     document.getElementById('btn-remove').addEventListener('click', handleRemove)
   }
 }
